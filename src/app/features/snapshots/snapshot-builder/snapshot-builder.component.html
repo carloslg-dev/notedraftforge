@@ -1,0 +1,23 @@
+<section class="snapshot-builder">
+  <header>
+    <h2>Snapshot Builder</h2>
+    <p>Select songs to include in a printable snapshot.</p>
+  </header>
+
+  <mat-selection-list>
+    <mat-list-option
+      *ngFor="let song of songs$ | async"
+      [selected]="(selectionState$ | async)?.has(song.id)"
+      (selectionChange)="toggleSong(song)"
+    >
+      {{ songTitle(song) }}
+    </mat-list-option>
+  </mat-selection-list>
+
+  <div class="actions">
+    <button mat-stroked-button color="primary" (click)="clearSelection()">Clear selection</button>
+    <div class="summary">
+      <strong>Selected:</strong> {{ (selectedSongs$ | async)?.length || 0 }}
+    </div>
+  </div>
+</section>

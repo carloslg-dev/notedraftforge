@@ -1,0 +1,30 @@
+.song-shell {
+  height: calc(100vh - 64px);
+  border: 1px solid #e0e0e0;
+}
+
+.song-nav {
+  width: 280px;
+  padding: 0.5rem 0.75rem;
+  border-right: 1px solid #e0e0e0;
+}
+
+.nav-title {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.song-content {
+  padding: 1rem;
+  background: #fafafa;
+}
+
+.placeholder {
+  color: #666;
+  font-style: italic;
+  margin-top: 1rem;
+}
+
+.active-link {
+  background-color: rgba(63, 81, 181, 0.08);
+}
