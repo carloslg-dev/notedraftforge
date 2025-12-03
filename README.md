@@ -74,4 +74,49 @@ Writers can structure chapters or poem stanzas into reusable modular units, maki
 ---
 
 ## 📂 Project Structure (initial draft)
+src/
+app/
+core/
+models/
+services/
+features/
+songs/
+poems/
+snapshots/
+workspace/
+shared/
+assets/
+mock/
+songs.json
+authors.json
+singers.json
+styles.json
+
+
+---
+
+## 📝 Status
+
+Early development — initial scaffolding with models, mock providers and UI exploration.  
+The goal is to create a flexible foundation that can grow into a full creative versioning environment.
+
+---
+
+## 📜 License
+
+MIT (tentative)
+
+---
+
+## 🤝 Contributions
+
+In the future this project may be opened for collaboration.  
+For now, the structure is being shaped to support long-term evolution.
+
+---
+
+## 💬 Contact
+
+Ideas, feedback or collaboration proposals are welcome.
+
 
