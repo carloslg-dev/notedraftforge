@@ -1,0 +1,140 @@
+[
+  {
+    "id": "song-001",
+    "title": {
+      "en": "Sunrise Echoes",
+      "es": "Ecos del Amanecer",
+      "fr": "Échos de l'aube"
+    },
+    "authorId": "author-1",
+    "styleId": "pop",
+    "rhythm": "4/4",
+    "baseKey": "C",
+    "singers": ["singer-1", "singer-2"],
+    "tags": ["upbeat", "acoustic"],
+    "song": {
+      "sections": [
+        {
+          "name": "Verse",
+          "lines": [
+            {
+              "blocks": [
+                {
+                  "chord": "C",
+                  "lyrics": {
+                    "en": "Walking with the morning light",
+                    "es": "Caminando con la luz del alba"
+                  }
+                },
+                {
+                  "chord": "G",
+                  "lyrics": {
+                    "en": "golden streets ahead",
+                    "es": "calles doradas delante"
+                  }
+                },
+                {
+                  "chord": "Am",
+                  "lyrics": {
+                    "en": "every step a rising song",
+                    "es": "cada paso una canción al elevar"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Chorus",
+          "lines": [
+            {
+              "blocks": [
+                {
+                  "chord": "F",
+                  "lyrics": {
+                    "en": "Hold the light inside",
+                    "es": "Guarda la luz dentro"
+                  }
+                },
+                {
+                  "chord": "G",
+                  "lyrics": {
+                    "en": "let the echo guide",
+                    "es": "deja que el eco guíe"
+                  }
+                },
+                {
+                  "chord": "C",
+                  "lyrics": {
+                    "en": "we're not alone",
+                    "es": "no estamos solos"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "song-002",
+    "title": {
+      "en": "Whispering Roots",
+      "es": "Raíces Susurrantes",
+      "ca": "Arrels Xiuxiuejants"
+    },
+    "authorId": "author-2",
+    "styleId": "flamenco",
+    "rhythm": "6/8",
+    "baseKey": "Am",
+    "singers": [],
+    "tags": ["ballad", "earthy"],
+    "song": {
+      "sections": [
+        {
+          "name": "Intro",
+          "lines": [
+            {
+              "blocks": [
+                {
+                  "chord": "Am",
+                  "lyrics": {
+                    "en": "Roots are whispering slow",
+                    "es": "Las raíces susurran despacio",
+                    "ca": "Les arrels xiuxiuegen a poc a poc"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Verse",
+          "lines": [
+            {
+              "blocks": [
+                {
+                  "chord": "Dm",
+                  "lyrics": {
+                    "en": "Night wind through the pines",
+                    "es": "Viento nocturno entre los pinos",
+                    "ca": "Vent de nit pels pins"
+                  }
+                },
+                {
+                  "chord": "E",
+                  "lyrics": {
+                    "en": "ancient stories turning",
+                    "es": "historias antiguas girando",
+                    "ca": "històries antigues girant"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

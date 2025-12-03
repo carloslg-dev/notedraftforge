@@ -1,0 +1,9 @@
+[
+  { "id": "pop", "label": "Pop" },
+  { "id": "rock", "label": "Rock" },
+  { "id": "rumba", "label": "Rumba" },
+  { "id": "balada", "label": "Balada" },
+  { "id": "latin", "label": "Latin" },
+  { "id": "flamenco", "label": "Flamenco" },
+  { "id": "others", "label": "Others" }
+]

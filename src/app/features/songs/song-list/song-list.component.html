@@ -1,0 +1,24 @@
+<mat-sidenav-container class="song-shell">
+  <mat-sidenav mode="side" opened class="song-nav">
+    <h3 class="nav-title">Songs</h3>
+    <mat-nav-list>
+      <a
+        mat-list-item
+        *ngFor="let song of songs$ | async"
+        [routerLink]="['/songs', song.id]"
+        routerLinkActive="active-link"
+      >
+        <mat-icon matListItemIcon>music_note</mat-icon>
+        <div matListItemTitle>{{ songTitle(song) }}</div>
+        <div matListItemLine>Key: {{ song.baseKey }}</div>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="song-content">
+    <router-outlet #detailOutlet="routerOutlet"></router-outlet>
+    <div *ngIf="!detailOutlet.isActivated" class="placeholder">
+      Select a song to view its details.
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
