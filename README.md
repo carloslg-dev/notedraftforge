@@ -1,122 +1,62 @@
 # NoteDraftForge
 
-**NoteDraftForge** is a modular creative workspace designed to organize, structure and version all kinds of content — songs, poems, chapters, notes or any text-based work.  
-It focuses on block-based composition, creative branching, and flexible reorganization, offering a lightweight approach that works entirely on the client side.
+NoteDraftForge is a lightweight, modular workspace for writing and arranging songs in blocks (sections, lines, chords, lyrics). It focuses on quick iteration, language flexibility, and safe experimentation before wiring a persistent backend.
 
-This project starts as an Angular application using mocked data, with a long-term vision of supporting local files, cloud storage (Google Drive, GitHub repositories), snapshots for print-ready compilations, and optional AI-assisted suggestions.
+The current Angular app ships with a song list, detail view, and in-memory CRUD. Mock data lives in JSON files under `assets/mock`, letting contributors evolve UX and data models without backend friction.
 
----
+## Features (current)
+- Song list with side navigation and detail view
+- Block-based song rendering (sections, lines, chords/lyrics)
+- In-memory create/update/delete with immediate UI updates (no persistence on reload)
+- Import/Export songs as JSON (download/upload)
+- Multi-language UI (EN/ES) via a lightweight translations table
+- Snapshot builder prototype for selecting songs
+- Angular Material-driven UI components
 
-## ✨ Core Concepts
+## Non-goals / limitations (for now)
+- No persistent storage; data resets on reload
+- No backend sync or auth flows (auth service is a dev stub)
+- Song sections edited as raw JSON (no visual block editor yet)
+- Snapshots are selection-only (no print/export)
+- Mock catalogs for authors/singers/styles are static
 
-### **Block-Based Structure**
-Content is organized into blocks (sections, lines, tokens).  
-This allows:
-- Reordering any part of a song or text  
-- Editing by segments instead of long documents  
-- Building alternative versions easily
+## Tech stack
+- Angular 21, TypeScript
+- Angular Material and CDK
+- RxJS
+- Karma/Jasmine for tests
 
-### **Creative Branching**
-Inspired by Git workflows:
-- Create alternate versions of chapters or songs  
-- Experiment without losing the original  
-- Merge, split or compare versions visually
+## Local setup
+- Node: 18+ (LTS recommended)
+- Install: `npm install`
+- Run dev server: `npm start`
+- Build: `npm run build`
+- Test: `npm test`
+- Lint: `npm run lint`
 
-### **Snapshots**
-Generate custom compilations:
-- Songbooks  
-- Poem collections  
-- Manuscript drafts  
-- Mixed content sets  
+## Project structure (high level)
+- `src/app/core` — models, services (song data, library store), i18n utilities
+- `src/app/features` — feature modules (songs, snapshots)
+- `src/app/shared` — shared UI/modules (future growth)
+- `src/assets/mock` — seed JSON (songs, authors, singers, styles)
 
-Snapshots can combine multiple pieces and export them in print-friendly format.
+## Workflow
+- Use feature branches per task; open PRs for review before merging
+- Track work with GitHub issues linked to PRs when possible
+- Keep changes scoped and atomic; prefer small, focused PRs
 
-### **Song Support**
-For musicians, NoteDraftForge supports:
-- Chords  
-- Melody hints  
-- Multilingual lyrics  
-- Chord-change highlighting  
-- Rhythm and style metadata
-
-Perfect for learning, rehearsing, or sharing versions with bandmates.
-
-### **Poems & Chapters**
-Writers can structure chapters or poem stanzas into reusable modular units, making it easier to:
-- Test narrative order  
-- Branch into alternate scenes  
-- Rebuild a manuscript dynamically
-
----
-
-## 🧩 Planned Features
-
-- Local file loading (JSON / Excel-like structures)
-- Cloud sync via Google Drive or GitHub repositories
-- Multi-user collaboration through abstracted Git branching
-- Version comparison and merge suggestions
-- AI tools:
-  - Chord progression suggestions
-  - Text variation proposals
-  - Snapshot composition assistance
-- PWA support for mobile editing
-
----
-
-## 🚀 Tech Stack (initial)
-
-- **Angular**  
-- **TypeScript**  
-- **Angular Material** (UI)
-- **Mocked JSON data** as the initial content provider
-- **Modular architecture** for future backend integration (Java, Node, or serverless optional)
-
----
-
-## 📂 Project Structure (initial draft)
-src/
-app/
-core/
-models/
-services/
-features/
-songs/
-poems/
-snapshots/
-workspace/
-shared/
-assets/
-mock/
-songs.json
-authors.json
-singers.json
-styles.json
-
-
----
-
-## 📝 Status
-
-Early development — initial scaffolding with models, mock providers and UI exploration.  
-The goal is to create a flexible foundation that can grow into a full creative versioning environment.
-
----
-
-## 📜 License
-
-MIT (tentative)
-
----
-
-## 🤝 Contributions
-
-In the future this project may be opened for collaboration.  
-For now, the structure is being shaped to support long-term evolution.
+## Roadmap (short)
+- Improve song detail editor UX (safer JSON editing, helpers)
+- Persist library locally (LocalStorage/IndexedDB) before backend
+- CRUD for authors/singers/styles via generic editors
+- Better import/export validation and error surfacing
+- Snapshot export/print templates
+- Optional backend adapter (e.g., FastAPI/Java) with real auth
+- Expand i18n coverage and add more locales
 
 ---
 
 ## 💬 Contact
 
 Ideas, feedback or collaboration proposals are welcome.
-
 
