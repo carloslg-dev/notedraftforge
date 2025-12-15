@@ -1,0 +1,13 @@
+<div class="lang-selector">
+  <span class="lang-label">{{ 'lang.label' | t }}</span>
+  <mat-button-toggle-group
+    class="lang-toggle"
+    [value]="lang()"
+    (change)="changeLang($event.value)"
+    aria-label="Language selector"
+  >
+    <mat-button-toggle *ngFor="let code of langs" [value]="code">
+      {{ code | uppercase }}
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+</div>

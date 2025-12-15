@@ -2,9 +2,9 @@
   <header class="song-header">
     <h2>{{ songTitle(song) }}</h2>
     <p class="meta">
-      <span>Key: {{ song.baseKey }}</span>
-      <span>Style: {{ song.styleId }}</span>
-      <span *ngIf="song.rhythm">Rhythm: {{ song.rhythm }}</span>
+      <span>{{ 'songs.key' | t }}: {{ song.baseKey }}</span>
+      <span>{{ 'songDetail.style' | t }}: {{ song.styleId }}</span>
+      <span *ngIf="song.rhythm">{{ 'songDetail.rhythm' | t }}: {{ song.rhythm }}</span>
     </p>
   </header>
 
@@ -26,5 +26,5 @@
 </section>
 
 <ng-template #notFound>
-  <p class="placeholder">Song not found. Pick another one from the list.</p>
+  <p class="placeholder">{{ 'songDetail.notFound' | t }}</p>
 </ng-template>
