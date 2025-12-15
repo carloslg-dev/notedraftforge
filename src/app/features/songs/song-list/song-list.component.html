@@ -1,6 +1,30 @@
 <mat-sidenav-container class="song-shell">
   <mat-sidenav mode="side" opened class="song-nav">
-    <h3 class="nav-title">{{ 'songs.title' | t }}</h3>
+    <div class="nav-header">
+      <h3 class="nav-title">{{ 'songs.title' | t }}</h3>
+      <div class="nav-actions">
+        <button mat-stroked-button color="primary" (click)="createNew()">
+          <mat-icon>add</mat-icon>
+          {{ 'songs.new' | t }}
+        </button>
+        <button mat-stroked-button (click)="exportSongs()">
+          <mat-icon>download</mat-icon>
+          {{ 'songs.export' | t }}
+        </button>
+        <button mat-stroked-button (click)="fileInput.click()">
+          <mat-icon>upload</mat-icon>
+          {{ 'songs.import' | t }}
+        </button>
+        <input
+          #fileInput
+          type="file"
+          accept=".json,application/json"
+          class="hidden-input"
+          (change)="onImport($event)"
+        />
+      </div>
+      <p class="import-error" *ngIf="importError">{{ importError }}</p>
+    </div>
     <mat-nav-list>
       <a
         mat-list-item

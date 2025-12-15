@@ -1,28 +1,124 @@
-<section *ngIf="song$ | async as song; else notFound" class="song-detail">
-  <header class="song-header">
-    <h2>{{ songTitle(song) }}</h2>
-    <p class="meta">
-      <span>{{ 'songs.key' | t }}: {{ song.baseKey }}</span>
-      <span>{{ 'songDetail.style' | t }}: {{ song.styleId }}</span>
-      <span *ngIf="song.rhythm">{{ 'songDetail.rhythm' | t }}: {{ song.rhythm }}</span>
-    </p>
-  </header>
+<section *ngIf="vm$ | async as vm">
+  <ng-container *ngIf="!vm.notFound; else notFound">
+    <form class="song-detail" [formGroup]="form" (ngSubmit)="save()">
+      <header class="song-header">
+        <div>
+          <h2>{{ currentSong ? songTitle(currentSong) : form.controls.titleEn.value || songTitle(vm.song) }}</h2>
+          <p class="meta">
+            <span>{{ 'songs.key' | t }}: {{ currentSong?.baseKey || form.controls.baseKey.value }}</span>
+            <span>{{ 'songDetail.style' | t }}: {{ currentSong?.styleId || form.controls.styleId.value }}</span>
+            <span *ngIf="currentSong?.rhythm || form.controls.rhythm.value">
+              {{ 'songDetail.rhythm' | t }}: {{ currentSong?.rhythm || form.controls.rhythm.value }}
+            </span>
+          </p>
+        </div>
+        <div class="header-actions">
+          <button type="button" mat-stroked-button (click)="startNew()">
+            <mat-icon>add</mat-icon>
+            {{ 'songs.new' | t }}
+          </button>
+          <button type="button" mat-stroked-button (click)="enterEdit()" [disabled]="mode === 'edit'">
+            <mat-icon>edit</mat-icon>
+            {{ 'songs.edit' | t }}
+          </button>
+          <button type="submit" mat-raised-button color="primary" *ngIf="mode === 'edit'" [disabled]="form.invalid">
+            <mat-icon>save</mat-icon>
+            {{ 'songs.save' | t }}
+          </button>
+          <button type="button" mat-stroked-button color="warn" (click)="deleteSong()" [disabled]="vm.isNew">
+            <mat-icon>delete</mat-icon>
+            {{ 'songs.delete' | t }}
+          </button>
+          <button type="button" mat-stroked-button *ngIf="mode === 'edit'" (click)="cancel()">
+            <mat-icon>cancel</mat-icon>
+            {{ 'songs.cancel' | t }}
+          </button>
+        </div>
+      </header>
 
-  <div class="song-body">
-    <div class="section" *ngFor="let section of song.song.sections">
-      <h3>{{ section.name }}</h3>
-      <div class="line" *ngFor="let line of section.lines">
-        <div
-          class="block"
-          *ngFor="let block of line.blocks; let i = index"
-          [class.chord-change]="hasChordChange(block, line.blocks[i - 1])"
-        >
-          <div class="chord" *ngIf="block.chord">{{ block.chord }}</div>
-          <div class="lyrics">{{ blockLyrics(block) }}</div>
+      <div *ngIf="mode === 'view' && currentSong" class="view-panel">
+        <div class="section" *ngFor="let section of currentSong.song.sections">
+          <h3>{{ section.name }}</h3>
+          <div class="line" *ngFor="let line of section.lines">
+            <div
+              class="block"
+              *ngFor="let block of line.blocks; let i = index"
+              [class.chord-change]="hasChordChange(block, line.blocks[i - 1])"
+            >
+              <div class="chord" *ngIf="block.chord">{{ block.chord }}</div>
+              <div class="lyrics">{{ blockLyrics(block) }}</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+
+      <div *ngIf="mode === 'edit'" class="form-grid">
+        <mat-form-field>
+          <mat-label>{{ 'songs.id' | t }}</mat-label>
+          <input matInput formControlName="id" [readonly]="!vm.isNew" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ 'songs.titleEn' | t }}</mat-label>
+          <input matInput formControlName="titleEn" required />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ 'songs.titleEs' | t }}</mat-label>
+          <input matInput formControlName="titleEs" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ 'songs.author' | t }}</mat-label>
+          <mat-select formControlName="authorId" required>
+            <mat-option *ngFor="let author of authors$ | async" [value]="author.id">
+              {{ author.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ 'songs.style' | t }}</mat-label>
+          <mat-select formControlName="styleId" required>
+            <mat-option *ngFor="let style of styles$ | async" [value]="style.id">
+              {{ style.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ 'songs.rhythm' | t }}</mat-label>
+          <input matInput formControlName="rhythm" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ 'songs.baseKey' | t }}</mat-label>
+          <input matInput formControlName="baseKey" required />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ 'songs.singers' | t }}</mat-label>
+          <mat-select formControlName="singers" multiple>
+            <mat-option *ngFor="let singer of singers$ | async" [value]="singer.id">
+              {{ singer.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ 'songs.tags' | t }}</mat-label>
+          <input matInput formControlName="tags" placeholder="tag1, tag2" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ 'songs.sections' | t }}</mat-label>
+          <textarea matInput rows="10" formControlName="sections"></textarea>
+        </mat-form-field>
+      </div>
+
+      <p class="error" *ngIf="jsonError">{{ jsonError }}</p>
+    </form>
+  </ng-container>
 </section>
 
 <ng-template #notFound>

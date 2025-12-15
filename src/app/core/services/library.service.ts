@@ -68,4 +68,43 @@ export class LibraryService {
   getStyleById(id: string): Observable<Style | undefined> {
     return this.getStyles().pipe(map((styles) => styles.find((style) => style.id === id)));
   }
+
+  addSong(song: Song): Song {
+    const library = this.requireLibrary();
+    this.library$.next({ ...library, songs: [...library.songs, song] });
+    return song;
+  }
+
+  updateSong(updated: Song): Song {
+    const library = this.requireLibrary();
+    const found = library.songs.some((song) => song.id === updated.id);
+    if (!found) {
+      throw new Error(`Song ${updated.id} not found`);
+    }
+    const songs = library.songs.map((song) => (song.id === updated.id ? updated : song));
+    this.library$.next({ ...library, songs });
+    return updated;
+  }
+
+  deleteSong(id: string): void {
+    const library = this.requireLibrary();
+    this.library$.next({ ...library, songs: library.songs.filter((song) => song.id !== id) });
+  }
+
+  exportSongs(): string {
+    return JSON.stringify(this.requireLibrary().songs, null, 2);
+  }
+
+  importSongs(songs: Song[]): void {
+    const library = this.requireLibrary();
+    this.library$.next({ ...library, songs: [...songs] });
+  }
+
+  private requireLibrary(): LibraryPayload {
+    const current = this.library$.value;
+    if (!current) {
+      throw new Error('Library has not been initialized');
+    }
+    return current;
+  }
 }
