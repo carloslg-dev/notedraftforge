@@ -16,7 +16,7 @@
   </mat-sidenav>
 
   <mat-sidenav-content class="song-content">
-    <router-outlet #detailOutlet="routerOutlet"></router-outlet>
+    <router-outlet #detailOutlet="outlet"></router-outlet>
     <div *ngIf="!detailOutlet.isActivated" class="placeholder">
       Select a song to view its details.
     </div>
