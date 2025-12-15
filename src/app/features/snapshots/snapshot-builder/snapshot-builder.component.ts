@@ -6,12 +6,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, map } from 'rxjs';
 import { LibraryService } from '../../../core/services/library.service';
 import { Song } from '../../../core/models/song';
-import { LangCode } from '../../../core/models/lang';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-snapshot-builder',
   standalone: true,
-  imports: [CommonModule, MatListModule, MatButtonModule],
+  imports: [CommonModule, MatListModule, MatButtonModule, TranslatePipe],
   templateUrl: './snapshot-builder.component.html',
   styleUrls: ['./snapshot-builder.component.scss'],
 })
@@ -19,8 +20,9 @@ export class SnapshotBuilderComponent implements OnInit {
   private readonly library = inject(LibraryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly selection$ = new BehaviorSubject<Set<string>>(new Set());
+  private readonly i18n = inject(I18nService);
 
-  readonly displayLang: LangCode = 'en';
+  readonly lang = this.i18n.lang;
   readonly songs$ = this.library.getSongs();
   readonly selectionState$ = this.selection$.asObservable();
   readonly selectedSongs$ = this.selection$.pipe(
@@ -35,7 +37,8 @@ export class SnapshotBuilderComponent implements OnInit {
   }
 
   songTitle(song: Song): string {
-    return song.title[this.displayLang] ?? Object.values(song.title)[0] ?? 'Untitled';
+    const lang = this.lang();
+    return song.title[lang] ?? Object.values(song.title)[0] ?? this.i18n.translate('songs.untitled', lang);
   }
 
   toggleSong(song: Song): void {

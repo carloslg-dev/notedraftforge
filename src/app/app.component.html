@@ -1,8 +1,9 @@
 <mat-toolbar color="primary" class="app-toolbar">
-  <span class="app-title">{{ title }}</span>
+  <span class="app-title">{{ 'app.title' | t }}</span>
   <span class="spacer"></span>
-  <a mat-button routerLink="/songs">Songs</a>
-  <a mat-button routerLink="/snapshots">Snapshots</a>
+  <a mat-button routerLink="/songs">{{ 'nav.songs' | t }}</a>
+  <a mat-button routerLink="/snapshots">{{ 'nav.snapshots' | t }}</a>
+  <app-language-selector></app-language-selector>
 </mat-toolbar>
 
 <main class="app-shell">

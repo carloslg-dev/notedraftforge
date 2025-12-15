@@ -1,6 +1,6 @@
 <mat-sidenav-container class="song-shell">
   <mat-sidenav mode="side" opened class="song-nav">
-    <h3 class="nav-title">Songs</h3>
+    <h3 class="nav-title">{{ 'songs.title' | t }}</h3>
     <mat-nav-list>
       <a
         mat-list-item
@@ -10,7 +10,7 @@
       >
         <mat-icon matListItemIcon>music_note</mat-icon>
         <div matListItemTitle>{{ songTitle(song) }}</div>
-        <div matListItemLine>Key: {{ song.baseKey }}</div>
+        <div matListItemLine>{{ 'songs.key' | t }}: {{ song.baseKey }}</div>
       </a>
     </mat-nav-list>
   </mat-sidenav>
@@ -18,7 +18,7 @@
   <mat-sidenav-content class="song-content">
     <router-outlet #detailOutlet="outlet"></router-outlet>
     <div *ngIf="!detailOutlet.isActivated" class="placeholder">
-      Select a song to view its details.
+      {{ 'songs.placeholder' | t }}
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

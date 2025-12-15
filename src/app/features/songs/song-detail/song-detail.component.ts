@@ -1,16 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { combineLatest, map, switchMap } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LibraryService } from '../../../core/services/library.service';
 import { Song, SongBlock } from '../../../core/models/song';
-import { LangCode } from '../../../core/models/lang';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-song-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './song-detail.component.html',
   styleUrls: ['./song-detail.component.scss'],
 })
@@ -18,8 +19,8 @@ export class SongDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly library = inject(LibraryService);
   private readonly destroyRef = inject(DestroyRef);
-
-  readonly displayLang: LangCode = 'en';
+  private readonly i18n = inject(I18nService);
+  readonly lang = this.i18n.lang;
 
   readonly song$ = this.route.paramMap.pipe(
     map((params) => params.get('id')),
@@ -28,11 +29,13 @@ export class SongDetailComponent {
   );
 
   songTitle(song: Song): string {
-    return song.title[this.displayLang] ?? Object.values(song.title)[0] ?? 'Untitled';
+    const lang = this.lang();
+    return song.title[lang] ?? Object.values(song.title)[0] ?? this.i18n.translate('songs.untitled', lang);
   }
 
   blockLyrics(block: SongBlock): string {
-    return block.lyrics[this.displayLang] ?? Object.values(block.lyrics)[0] ?? '';
+    const lang = this.lang();
+    return block.lyrics[lang] ?? Object.values(block.lyrics)[0] ?? '';
   }
 
   hasChordChange(block: SongBlock, previous?: SongBlock): boolean {
