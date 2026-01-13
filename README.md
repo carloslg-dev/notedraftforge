@@ -50,13 +50,14 @@ The current Angular app ships with a song list, detail view, and in-memory CRUD.
 - Persist library locally (LocalStorage/IndexedDB) before backend
 - CRUD for authors/singers/styles via generic editors
 - Better import/export validation and error surfacing
-- Snapshot export/print templates
+- Snapshot export/print templates and narrative workspace ordering
 - Optional backend adapter (e.g., FastAPI/Java) with real auth
 - Expand i18n coverage and add more locales
+- Extend block model to narratives (chapters/paragraphs) and poetry (verses)
+- Visual chord/tension cues (color-coded notes, secondary line for tensions)
 
 ---
 
 ## 💬 Contact
 
 Ideas, feedback or collaboration proposals are welcome.
-

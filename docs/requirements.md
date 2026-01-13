@@ -56,3 +56,8 @@
   - Users can toggle selections and clear all; selection count updates live.
   - Selections are kept in memory during the session.
 - **Notes/assumptions**: No export/print is implemented yet; feature is a selection-only prototype.
+
+## Planned extensions (not yet implemented)
+- Narrative blocks: chapters composed of paragraph blocks; snapshots act as workspaces to reorder narrative parts and experiment with story flow.
+- Poetry mode: stanzas with verse blocks, using the same block-based rendering.
+- Enhanced song editing: friendlier block/line grouping, color-coded chords, and a tension line to surface extensions (7th/5th/sharp/flat/diminished) for performers.
