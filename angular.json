@@ -40,7 +40,8 @@
                   "maximumWarning": "6KB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/notedraftforge/"
             },
             "development": {
               "buildOptimizer": false,
