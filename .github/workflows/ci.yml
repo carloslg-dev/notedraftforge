@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
   pages: write
   id-token: write
 
@@ -30,6 +31,24 @@ jobs:
 
       - name: Test
         run: npm test -- --watch=false --browsers=ChromeHeadless
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.projectName=NoteDraftForge
+            -Dsonar.sources=src
+            -Dsonar.exclusions=**/*.spec.ts,**/environment*.ts
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.typescript.tsconfigPath=tsconfig.app.json
 
       - name: Build
         run: npm run build -- --configuration=production --base-href=/notedraftforge/

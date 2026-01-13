@@ -126,6 +126,14 @@ A PR is mergeable only if:
 * SonarCloud quality gate is ✅ (when enabled)
 * Demo build works (if it affects routing or deploy)
 
+### SonarCloud setup (CI)
+
+* Secrets/vars needed:
+  * `SONAR_TOKEN` (repository secret) — user token from SonarCloud.
+  * `SONAR_ORGANIZATION` (repo/org variable) — SonarCloud org key (defaults to GitHub owner if omitted).
+  * `SONAR_PROJECT_KEY` (repo/org variable) — SonarCloud project key (defaults to `<owner>_<repo>`).
+* The CI workflow runs the scan after tests only when `SONAR_TOKEN` is present. PR decoration uses the default `GITHUB_TOKEN`.
+
 ### 6) Merge strategy
 
 * Use **Squash and merge** for most PRs:
