@@ -27,6 +27,10 @@
 - Persist locally via `localStorage` or IndexedDB as an intermediate step.
 - Add a backend adapter layer (e.g., FastAPI or Java/Spring) for real persistence, auth, and collaboration flows.
 - Extend translation loading to remote JSON bundles or a dedicated i18n library if scale requires.
+- Extend the block model to additional domains:
+  - Narratives: chapters containing paragraph blocks; snapshots act as workspaces to reorder chapters/sections for story experiments.
+  - Poetry: verses as blocks within stanzas.
+  - Music notation: chord rendering with color-coded notes and a secondary line for tensions/extensions (7th, 5th, sharp/flat, diminished) to aid performers.
 
 ## Testing approach
 - **Current**: Unit tests via Karma/Jasmine (service specs present; components can be tested with Angular TestBed).
