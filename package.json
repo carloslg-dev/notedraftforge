@@ -7,7 +7,8 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "npm run lint:tsc",
+    "lint:tsc": "tsc -p tsconfig.app.json --noEmit"
   },
   "dependencies": {
     "@angular/animations": "^21.0.3",
