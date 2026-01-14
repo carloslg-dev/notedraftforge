@@ -14,6 +14,18 @@
   font-weight: 600;
 }
 
+.nav-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.layout-controls {
+  display: flex;
+  align-items: center;
+}
+
 .nav-header {
   display: flex;
   flex-direction: column;
@@ -39,6 +51,51 @@
 .song-content {
   padding: 1rem;
   background: #fafafa;
+}
+
+.song-content.content-hidden {
+  display: none;
+}
+
+.song-shell.list-only .song-nav {
+  width: 100%;
+  max-width: 100%;
+  border-right: none;
+}
+
+.song-shell.list-only .nav-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.detail-controls {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.detail-shell {
+  min-height: 0;
+}
+
+.detail-shell.detail-hidden {
+  display: none;
+}
+
+.list-placeholder {
+  margin-top: 1.5rem;
+}
+
+.mobile-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.mobile-title {
+  font-weight: 600;
 }
 
 .placeholder {

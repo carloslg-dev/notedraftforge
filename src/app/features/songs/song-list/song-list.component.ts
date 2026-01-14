@@ -3,25 +3,29 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { IsActiveMatchOptions, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { filter, map } from 'rxjs';
 import { LibraryService } from '../../../core/services/library.service';
 import { Song } from '../../../core/models/song';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { MatButtonModule } from '@angular/material/button';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+
+type LayoutMode = 'list' | 'split' | 'detail';
 
 @Component({
   selector: 'app-song-list',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
-    RouterLinkActive,
     RouterOutlet,
     MatSidenavModule,
     MatListModule,
     MatIconModule,
+    MatToolbarModule,
     TranslatePipe,
     MatButtonModule,
   ],
@@ -33,16 +37,62 @@ export class SongListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly responsive = inject(ResponsiveService);
 
   readonly lang = this.i18n.lang;
   readonly songs$ = this.library.getSongs();
+  readonly isHandset$ = this.responsive.isHandset$;
+  readonly layout$ = this.isHandset$.pipe(map((isHandset) => ({ isHandset })));
+
   importError = '';
+  navOpen = false;
+  layoutMode: LayoutMode = 'list';
+  private isHandset = false;
+  private readonly routeMatch: IsActiveMatchOptions = {
+    paths: 'exact',
+    queryParams: 'ignored',
+    fragment: 'ignored',
+    matrixParams: 'ignored',
+  };
 
   ngOnInit(): void {
     this.library
       .init()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
+
+    this.isHandset$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((isHandset) => {
+        this.isHandset = isHandset;
+        if (isHandset) {
+          this.navOpen = false;
+          this.layoutMode = this.isInDetailRoute() ? 'detail' : 'list';
+          return;
+        }
+        if (this.layoutMode === 'detail') {
+          this.layoutMode = 'split';
+        }
+      });
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        const inDetail = this.isInDetailRoute();
+        if (this.isHandset) {
+          this.layoutMode = inDetail ? 'detail' : 'list';
+          return;
+        }
+        if (inDetail && this.layoutMode === 'list') {
+          this.layoutMode = 'split';
+        }
+        if (!inDetail) {
+          this.layoutMode = 'list';
+        }
+      });
   }
 
   songTitle(song: Song): string {
@@ -50,9 +100,13 @@ export class SongListComponent implements OnInit {
     return song.title[lang] ?? Object.values(song.title)[0] ?? this.i18n.translate('songs.untitled', lang);
   }
 
-  createNew(): void {
+  createNew(closeNav = false): void {
     this.importError = '';
     this.router.navigate(['/songs', 'new']);
+    if (closeNav) {
+      this.navOpen = false;
+    }
+    this.layoutMode = this.isHandset ? 'detail' : 'split';
   }
 
   exportSongs(): void {
@@ -91,5 +145,39 @@ export class SongListComponent implements OnInit {
       }
     };
     reader.readAsText(file);
+  }
+
+  openSong(song: Song): void {
+    this.router.navigate(['/songs', song.id]);
+    if (this.isHandset) {
+      this.layoutMode = 'detail';
+      this.navOpen = false;
+      return;
+    }
+    this.layoutMode = 'split';
+  }
+
+  toggleNav(): void {
+    this.navOpen = !this.navOpen;
+  }
+
+  showListOnly(): void {
+    this.layoutMode = 'list';
+  }
+
+  showDetailOnly(): void {
+    this.layoutMode = 'detail';
+  }
+
+  showSplit(): void {
+    this.layoutMode = 'split';
+  }
+
+  isActiveSong(song: Song): boolean {
+    return this.router.isActive(`/songs/${song.id}`, this.routeMatch);
+  }
+
+  private isInDetailRoute(): boolean {
+    return this.router.url.startsWith('/songs/') && this.router.url !== '/songs';
   }
 }

@@ -55,22 +55,22 @@
       <div *ngIf="mode === 'edit'" class="form-grid">
         <mat-form-field>
           <mat-label>{{ 'songs.id' | t }}</mat-label>
-          <input matInput formControlName="id" [readonly]="!vm.isNew" />
+          <input matInput formControlName="id" name="id" [readonly]="!vm.isNew" />
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>{{ 'songs.titleEn' | t }}</mat-label>
-          <input matInput formControlName="titleEn" required />
+          <input matInput formControlName="titleEn" name="titleEn" required />
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>{{ 'songs.titleEs' | t }}</mat-label>
-          <input matInput formControlName="titleEs" />
+          <input matInput formControlName="titleEs" name="titleEs" />
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>{{ 'songs.author' | t }}</mat-label>
-          <mat-select formControlName="authorId" required>
+          <mat-select formControlName="authorId" name="authorId" required>
             <mat-option *ngFor="let author of authors$ | async" [value]="author.id">
               {{ author.name }}
             </mat-option>
@@ -79,7 +79,7 @@
 
         <mat-form-field>
           <mat-label>{{ 'songs.style' | t }}</mat-label>
-          <mat-select formControlName="styleId" required>
+          <mat-select formControlName="styleId" name="styleId" required>
             <mat-option *ngFor="let style of styles$ | async" [value]="style.id">
               {{ style.label }}
             </mat-option>
@@ -88,17 +88,17 @@
 
         <mat-form-field>
           <mat-label>{{ 'songs.rhythm' | t }}</mat-label>
-          <input matInput formControlName="rhythm" />
+          <input matInput formControlName="rhythm" name="rhythm" />
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>{{ 'songs.baseKey' | t }}</mat-label>
-          <input matInput formControlName="baseKey" required />
+          <input matInput formControlName="baseKey" name="baseKey" required />
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>{{ 'songs.singers' | t }}</mat-label>
-          <mat-select formControlName="singers" multiple>
+          <mat-select formControlName="singers" name="singers" multiple>
             <mat-option *ngFor="let singer of singers$ | async" [value]="singer.id">
               {{ singer.name }}
             </mat-option>
@@ -107,12 +107,12 @@
 
         <mat-form-field>
           <mat-label>{{ 'songs.tags' | t }}</mat-label>
-          <input matInput formControlName="tags" placeholder="tag1, tag2" />
+          <input matInput formControlName="tags" name="tags" placeholder="tag1, tag2" />
         </mat-form-field>
 
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>{{ 'songs.sections' | t }}</mat-label>
-          <textarea matInput rows="10" formControlName="sections"></textarea>
+          <textarea matInput rows="10" formControlName="sections" name="sections"></textarea>
         </mat-form-field>
       </div>
 
