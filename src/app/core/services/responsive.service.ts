@@ -32,5 +32,11 @@ export class ResponsiveService {
   readonly isHandset$ = this.device$.pipe(map((d) => d === DEVICE_KIND.Handset));
   readonly isTablet$ = this.device$.pipe(map((d) => d === DEVICE_KIND.Tablet));
   readonly isWeb$ = this.device$.pipe(map((d) => d === DEVICE_KIND.Web));
-}
 
+  readonly isCompact$ = this.breakpointObserver
+    .observe([Breakpoints.Handset, Breakpoints.Tablet])
+    .pipe(
+      map((result) => result.matches),
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
+}

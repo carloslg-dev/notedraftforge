@@ -7,6 +7,7 @@ import { IsActiveMatchOptions, NavigationEnd, Router, RouterOutlet } from '@angu
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { filter, map } from 'rxjs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { LibraryService } from '../../../core/services/library.service';
 import { Song } from '../../../core/models/song';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
@@ -26,6 +27,7 @@ type LayoutMode = 'list' | 'split' | 'detail';
     MatListModule,
     MatIconModule,
     MatToolbarModule,
+    MatTooltipModule,
     TranslatePipe,
     MatButtonModule,
   ],
@@ -41,13 +43,12 @@ export class SongListComponent implements OnInit {
 
   readonly lang = this.i18n.lang;
   readonly songs$ = this.library.getSongs();
-  readonly isHandset$ = this.responsive.isHandset$;
-  readonly layout$ = this.isHandset$.pipe(map((isHandset) => ({ isHandset })));
+  readonly isCompact$ = this.responsive.isCompact$;
+  readonly layout$ = this.isCompact$.pipe(map((isCompact) => ({ isCompact })));
 
   importError = '';
-  navOpen = false;
   layoutMode: LayoutMode = 'list';
-  private isHandset = false;
+  private isCompact = false;
   private readonly routeMatch: IsActiveMatchOptions = {
     paths: 'exact',
     queryParams: 'ignored',
@@ -61,12 +62,11 @@ export class SongListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
 
-    this.isHandset$
+    this.isCompact$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((isHandset) => {
-        this.isHandset = isHandset;
-        if (isHandset) {
-          this.navOpen = false;
+      .subscribe((isCompact) => {
+        this.isCompact = isCompact;
+        if (isCompact) {
           this.layoutMode = this.isInDetailRoute() ? 'detail' : 'list';
           return;
         }
@@ -82,7 +82,7 @@ export class SongListComponent implements OnInit {
       )
       .subscribe(() => {
         const inDetail = this.isInDetailRoute();
-        if (this.isHandset) {
+        if (this.isCompact) {
           this.layoutMode = inDetail ? 'detail' : 'list';
           return;
         }
@@ -100,13 +100,10 @@ export class SongListComponent implements OnInit {
     return song.title[lang] ?? Object.values(song.title)[0] ?? this.i18n.translate('songs.untitled', lang);
   }
 
-  createNew(closeNav = false): void {
+  createNew(): void {
     this.importError = '';
     this.router.navigate(['/songs', 'new']);
-    if (closeNav) {
-      this.navOpen = false;
-    }
-    this.layoutMode = this.isHandset ? 'detail' : 'split';
+    this.layoutMode = this.isCompact ? 'detail' : 'split';
   }
 
   exportSongs(): void {
@@ -149,16 +146,11 @@ export class SongListComponent implements OnInit {
 
   openSong(song: Song): void {
     this.router.navigate(['/songs', song.id]);
-    if (this.isHandset) {
+    if (this.isCompact) {
       this.layoutMode = 'detail';
-      this.navOpen = false;
       return;
     }
     this.layoutMode = 'split';
-  }
-
-  toggleNav(): void {
-    this.navOpen = !this.navOpen;
   }
 
   showListOnly(): void {
@@ -171,6 +163,11 @@ export class SongListComponent implements OnInit {
 
   showSplit(): void {
     this.layoutMode = 'split';
+  }
+
+  backToList(): void {
+    this.router.navigate(['/songs']);
+    this.layoutMode = 'list';
   }
 
   isActiveSong(song: Song): boolean {

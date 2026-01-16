@@ -1,10 +1,26 @@
 <mat-toolbar color="primary" class="app-toolbar">
   <span class="app-title">{{ 'app.title' | t }}</span>
   <span class="spacer"></span>
+  <ng-container *ngIf="isCompact$ | async; else desktopNav">
+    <button mat-icon-button [matMenuTriggerFor]="mainMenu" aria-label="Open navigation menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+  </ng-container>
+</mat-toolbar>
+
+<ng-template #desktopNav>
   <a mat-button routerLink="/songs">{{ 'nav.songs' | t }}</a>
   <a mat-button routerLink="/snapshots">{{ 'nav.snapshots' | t }}</a>
   <app-language-selector></app-language-selector>
-</mat-toolbar>
+</ng-template>
+
+<mat-menu #mainMenu="matMenu">
+  <button mat-menu-item routerLink="/songs">{{ 'nav.songs' | t }}</button>
+  <button mat-menu-item routerLink="/snapshots">{{ 'nav.snapshots' | t }}</button>
+  <div class="menu-language">
+    <app-language-selector></app-language-selector>
+  </div>
+</mat-menu>
 
 <main class="app-shell">
   <router-outlet></router-outlet>

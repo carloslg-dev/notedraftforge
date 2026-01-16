@@ -17,8 +17,12 @@
 .nav-title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.5rem;
+}
+
+.layout-controls {
+  margin-left: auto;
 }
 
 .layout-controls {
@@ -34,8 +38,8 @@
 
 .nav-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .hidden-input {
@@ -55,6 +59,12 @@
 
 .song-content.content-hidden {
   display: none;
+}
+
+.song-compact {
+  background: #fff;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
 }
 
 .song-shell.list-only .song-nav {

@@ -1,112 +1,144 @@
 <ng-container *ngIf="layout$ | async as layout">
-  <mat-sidenav-container
-    class="song-shell"
-    [class.list-only]="layoutMode === 'list' && !layout.isHandset"
-    [hasBackdrop]="layout.isHandset"
-    [autosize]="true"
-  >
-    <mat-sidenav
-      #sidenav
-      class="song-nav"
-      [mode]="layout.isHandset ? 'over' : 'side'"
-      [opened]="layout.isHandset ? navOpen : layoutMode !== 'detail'"
-      (openedChange)="navOpen = $event"
-    >
-      <div class="nav-header">
-        <div class="nav-title-row">
-          <h3 class="nav-title">{{ 'songs.title' | t }}</h3>
-          <div class="layout-controls" *ngIf="!layout.isHandset">
-            <button
-              mat-icon-button
-              (click)="layoutMode === 'split' ? showDetailOnly() : showSplit()"
-              [attr.aria-label]="layoutMode === 'split' ? 'Show detail only' : 'Show split view'"
-            >
-              <mat-icon>chevron_left</mat-icon>
-            </button>
+  <ng-container *ngIf="layout.isCompact; else desktopLayout">
+    <section class="song-compact">
+      <ng-container *ngIf="layoutMode === 'list'; else compactDetail">
+        <ng-container
+          *ngTemplateOutlet="listContent; context: { isCompact: layout.isCompact }"
+        ></ng-container>
+      </ng-container>
+      <ng-template #compactDetail>
+        <mat-toolbar class="mobile-toolbar" color="primary">
+          <button mat-icon-button (click)="backToList()" aria-label="Back to songs list">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <span class="mobile-title">{{ 'songs.title' | t }}</span>
+          <span class="spacer"></span>
+          <button mat-icon-button color="accent" (click)="createNew()" aria-label="New song">
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-toolbar>
+        <div class="detail-shell">
+          <router-outlet #detailOutlet="outlet"></router-outlet>
+          <div *ngIf="!detailOutlet.isActivated" class="placeholder">
+            {{ 'songs.placeholder' | t }}
           </div>
         </div>
-        <div class="nav-actions">
-          <button mat-stroked-button color="primary" (click)="createNew(layout.isHandset)">
-            <mat-icon>add</mat-icon>
-            {{ 'songs.new' | t }}
-          </button>
-          <button mat-stroked-button (click)="exportSongs()">
-            <mat-icon>download</mat-icon>
-            {{ 'songs.export' | t }}
-          </button>
-          <button mat-stroked-button (click)="fileInput.click()">
-            <mat-icon>upload</mat-icon>
-            {{ 'songs.import' | t }}
-          </button>
-          <input
-            #fileInput
-            type="file"
-            accept=".json,application/json"
-            class="hidden-input"
-            (change)="onImport($event)"
-          />
-        </div>
-        <p class="import-error" *ngIf="importError">{{ importError }}</p>
-      </div>
-      <mat-nav-list>
-        <mat-list-item
-          class="song-item"
-          *ngFor="let song of songs$ | async"
-          [class.active-link]="isActiveSong(song)"
-        >
-          <mat-icon matListItemIcon>music_note</mat-icon>
-          <div matListItemTitle>{{ songTitle(song) }}</div>
-          <div matListItemLine>{{ 'songs.key' | t }}: {{ song.baseKey }}</div>
+      </ng-template>
+    </section>
+  </ng-container>
+
+  <ng-template #desktopLayout>
+    <mat-sidenav-container
+      class="song-shell"
+      [class.list-only]="layoutMode === 'list'"
+      [autosize]="true"
+    >
+      <mat-sidenav
+        class="song-nav"
+        mode="side"
+        [opened]="layoutMode !== 'detail'"
+      >
+        <ng-container
+          *ngTemplateOutlet="listContent; context: { isCompact: false }"
+        ></ng-container>
+      </mat-sidenav>
+
+      <mat-sidenav-content
+        class="song-content"
+        [class.content-hidden]="layoutMode === 'list'"
+      >
+        <div class="detail-controls" *ngIf="layoutMode !== 'list'">
           <button
             mat-icon-button
-            matListItemMeta
-            type="button"
-            (click)="openSong(song)"
-            aria-label="View song"
+            (click)="layoutMode === 'split' ? showListOnly() : showSplit()"
+            [attr.aria-label]="layoutMode === 'split' ? 'Show list only' : 'Show split view'"
           >
-            <mat-icon>visibility</mat-icon>
+            <mat-icon>chevron_right</mat-icon>
           </button>
-        </mat-list-item>
-      </mat-nav-list>
-    </mat-sidenav>
+        </div>
 
-    <mat-sidenav-content
-      class="song-content"
-      [class.content-hidden]="layoutMode === 'list' && !layout.isHandset"
-    >
-      <mat-toolbar *ngIf="layout.isHandset" class="mobile-toolbar" color="primary">
-        <button mat-icon-button (click)="toggleNav()">
-          <mat-icon>menu</mat-icon>
-        </button>
-        <span class="mobile-title">{{ 'songs.title' | t }}</span>
-        <span class="spacer"></span>
-        <button mat-icon-button color="accent" (click)="createNew(true)" aria-label="New song">
-          <mat-icon>add</mat-icon>
-        </button>
-      </mat-toolbar>
-
-      <div
-        class="detail-controls"
-        *ngIf="!layout.isHandset && layoutMode !== 'list'"
-      >
-        <button
-          mat-icon-button
-          (click)="layoutMode === 'split' ? showListOnly() : showSplit()"
-          [attr.aria-label]="layoutMode === 'split' ? 'Show list only' : 'Show split view'"
-        >
-          <mat-icon>chevron_right</mat-icon>
-        </button>
-      </div>
-
-      <div class="detail-shell" [class.detail-hidden]="layoutMode === 'list'">
-        <router-outlet #detailOutlet="outlet"></router-outlet>
-        <div *ngIf="!detailOutlet.isActivated" class="placeholder">
+        <div class="detail-shell" [class.detail-hidden]="layoutMode === 'list'">
+          <router-outlet #detailOutlet="outlet"></router-outlet>
+          <div *ngIf="!detailOutlet.isActivated" class="placeholder">
+            {{ 'songs.placeholder' | t }}
+          </div>
+        </div>
+        <div *ngIf="layoutMode === 'list'" class="placeholder list-placeholder">
           {{ 'songs.placeholder' | t }}
         </div>
-      </div>
-      <div *ngIf="layoutMode === 'list'" class="placeholder list-placeholder">
-        {{ 'songs.placeholder' | t }}
-      </div>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  </ng-template>
 </ng-container>
+
+<ng-template #listContent let-isCompact="isCompact">
+  <div class="nav-header">
+    <div class="nav-title-row">
+      <h3 class="nav-title">{{ 'songs.title' | t }}</h3>
+      <div class="nav-actions">
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="createNew()"
+          aria-label="New song"
+          matTooltip="{{ 'songs.new' | t }}"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          (click)="exportSongs()"
+          aria-label="Export songs"
+          matTooltip="{{ 'songs.export' | t }}"
+        >
+          <mat-icon>download</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          (click)="fileInput.click()"
+          aria-label="Import songs"
+          matTooltip="{{ 'songs.import' | t }}"
+        >
+          <mat-icon>upload</mat-icon>
+        </button>
+        <input
+          #fileInput
+          type="file"
+          accept=".json,application/json"
+          class="hidden-input"
+          (change)="onImport($event)"
+        />
+      </div>
+      <div class="layout-controls" *ngIf="!isCompact">
+        <button
+          mat-icon-button
+          (click)="layoutMode === 'split' ? showDetailOnly() : showSplit()"
+          [attr.aria-label]="layoutMode === 'split' ? 'Show detail only' : 'Show split view'"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+      </div>
+    </div>
+    <p class="import-error" *ngIf="importError">{{ importError }}</p>
+  </div>
+  <mat-nav-list>
+    <mat-list-item
+      class="song-item"
+      *ngFor="let song of songs$ | async"
+      [class.active-link]="isActiveSong(song)"
+    >
+      <mat-icon matListItemIcon>music_note</mat-icon>
+      <div matListItemTitle>{{ songTitle(song) }}</div>
+      <div matListItemLine>{{ 'songs.key' | t }}: {{ song.baseKey }}</div>
+      <button
+        mat-icon-button
+        matListItemMeta
+        type="button"
+        (click)="openSong(song)"
+        aria-label="View song"
+      >
+        <mat-icon>visibility</mat-icon>
+      </button>
+    </mat-list-item>
+  </mat-nav-list>
+</ng-template>
