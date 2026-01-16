@@ -33,7 +33,7 @@ jobs:
         run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
 
       - name: SonarCloud Scan
-        if: secrets.SONAR_TOKEN != ''
+        if: ${{ secrets.SONAR_TOKEN != '' }}
         uses: sonarsource/sonarcloud-github-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
