@@ -114,6 +114,20 @@
   margin-top: 1rem;
 }
 
+@media (max-width: 600px) {
+  .song-compact {
+    padding: 0.5rem;
+  }
+
+  .nav-title {
+    font-size: 1.05rem;
+  }
+
+  .song-item [matListItemTitle] {
+    white-space: normal;
+  }
+}
+
 .active-link {
   background-color: rgba(63, 81, 181, 0.08);
 }
