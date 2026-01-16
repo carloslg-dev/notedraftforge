@@ -1,6 +1,7 @@
 .app-toolbar {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .app-title {
@@ -18,4 +19,23 @@
 app-language-selector {
   display: flex;
   align-items: center;
+}
+
+.menu-language {
+  padding: 0.5rem 1rem 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .app-toolbar {
+    padding: 0 0.5rem;
+    row-gap: 0.25rem;
+  }
+
+  .app-title {
+    font-size: 1.05rem;
+  }
+
+  .app-shell {
+    padding: 0.6rem;
+  }
 }

@@ -14,6 +14,19 @@
   font-weight: 600;
 }
 
+.nav-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.layout-controls {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
 .nav-header {
   display: flex;
   flex-direction: column;
@@ -22,8 +35,8 @@
 
 .nav-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .hidden-input {
@@ -41,10 +54,75 @@
   background: #fafafa;
 }
 
+.song-content.content-hidden {
+  display: none;
+}
+
+.song-compact {
+  background: #fff;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+}
+
+.song-shell.list-only .song-nav {
+  width: 100%;
+  max-width: 100%;
+  border-right: none;
+}
+
+.song-shell.list-only .nav-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.detail-controls {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.detail-shell {
+  min-height: 0;
+}
+
+.detail-shell.detail-hidden {
+  display: none;
+}
+
+.list-placeholder {
+  margin-top: 1.5rem;
+}
+
+.mobile-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.mobile-title {
+  font-weight: 600;
+}
+
 .placeholder {
   color: #666;
   font-style: italic;
   margin-top: 1rem;
+}
+
+@media (max-width: 600px) {
+  .song-compact {
+    padding: 0.5rem;
+  }
+
+  .nav-title {
+    font-size: 1.05rem;
+  }
+
+  .song-item [matListItemTitle] {
+    white-space: normal;
+  }
 }
 
 .active-link {

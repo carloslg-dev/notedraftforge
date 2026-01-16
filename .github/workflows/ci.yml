@@ -13,6 +13,8 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,7 +32,27 @@ jobs:
         run: npm run lint
 
       - name: Test
-        run: npm test -- --watch=false --browsers=ChromeHeadless
+        run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
+
+      - name: SonarCloud Scan
+        if: ${{ env.SONAR_TOKEN != '' }}
+        uses: sonarsource/sonarcloud-github-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION || github.repository_owner }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY || format('{0}_{1}', github.repository_owner, github.event.repository.name) }}
+            -Dsonar.projectName=NoteDraftForge
+            -Dsonar.sources=src
+            -Dsonar.exclusions=**/*.spec.ts,**/environment*.ts
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.typescript.tsconfigPath=tsconfig.app.json
+            -Dsonar.javascript.lcov.reportPaths=coverage/notedraftforge/lcov.info
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3

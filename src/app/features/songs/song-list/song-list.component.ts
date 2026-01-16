@@ -3,25 +3,31 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { IsActiveMatchOptions, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { filter, map } from 'rxjs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { LibraryService } from '../../../core/services/library.service';
 import { Song } from '../../../core/models/song';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { MatButtonModule } from '@angular/material/button';
+import { ResponsiveService } from '../../../core/services/responsive.service';
+
+type LayoutMode = 'list' | 'split' | 'detail';
 
 @Component({
   selector: 'app-song-list',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
-    RouterLinkActive,
     RouterOutlet,
     MatSidenavModule,
     MatListModule,
     MatIconModule,
+    MatToolbarModule,
+    MatTooltipModule,
     TranslatePipe,
     MatButtonModule,
   ],
@@ -33,16 +39,60 @@ export class SongListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly responsive = inject(ResponsiveService);
 
   readonly lang = this.i18n.lang;
   readonly songs$ = this.library.getSongs();
+  readonly isCompact$ = this.responsive.isCompact$;
+  readonly layout$ = this.isCompact$.pipe(map((isCompact) => ({ isCompact })));
+
   importError = '';
+  layoutMode: LayoutMode = 'list';
+  private isCompact = false;
+  private readonly routeMatch: IsActiveMatchOptions = {
+    paths: 'exact',
+    queryParams: 'ignored',
+    fragment: 'ignored',
+    matrixParams: 'ignored',
+  };
 
   ngOnInit(): void {
     this.library
       .init()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
+
+    this.isCompact$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((isCompact) => {
+        this.isCompact = isCompact;
+        if (isCompact) {
+          this.layoutMode = this.isInDetailRoute() ? 'detail' : 'list';
+          return;
+        }
+        if (this.layoutMode === 'detail') {
+          this.layoutMode = 'split';
+        }
+      });
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        const inDetail = this.isInDetailRoute();
+        if (this.isCompact) {
+          this.layoutMode = inDetail ? 'detail' : 'list';
+          return;
+        }
+        if (inDetail && this.layoutMode === 'list') {
+          this.layoutMode = 'split';
+        }
+        if (!inDetail) {
+          this.layoutMode = 'list';
+        }
+      });
   }
 
   songTitle(song: Song): string {
@@ -53,6 +103,7 @@ export class SongListComponent implements OnInit {
   createNew(): void {
     this.importError = '';
     this.router.navigate(['/songs', 'new']);
+    this.layoutMode = this.isCompact ? 'detail' : 'split';
   }
 
   exportSongs(): void {
@@ -91,5 +142,39 @@ export class SongListComponent implements OnInit {
       }
     };
     reader.readAsText(file);
+  }
+
+  openSong(song: Song): void {
+    this.router.navigate(['/songs', song.id]);
+    if (this.isCompact) {
+      this.layoutMode = 'detail';
+      return;
+    }
+    this.layoutMode = 'split';
+  }
+
+  showListOnly(): void {
+    this.layoutMode = 'list';
+  }
+
+  showDetailOnly(): void {
+    this.layoutMode = 'detail';
+  }
+
+  showSplit(): void {
+    this.layoutMode = 'split';
+  }
+
+  backToList(): void {
+    this.router.navigate(['/songs']);
+    this.layoutMode = 'list';
+  }
+
+  isActiveSong(song: Song): boolean {
+    return this.router.isActive(`/songs/${song.id}`, this.routeMatch);
+  }
+
+  private isInDetailRoute(): boolean {
+    return this.router.url.startsWith('/songs/') && this.router.url !== '/songs';
   }
 }
