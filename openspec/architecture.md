@@ -20,6 +20,7 @@ Avoid ceremony. Avoid over-abstraction. Deliver working software.
 - **Ports** are TypeScript interfaces that define what the application needs from the outside world.
 - **Adapters** implement port interfaces. They contain IndexedDB calls, file I/O, etc.
 - **Features** are Angular modules/components. They call use cases. They contain no domain logic.
+- Persistence, snapshot storage, and rendered output generation must stay behind ports/adapters; none of these concerns are allowed to leak into Angular components.
 
 ---
 
@@ -32,7 +33,7 @@ src/app/
       piece/          ← Piece, PieceType, domain rules
       anchor/         ← AnchorMark, anchor tag parsing and generation
       annotation/     ← Annotation, all content types, kind rules
-      layer/          ← Layer, LayerId, LayerType, CSS class rules
+      layer/          ← Layer, LayerKind, mapping rules, CSS class rules
       snapshot/       ← PieceSnapshot, invalidation rules, CSS mechanism
     application/
       use-cases/      ← one file per use case
@@ -89,12 +90,13 @@ interface SnapshotRepository {
   save(snapshot: PieceSnapshot): Promise<void>;
   deleteByPieceId(pieceId: string): Promise<void>;
 }
-
-// core/ports/layer-repository.port.ts
-interface LayerRepository {
-  getAll(): Promise<Layer[]>;  // always returns the 5 fixed layers
-}
 ```
+
+In MVP, the snapshot persistence adapter also owns bounded rendered recovery-copy
+storage. A dedicated backup port is only introduced if recovery flows later need
+their own explicit UI/use cases.
+No `LayerRepository` port is required in MVP: the 5 layer definitions are fixed
+compile-time constants and only their per-piece visibility state is persisted.
 
 ---
 
@@ -137,26 +139,57 @@ function renderPiece(piece: Piece, annotations: Annotation[]): string {
 - It can be unit tested in isolation with plain TypeScript
 - All annotations are always rendered regardless of layer visibility
 - Layer visibility is always handled by CSS classes, never by conditional rendering
+- Rendered base-text fragments in visualization mode must expose raw-source offset metadata so the app can map DOM selections back to `Piece.content`
+- Any future intelligent anchor-correction capability must be a separate adapter/port, not part of the renderer and not part of the autosave/save loop
 
 ---
 
 ## Snapshot Lifecycle
 
+Two independent timers are used in editing mode:
+- **Content autosave debounce (`800ms`)**: persists `Piece.content` and `updatedAt` after typing pauses.
+- **Snapshot inactivity debounce (`5s`)**: regenerates `PieceSnapshot` after no content/annotation/anchor changes.
+
 ```
 User edits content in editing mode
-  → debounce 5 seconds
+  → content autosave debounce (800ms)
+  → increment Piece.revision and update updatedAt
+  → PieceRepository.save(piece with updatedAt)
+  → run anchor integrity pass for the same content revision
+  → persist any derived needsReview annotation updates before any snapshot regeneration for that revision
+  → snapshot inactivity debounce (5s, reset on each relevant change)
   → SnapshotInvalidationService marks snapshot as stale
   → SnapshotGenerationService generates new snapshot in background
   → SnapshotRepository.save()
 
-User exits editing mode with pending changes
-  → immediate snapshot generation (no wait)
+User creates/edits/deletes/resolves an annotation
+  → update Piece.updatedAt and increment Piece.revision
+  → persist affected Piece / AnchorMark / Annotation entities through ports
+  → if visualization mode is active, apply immediate overlay feedback on the current view
+  → snapshot inactivity debounce (5s, reset on each relevant change)
+  → SnapshotInvalidationService marks snapshot as stale
+  → SnapshotGenerationService generates new snapshot in background
   → SnapshotRepository.save()
 
+MVP persistence note:
+- Multi-entity annotation flows are best-effort and sequential; no cross-repository transaction or rollback guarantee is required in MVP
+- If a later persist step fails, the UI shows a visible error, keeps already-persisted state unchanged, and the automatic persistence flow retries on the next relevant save cycle
+
+User exits editing mode with pending changes
+  → immediate background snapshot generation (no wait)
+  → SnapshotRepository.save()
+
+User enters editing mode with no snapshot yet
+  → trigger first background snapshot generation immediately
+  → keep annotation actions disabled until the first snapshot is ready
+
 User opens visualization mode
-  → load PieceSnapshot from SnapshotRepository
-  → inject HTML into view container (no Angular rendering)
-  → apply CSS hide classes based on PieceSnapshot.layerVisibility
+  → load Piece + PieceSnapshot from ports
+  → if snapshot exists and is current: inject HTML into view container (no Angular rendering)
+  → if snapshot exists but sourceRevision < Piece.revision: inject current HTML immediately and regenerate in background
+  → if no snapshot exists: show base text in read-only mode, disable annotation actions, generate first snapshot in background
+  → apply CSS hide classes based on PieceSnapshot.layerVisibility when a snapshot is available
+  → maintain up to 3 rendered recovery copies per piece in the snapshot storage layer; prune the oldest copy automatically when the limit is exceeded
 
 User toggles a layer
   → update PieceSnapshot.layerVisibility
@@ -195,6 +228,10 @@ No duplicate modals, no duplicate persists, no duplicate navigation.
 - Angular components (brittle, low ROI at this stage)
 - IndexedDB adapters (integration test territory, not unit)
 - The renderer HTML output (visual, better verified manually)
+
+### Failure handling baseline
+- Adapters may return errors or rejected promises, but use cases must translate them into simple UI outcomes
+- MVP error handling stays intentionally lightweight: inline validation for bad input, banners/toasts for recoverable runtime failures, blocking screen only for fatal storage unavailability on launch
 
 ### Architecture tests
 Use ESLint rules or a lightweight tool to enforce import boundaries:

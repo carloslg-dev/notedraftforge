@@ -14,7 +14,7 @@
 
 ### Annotation
 - **Context:** domain and UI
-- **Definition:** A piece of information attached to a specific text range within a Piece's Markdown content
+- **Definition:** A piece of information attached to an AnchorMark, a system-delimited text zone within a Piece's Markdown content
 - **Rule:** Use `Annotation` in both domain and UI contexts. No alias.
 
 ### Layer

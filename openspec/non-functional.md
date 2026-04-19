@@ -10,7 +10,7 @@
 ### Visualization load time
 - A piece must be visible to the user in under **1 second** from the moment they tap it in the list
 - This is achieved via pre-rendered PieceSnapshot loaded from IndexedDB — no Angular render pipeline on open
-- If no snapshot exists (new piece), the first render may take longer; a loading indicator must be shown
+- If no snapshot exists (new piece), show plain text immediately and a non-blocking indicator while the snapshot is generated in the background
 
 ### Layer toggle response
 - Toggling a layer must be **instantaneous** (imperceptible delay)
@@ -19,12 +19,15 @@
 ### Snapshot generation
 - Must not block the UI — always runs in the background
 - Triggered after 5 seconds of inactivity or on exit from editing mode
-- The user must never see a loading state caused by snapshot generation
+- If no snapshot exists on first visualization open, generation starts immediately in background
+- If a snapshot is stale on visualization open, the stale view remains visible while regeneration starts immediately in background
+- Snapshot generation must not block typing, scrolling, or interaction
 
 ### Editing responsiveness
 - The Markdown editor must feel native — keystrokes must register with no perceptible lag
-- Anchor integrity check (UC-AS-06) runs synchronously after each content change in the MVP
-- If profiling shows integrity check causes visible lag on large pieces (>100 anchors), deferring to the next idle frame is an acceptable future optimisation — but not a requirement in MVP
+- Anchor integrity checks must preserve typing responsiveness
+- A short delay before the final `needsReview` status update is acceptable if the user keeps immediate, in-place feedback in the current view
+- The system must not require navigation or manual refresh for the user to understand the final integrity result
 
 ---
 
@@ -55,6 +58,16 @@
 ### IndexedDB failure
 - If IndexedDB is unavailable on launch (e.g. private browsing mode in some browsers), the app must show a clear error explaining that local storage is required
 - The app must not crash silently
+
+### Error policy (MVP)
+
+| Failure type | Required response |
+|---|---|
+| Import file read failure | Skip only the failing file and show a non-blocking per-file message |
+| IndexedDB write failure during normal use | Show a visible error/banner immediately; never fail silently |
+| Snapshot generation failure | Keep the last usable snapshot or base text visible and show a non-blocking warning |
+| Invalid annotation input | Show inline validation in the modal; do not persist invalid data |
+| Multi-entity annotation persistence failure | Show a visible error, keep the last successfully persisted state, and let the automatic persistence flow retry on the next save cycle; no rollback is required in MVP |
 
 ---
 

@@ -11,7 +11,7 @@ The source of truth is under `openspec/` (SDD workflow), and app implementation 
 
 Build an offline-first editor focused on creative writing and interpretation layers:
 - Write and edit Markdown content.
-- Attach structured annotations (chord, meter, breath, intention, comment).
+- Attach structured annotations (chord, meter, breath, intention, comment) to anchor-based text zones.
 - Manage per-piece layer visibility with fast snapshot rendering.
 
 ## Documentation Map
@@ -32,8 +32,14 @@ Feature specs:
 - `openspec/specs/snapshot-and-layer-state/spec.md`
 
 Process rules for agents:
-- `docs/doc-init/workflow-rules.md`
-- `docs/doc-init/agent-rules.md`
+- `openspec/workflow/workflow-rules.md`
+- `openspec/workflow/agent-rules.md`
+
+Decision log:
+- `openspec/decisions/decisions.md`
+
+Epic and issue backlog:
+- `openspec/backlog.md`
 
 ## Workflow (SDD)
 

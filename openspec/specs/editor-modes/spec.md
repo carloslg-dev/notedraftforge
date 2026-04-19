@@ -30,6 +30,9 @@ There are exactly **two modes** in the MVP:
 - Visible layers are rendered as overlays on the text
 - Auto-scroll is available (start/stop, fixed speed)
 - User can select a text range to add a new annotation (UC-AS-01)
+- In visualization mode, that selection is mapped back to raw `Piece.content` using source offsets emitted by the snapshot renderer
+- If no snapshot exists yet, visualization starts in a temporary base-text state and annotation actions stay disabled until the first snapshot is ready
+- If a snapshot is already visible, annotations added or resolved here must show immediate overlay feedback while full snapshot regeneration continues in the background
 
 ### Allowed actions
 - Toggle layer visibility (side panel)
@@ -37,6 +40,11 @@ There are exactly **two modes** in the MVP:
 - Resolve `needsReview` annotations (UC-AS-04)
 - Start / stop auto-scroll
 - Switch to editing mode
+
+Condition:
+- In the temporary no-snapshot state, all annotation actions are disabled until snapshot generation completes.
+- In the temporary no-snapshot state, layer visibility toggles are also disabled until the first snapshot is ready.
+- When the first snapshot becomes available, the view transitions subtly from base text to the interactive rendered visualization.
 
 ### Forbidden actions
 - Modify `Piece.content` directly (user text editing is locked)
@@ -58,20 +66,21 @@ not a user text edit, and is permitted.
 ### Behavior
 - `Piece.content` is fully editable (Markdown editor)
 - Anchor integrity is checked in real time as content changes (UC-AS-06)
-- Annotations are displayed and manageable
+- Annotation records are manageable, but interpretation layers are not rendered as live overlays in editing mode
+- If no snapshot exists when editing mode is entered, the first snapshot is generated in the background and annotation actions stay disabled until it is ready
 
 ### Allowed actions
 - Edit `Piece.content`
-- Add annotation (UC-AS-01)
-- Edit annotation content (UC-AS-02)
-- Delete annotation (UC-AS-03)
-- Resolve `needsReview` annotations (UC-AS-04)
-- Toggle layer visibility (side panel)
+- Add annotation (UC-AS-01) only when a snapshot already exists
+- Edit annotation content (UC-AS-02) only when a snapshot already exists
+- Delete annotation (UC-AS-03) only when a snapshot already exists
+- Resolve `needsReview` annotations (UC-AS-04) only when a snapshot already exists
 - Update piece metadata (title, type, language, tags) — UC-PM-05
 - Switch to visualization mode
 
 ### Forbidden actions
 - Auto-scroll (not available in editing mode)
+- Layer visibility toggles (layers are not shown in editing mode)
 
 ---
 
@@ -94,7 +103,7 @@ Appears when the user selects a text range. Available in both modes.
 
 | Action | Available in visualization | Available in editing |
 |---|---|---|
-| Add annotation (all kinds) | Yes | Yes |
+| Add annotation (all kinds) | Yes, only when a snapshot exists | Yes, only when a snapshot exists |
 
 The kind selection within the FAB determines the layer automatically.
 No separate "assign layer" action exists — kind and layer are always 1:1.

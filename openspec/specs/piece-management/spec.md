@@ -23,6 +23,7 @@ The modal asks for 3 fields before creating the piece:
 - Set `content` to empty string
 - Set `tags` to `[type]` (type tag always present, system-managed)
 - Set `createdAt` and `updatedAt` to current datetime (ISO 8601)
+- Set `revision` to `0`
 - Persist via `PieceRepository.save()`
 - Navigate to editing mode for the new piece
 
@@ -56,8 +57,13 @@ The modal asks for 3 fields before creating the piece:
 **Behavior:**
 - Update `Piece.content` with the new Markdown string
 - Update `updatedAt` to current datetime
-- Persist via `PieceRepository.save()`
+- Increment `revision`
+- Persist via `PieceRepository.save()` using autosave debounce (MVP default: `800ms`)
 - Trigger anchor integrity check (UC-AS-06)
+
+**Ordering rule:**
+- The content save starts a single content-change cycle
+- Any `needsReview` updates derived from UC-AS-06 must be persisted before snapshot regeneration for that same cycle
 
 ---
 
@@ -69,9 +75,13 @@ The modal asks for 3 fields before creating the piece:
 - Update `updatedAt`
 - Persist via `PieceRepository.save()`
 
+**Snapshot rule:**
+- Metadata-only changes do NOT increment `revision` and do NOT invalidate the current snapshot
+
 **Tag rules:**
 - The type tag (e.g. `"poem"`, `"song"`, `"text"`) is system-managed and cannot be removed by the user. It does not appear as a removable chip in the tag editor UI.
 - User-defined tags can be freely added and removed.
+- Type tags and user-defined tags share one unified filter model. In list/filter UIs, the type tag is displayed first as a badge, but matching logic is the same as for any other tag.
 - When the user types a new tag name, the system checks existing tags across all pieces (case-insensitive). If a match exists, the existing tag is linked — no duplicate is created.
 - Tag comparison is case-insensitive: `"Rock"` and `"rock"` are the same tag. The first-used casing is preserved as the canonical form.
 
@@ -99,19 +109,29 @@ The modal asks for 3 fields before creating the piece:
 **Trigger:** User selects one or more `.md` files via the Global FAB import action  
 **Behavior (per file):**
 - Read the file content as a UTF-8 string
+- Normalize imported Markdown to the MVP-supported text-oriented subset when needed
 - Create a new `Piece` with:
   - `title`: filename without the `.md` extension
-  - `content`: full file content as-is
+  - `content`: normalized Markdown content
   - `type`: `text` (default, user can change after import)
   - `language`: `es` (default, user can change after import)
   - `tags`: `['text']`
   - `createdAt` / `updatedAt`: current datetime
+  - `revision`: `0`
 - Persist via `PieceRepository.save()`
 
 **Rules:**
 - No deduplication. Importing the same file twice creates two pieces.
 - If a file cannot be read, skip it and show a non-blocking error for that file.
-- Files are not validated for Markdown syntax. Any text file is accepted.
+- Import is intended for text-oriented Markdown only.
+- Unsupported complex structures may be simplified into plain text-oriented Markdown for MVP consistency.
+- Lists and bullets are not preserved as structured list semantics in MVP; they may be flattened into plain text lines during import normalization.
+
+**Normalization rules (MVP):**
+- Preserve paragraphs, headings, emphasis, inline links, and plain line breaks as text-oriented Markdown
+- Convert bullet and ordered list items into plain text lines, preserving order but removing list structure
+- Convert table rows into plain text lines by joining cells with ` | `
+- Remove unsupported HTML/media wrappers while preserving human-readable fallback text or URLs when available
 
 ---
 

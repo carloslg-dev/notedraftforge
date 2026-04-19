@@ -3,9 +3,9 @@
 > References: `openspec/domain-model.md`, `openspec/terminology.md`
 
 ## Purpose
-Allow the user to attach structured annotations to text zones (AnchorMarks) within a Piece,
-grouped by independent fixed layers, with automatic integrity maintenance when the Piece
-content is edited.
+Allow the user to attach structured annotations to anchor-based text zones (AnchorMarks)
+within a Piece, grouped by independent fixed layers, with automatic integrity maintenance
+when the Piece content is edited.
 
 ---
 
@@ -13,7 +13,7 @@ content is edited.
 
 ### UC-AS-01: Add Annotation
 **Trigger:** User selects a text range and taps "add annotation" in the Contextual FAB
-**Available in:** both visualization mode and editing mode
+**Available in:** both visualization mode and editing mode, only after the piece has at least one generated snapshot
 
 #### Step 1 — Kind selection (Contextual FAB)
 The FAB shows the 5 annotation kinds as tappable options:
@@ -30,10 +30,10 @@ Before opening the modal, the system checks the selected text range:
 
 - **If the range exactly matches an existing AnchorMark:** reuse that anchor.
   No new anchor tag is inserted into `Piece.content`.
-- **If no AnchorMark exists for that range:** create a new `AnchorMark`,
-  insert `<!--{id}s-->` and `<!--{id}e-->` into `Piece.content` at the
-  selected positions, persist via `AnchorRepository.save()`, and persist
-  the updated `Piece` via `PieceRepository.save()` with `updatedAt` refreshed.
+- **If no AnchorMark exists for that range:** reserve a provisional anchor plan
+  for the selected range. The system prepares the new `AnchorMark.id` and
+  insertion points in memory, but does NOT modify `Piece.content` or persist
+  anything until the user saves the annotation.
 - **Empty range (start === end):** valid — creates a punctual anchor
   (e.g. for instrumental measures with no lyrics: `<!--a2s--><!--a2e-->`).
 
@@ -41,6 +41,23 @@ Before opening the modal, the system checks the selected text range:
 but this is a **system-level operation**, not a user text edit. The rule
 "text cannot be modified in visualization mode" refers to direct user editing
 of the text. System anchor insertion is permitted in both modes.
+
+#### Selection-to-source mapping contract
+The annotation system always works with offsets over raw `Piece.content`.
+
+- In editing mode, the Markdown editor provides those offsets directly.
+- In visualization mode, the selection is resolved from the rendered snapshot DOM.
+- The snapshot renderer must emit selectable base-text fragments with:
+  - `data-src-start`: inclusive raw offset in `Piece.content`
+  - `data-src-end`: exclusive raw offset in `Piece.content`
+- Overlay annotation elements must be non-selectable and must not contribute to the mapped range.
+- Anchor tags themselves have no selectable footprint in visualization mode; the mapping skips over them and resolves to the surrounding raw content offsets.
+
+**Rule:** `UC-AS-01` receives a normalized `{start, end}` pair over raw `Piece.content`
+before applying anchor reuse or anchor creation logic.
+
+**Availability rule:** if the piece has no generated snapshot yet, add-annotation entry points stay disabled in both modes until the first snapshot is ready.
+
 #### Step 3 — Annotation modal
 
 **Layout rules:**
@@ -49,6 +66,7 @@ of the text. System anchor insertion is permitted in both modes.
 - Tapping/clicking outside does nothing (no accidental dismiss)
 - Two explicit actions: **Save** and **Close**
 - Closing without saving discards silently (user chose Close explicitly)
+- Closing without saving also discards any provisional anchor plan created in Step 2
 
 **Modal — Chord:**
 - Root selector: tag buttons `A B C D E F G`, one at a time
@@ -81,13 +99,28 @@ Kind → layer mapping is defined in domain-model.md.
 #### Step 4 — Save
 - Validate all inputs (see below)
 - Generate UUID for annotation `id`
+- Set `anchorId` from the reused anchor or provisional anchor prepared in Step 2
 - Set `layerId` from kind (fixed mapping)
 - Set `status` to `valid`
 - If kind is `chord`: compute and store `display`
+- If a provisional anchor plan exists:
+  - Insert `<!--{id}s-->` and `<!--{id}e-->` into `Piece.content`
+  - Persist the new anchor via `AnchorRepository.save()`
+- Refresh `Piece.updatedAt`
+- Increment `Piece.revision`
+- Persist the updated `Piece` via `PieceRepository.save()`
 - Persist via `AnnotationRepository.save()`
 - Mark `PieceSnapshot` as stale → trigger regeneration
+- If the current view is visualization mode and a rendered snapshot is already visible:
+  - inject the new annotation as an immediate overlay on top of the current DOM
+  - keep the current snapshot visible while full regeneration runs in the background
 - Close modal
-- Render new annotation immediately in current view
+- Render new annotation immediately in the current view
+
+**Persistence rule (MVP):**
+- This flow uses best-effort sequential persistence across `Piece`, `AnchorMark`, and `Annotation`
+- No cross-repository rollback is required in MVP
+- If a later persist step fails, the UI shows a visible error, the already-persisted state is left unchanged, and the next automatic persistence cycle retries the remaining saves
 
 **Validation:**
 - `anchorId` must reference a valid `AnchorMark` in the same piece
@@ -107,6 +140,9 @@ Kind → layer mapping is defined in domain-model.md.
 - Apply changes on Save
 - Re-validate content per kind rules
 - If kind is `chord` and root or modifiers changed: recompute and store `display`
+- Refresh `Piece.updatedAt`
+- Increment `Piece.revision`
+- Persist the updated `Piece` via `PieceRepository.save()`
 - Update via `AnnotationRepository.save()`
 - Mark `PieceSnapshot` as stale → trigger regeneration
 - `needsReview` status is NOT reset by editing — must be resolved via UC-AS-04
@@ -120,13 +156,16 @@ Kind → layer mapping is defined in domain-model.md.
 - If the deleted annotation was the last one referencing its `AnchorMark`:
   - Remove the anchor tags from `Piece.content`
   - Delete the `AnchorMark` via `AnchorRepository.delete(anchorId)`
+- Refresh `Piece.updatedAt`
+- Increment `Piece.revision`
+- Persist the updated `Piece` via `PieceRepository.save()`
 - Mark `PieceSnapshot` as stale → trigger regeneration
 
 ---
 
 ### UC-AS-04: Resolve needsReview Annotation
 **Trigger:** User taps a needsReview annotation
-**Available in:** both visualization mode and editing mode
+**Available in:** both visualization mode and editing mode, only after the piece has at least one generated snapshot
 
 **Rationale:** users can add annotations from visualization mode, so resolving
 system-invalidated annotations there is consistent — no mode switch required.
@@ -138,12 +177,21 @@ system-invalidated annotations there is consistent — no mode switch required.
 - **Delete:** remove the annotation (and its anchor if no other annotations reference it)
 
 **Rule:** No automatic resolution. The user must act explicitly.
+**Rule:** Every resolve action refreshes `Piece.updatedAt`, increments `Piece.revision`,
+persists the affected entities, and invalidates the snapshot.
+**Rule:** Confirm and re-anchor persist the updated annotation via `AnnotationRepository.save()`.
+**Rule:** If re-anchor creates or removes anchor tags in `Piece.content`, persist
+the updated `Piece` via `PieceRepository.save()`. If the previous anchor becomes
+unreferenced after the move, remove its tags and delete it.
+**Rule:** In visualization mode with an existing rendered snapshot, confirm and
+re-anchor actions update the current view immediately; full snapshot regeneration
+continues asynchronously in the background.
 
 ---
 
 ### UC-AS-05: Toggle Layer Visibility
 **Trigger:** User taps the toggle for a layer in the side panel
-**Available in:** both modes
+**Available in:** visualization mode only
 **Behavior:**
 - Flip the layer's value in `PieceSnapshot.layerVisibility`
 - Add or remove the corresponding CSS hide class on the piece container
@@ -156,18 +204,30 @@ system-invalidated annotations there is consistent — no mode switch required.
 
 ### UC-AS-06: Maintain Anchor Integrity on Content Edit
 **Trigger:** `Piece.content` changes in editing mode
-**Behavior:** After each edit, the system scans the updated content for anchor integrity.
+**Behavior:** After each edit, the system evaluates anchor integrity with a conservative
+boundary-focused heuristic.
 
 #### Integrity check
-For each `AnchorMark` of the piece:
-- Verify both `<!--{id}s-->` and `<!--{id}e-->` are present in `Piece.content`
+For anchors affected by the edited range:
+- Verify both `<!--{id}s-->` and `<!--{id}e-->` are still present in `Piece.content`
 - Verify start tag appears before end tag
-
-If either tag is missing or out of order:
-- Mark all annotations referencing that `anchorId` as `status: 'needsReview'`
+- If the edit clearly stays inside the anchor body and both boundary tags remain valid,
+  keep the annotation state unchanged
+- If a boundary tag is missing, out of order, or the system can no longer trust the
+  original boundary, mark all annotations referencing that `anchorId` as `status: 'needsReview'`
 - Do NOT automatically remove or repair the anchor tags
 
-**Rule:** Integrity check runs in a single pass after each content change. Never lazy.
+Anchors clearly outside the edited zone are left untouched.
+
+#### Persistence and ordering
+- All annotations newly moved to `status: 'needsReview'` must be persisted via `AnnotationRepository.save()`
+- These derived status updates belong to the same content-change cycle that triggered the integrity check
+- The content change already incremented `Piece.revision`; integrity-driven `needsReview` updates for that same cycle do **not** increment it a second time
+- Any snapshot regeneration for that content-change cycle must wait until the corresponding `needsReview` persists have completed
+
+**Rule:** The integrity check may complete with a short delay if needed to keep typing
+responsive, but the final `needsReview` state must appear in place without requiring
+navigation or manual refresh.
 
 ---
 
@@ -180,6 +240,8 @@ If either tag is missing or out of order:
 
 **UI rule:** `needsReview` annotations must be visually distinct (warning indicator).
 Never silently hidden. Visible in both modes.
+Only true boundary ambiguity should move an annotation into `needsReview`; edits that
+leave anchor boundaries intact must not be invalidated conservatively.
 
 ---
 

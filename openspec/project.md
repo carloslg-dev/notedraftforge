@@ -34,7 +34,7 @@ See `openspec/domain-model.md` for authoritative type definitions.
 |---|---|
 | Piece | A single atomic creative unit (poem, song, text). Domain term. |
 | Work | User-facing name for a Piece. UI term only. |
-| Annotation | Information attached to a specific text range in a Piece |
+| Annotation | Information attached to an AnchorMark, a system-delimited text zone in a Piece |
 | Layer | A logical grouping of annotations. Controls visibility and rendering. |
 
 Naming rules: see `openspec/terminology.md`
@@ -54,7 +54,10 @@ See `openspec/architecture.md` for full rules.
 
 ## Workflow
 
-See `docs/doc-init/workflow-rules.md` for full rules.
+See `openspec/workflow/workflow-rules.md` for full rules.
+See `openspec/workflow/agent-rules.md` for agent constraints.
+Track cross-spec decisions in `openspec/decisions/decisions.md`.
+Implementation order and issue breakdown: `openspec/backlog.md`.
 
 - SDD: no implementation without a spec
 - Every task starts with a GitHub issue referencing the relevant `openspec/specs/<feature>/spec.md`
@@ -67,7 +70,7 @@ See `docs/doc-init/workflow-rules.md` for full rules.
 | Feature | Spec |
 |---|---|
 | Piece management (CRUD, import, export) | `openspec/specs/piece-management/spec.md` |
-| Annotation system (annotations, layers, range updates) | `openspec/specs/annotation-system/spec.md` |
+| Annotation system (annotations, layers, anchor updates) | `openspec/specs/annotation-system/spec.md` |
 | Editor modes (visualization vs editing) | `openspec/specs/editor-modes/spec.md` |
 | Work list (list, filter, navigation) | `openspec/specs/work-list/spec.md` |
 | Layer visibility (toggle, rendering) | `openspec/specs/layer-visibility/spec.md` |

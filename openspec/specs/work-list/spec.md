@@ -43,6 +43,7 @@ Display all Pieces as a list of Works, allow filtering by tags, and navigate to 
 - Show only tags that exist on at least one piece
 - Always include the type tags (`text`, `poem`, `song`) if any piece has that type
 - Sort tags alphabetically, with type tags shown first
+- Type tags and user-defined tags are filtered through one unified matching model; the type badge is only a UI distinction, not a separate filtering system
 
 ---
 
@@ -84,7 +85,7 @@ Display all Pieces as a list of Works, allow filtering by tags, and navigate to 
 
 Each list item shows:
 - `title` (primary label)
-- `type` as a styled badge (`text` | `poem` | `song`)
+- `type` as a styled badge (`text` | `poem` | `song`) representing the system-managed type tag
 - User-defined tags as smaller chips (if any)
 - `updatedAt` formatted as a relative date (e.g. "2 days ago")
 

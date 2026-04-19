@@ -20,6 +20,7 @@ interface Piece {
   tags: string[];       // user-defined tags; type value is always included
   createdAt: string;    // ISO 8601 datetime
   updatedAt: string;    // ISO 8601 datetime
+  revision: number;     // monotonically increasing internal counter for snapshot freshness
 }
 
 type PieceType = 'text' | 'poem' | 'song';
@@ -33,6 +34,8 @@ type PieceType = 'text' | 'poem' | 'song';
 - `language` must be a valid ISO 639-1 two-letter code
 - Translations of a piece are separate `Piece` entities (no link in MVP)
 - A `Piece` has no reference to any workspace or collection in the MVP
+- `updatedAt` reflects the last user-visible change to content, metadata, or annotations
+- `revision` starts at `0` and increments on any content, annotation, or anchor change that invalidates the snapshot
 
 ---
 
@@ -88,7 +91,6 @@ and groups exactly one annotation kind.
 interface Layer {
   id: LayerKind;
   kind: AnnotationKind;
-  visible: boolean;       // runtime state, persisted per-piece in PieceSnapshot
 }
 
 type LayerKind =
@@ -118,7 +120,7 @@ This is intentional: `id` is the layer identifier, `kind` is the annotation kind
 - Each layer renders exactly one annotation kind.
 - Layer visibility is **per-piece**, persisted in `PieceSnapshot.layerVisibility`.
 - Toggling a layer updates `PieceSnapshot.layerVisibility` and applies a CSS class — it does NOT regenerate the snapshot HTML.
-- Layers are global entities (5 fixed records). Visibility state is per-piece.
+- Layers are fixed definitions (5 compile-time records). Visibility state lives only in `PieceSnapshot.layerVisibility`.
 
 ### Visual rendering per layer
 
@@ -251,6 +253,7 @@ interface PieceSnapshot {
   pieceId: string;
   html: string;                           // static HTML, all annotations included
   layerVisibility: Record<LayerKind, boolean>; // per-piece layer state
+  sourceRevision: number;                 // exact Piece.revision used to generate this snapshot
   generatedAt: string;                    // ISO 8601
 }
 ```
@@ -268,6 +271,10 @@ Snapshot must be regenerated when:
 
 Snapshot is NOT invalidated by:
 - Layer visibility toggle
+
+Revision consistency rule:
+- A snapshot is current when `PieceSnapshot.sourceRevision === Piece.revision`
+- A snapshot is stale when `PieceSnapshot.sourceRevision < Piece.revision`
 
 ### CSS visibility mechanism
 Each annotation element in the HTML carries a CSS class for its layer kind:
@@ -304,7 +311,8 @@ User-configurable snapshot generation timing:
 4. An `Annotation` belongs to exactly one `Piece`, one `AnchorMark`, and one `Layer`.
 5. An `Annotation`'s `kind` must match its `Layer`'s `kind`.
 6. Multiple annotations of different kinds may share the same `AnchorMark`.
-7. `Layer` entities are global and fixed. Visibility is per-piece, stored in `PieceSnapshot`.
+7. `Layer` definitions are fixed and visibility is per-piece, stored in `PieceSnapshot`.
 8. `Piece.content` may contain anchor tags. Exported `.md` files never contain anchor tags.
 9. The semantic content of `Piece.content` (excluding anchor tags) must never be modified by the annotation system.
 10. There are exactly 5 layers in the MVP. They are fixed and always exist.
+11. `PieceSnapshot.sourceRevision` must match `Piece.revision` at generation time.
