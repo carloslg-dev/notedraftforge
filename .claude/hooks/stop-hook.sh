@@ -17,6 +17,9 @@ PHASE=$(awk '
 [ "$PHASE" != "RETRO" ] && exit 0
 
 CHANGE_NAME=$(./scripts/ai/resolve-change-name.sh)
-[ -z "$CHANGE_NAME" ] && exit 2
+if [ -z "$CHANGE_NAME" ]; then
+  echo "[stop-hook] Blocking RETRO close: Change reference is missing in .ai/current-task.md" >&2
+  exit 2
+fi
 
 ./scripts/ai/final-review.sh "$CHANGE_NAME" || exit 2

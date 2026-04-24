@@ -15,6 +15,7 @@ REQUIRED_DOCS=(
   "docs/ai/context-strategy.md"
   "docs/ai/done-definition.md"
   "docs/ai/current-task.template.md"
+  "docs/ai/execution-record.template.md"
 )
 
 echo "$LABEL Checking docs/ai/ documents..."
