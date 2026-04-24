@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # pre-edit.sh — Run before editing any application file.
 # Blocks (exit 1) if task state is missing, phase is not IMPLEMENT,
-# or no approved plan is found.
+# or execution authorization is not approved.
 # Warns if the context table appears empty.
 set -euo pipefail
 
@@ -29,26 +29,20 @@ if [ "${CURRENT_PHASE}" != "IMPLEMENT" ]; then
   exit 1
 fi
 
-# --- Plan must be approved ---
-# Accepted patterns (case-insensitive):
-#   - [x] Yes
-#   Approved: yes
-#   Plan approved: true
-PLAN_APPROVED=0
-if grep -qiE '^\s*-\s*\[x\]\s*Yes' "$TASK_FILE" 2>/dev/null; then
-  PLAN_APPROVED=1
-elif grep -qiE '^Approved:\s*yes' "$TASK_FILE" 2>/dev/null; then
-  PLAN_APPROVED=1
-elif grep -qiE '^Plan approved:\s*true' "$TASK_FILE" 2>/dev/null; then
-  PLAN_APPROVED=1
-fi
+# --- Execution authorization must be approved ---
+# Reads Status field from the "## Execution authorization" section.
+# Expected: Status: approved  (case-insensitive)
+AUTH_STATUS=$(awk '
+  /^## Execution authorization/ { found=1; next }
+  found && /^## /               { exit }
+  found && /^Status:/           { print; exit }
+' "$TASK_FILE" | sed 's/^Status:[[:space:]]*//' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
 
-if [ "$PLAN_APPROVED" -eq 0 ]; then
-  echo "$LABEL ERROR: No approved plan found in $TASK_FILE." >&2
-  echo "$LABEL       Accepted approval patterns:" >&2
-  echo "$LABEL         - [x] Yes" >&2
-  echo "$LABEL         Approved: yes" >&2
-  echo "$LABEL         Plan approved: true" >&2
+if [ "${AUTH_STATUS}" != "approved" ]; then
+  echo "$LABEL ERROR: Execution authorization status is '${AUTH_STATUS:-not set}', expected 'approved'." >&2
+  echo "$LABEL       Set in $TASK_FILE under '## Execution authorization':" >&2
+  echo "$LABEL         Status: approved" >&2
+  echo "$LABEL         Source: human | agent | delegated | ci" >&2
   exit 1
 fi
 
@@ -69,5 +63,5 @@ if [ -z "$CONTEXT_DATA" ]; then
   echo "$LABEL       Document your context before editing (docs/ai/context-strategy.md)."
 fi
 
-echo "$LABEL Phase: IMPLEMENT. Plan: approved. Proceeding."
+echo "$LABEL Phase: IMPLEMENT. Execution authorization: approved. Proceeding."
 exit 0

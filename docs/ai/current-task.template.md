@@ -17,10 +17,12 @@
 
 <!-- PLAN | CONTEXT | IMPLEMENT | VALIDATE | REVIEW | RETRO -->
 
-## Human-approved plan
+## Execution authorization
 
-- [ ] Yes
-- [ ] No
+Status: pending | approved | rejected
+Source: human | agent | delegated | ci
+Approved by:
+Reason:
 
 ---
 

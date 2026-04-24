@@ -16,6 +16,9 @@ PLAN → CONTEXT → IMPLEMENT → VALIDATE → REVIEW → RETRO
 Phases must not be skipped. No code changes before IMPLEMENT phase.
 Update `.ai/current-task.md` at the start and end of each phase.
 
+> **Scripts note:** Scripts in `scripts/ai/` are V1 minimum guardrails.
+> They enforce a structural baseline but do not replace agent judgment or human review.
+
 ---
 
 ## Phase 1: PLAN
@@ -63,7 +66,8 @@ Update `.ai/current-task.md` at the start and end of each phase.
 **Objective:** Make the change. Small, focused, reviewable.
 
 **Inputs:**
-- Approved plan and selected context
+- Execution authorization with status `approved` in `.ai/current-task.md`
+- Selected context from CONTEXT phase
 - Relevant spec and domain model
 
 **Before editing:**
@@ -111,25 +115,33 @@ Update `.ai/current-task.md` at the start and end of each phase.
 - `.ai/current-task.md` updated (decisions, blockers if any)
 
 **Constraints:**
-- Run `./scripts/ai/final-review.sh` if available
 - Validate against spec, not intuition
 - Check domain consistency and architectural boundaries
+- Do not run `final-review.sh` here — that is the RETRO gate
 
 ---
 
 ## Phase 6: RETRO
 
-**Objective:** Learn from the process. Improve docs, scripts, prompts.
+**Objective:** Learn from the process. Write execution record. Close the task.
 
 **Outputs:**
-- Retrospective notes in `.ai/current-task.md`
+- Retrospective notes in `.ai/current-task.md` (mandatory — see below)
+- `openspec/changes/<change-name>/execution-record.md` created and filled
 
-**Questions to answer:**
+**Questions to answer (required):**
 - What context was missing at the start?
 - Which document was most useful?
 - Which rule was ambiguous?
 - What validation should be automated?
 - What should be moved to `docs/ai/`?
+
+**Closing gate:**
+
+Run `./scripts/ai/final-review.sh <change-name>` at the end of this phase.
+The script blocks if retrospective notes are empty.
+The script validates `execution-record.md` if `<change-name>` is provided.
+Only after it passes is the task ready for commit.
 
 ---
 
@@ -143,5 +155,7 @@ Update `.ai/current-task.md` at the start and end of each phase.
 | Definition of Done | `docs/ai/done-definition.md` |
 | Task state (local, not versioned) | `.ai/current-task.md` |
 | Task state template | `docs/ai/current-task.template.md` |
+| Execution record (versioned, per change) | `openspec/changes/<change>/execution-record.md` |
+| Execution record template | `docs/ai/execution-record.template.md` |
 | Execution checklist | `docs/ai/templates/checklist-execution.md` |
 | Review checklist | `openspec/templates/checklist-review.md` |

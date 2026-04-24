@@ -2,9 +2,13 @@
 
 ## Start here
 
+`AGENTS.md` is the common contract for all agents: workflow, scripts, hard constraints.
+This file (`CLAUDE.md`) adds Claude Code-specific behavior on top of that contract.
+
 Before any task, read in this order:
-1. `openspec/project.md` — project orientation, specs index, and workflow summary.
-2. `docs/ai/workflow.md` — mandatory agent phases (PLAN → CONTEXT → IMPLEMENT → VALIDATE → REVIEW → RETRO).
+1. `AGENTS.md` — common agent contract (workflow, scripts, constraints)
+2. `openspec/project.md` — project orientation and specs index
+3. `docs/ai/workflow.md` — mandatory agent phases (PLAN → CONTEXT → IMPLEMENT → VALIDATE → REVIEW → RETRO)
 
 ---
 
@@ -39,11 +43,13 @@ Visualization uses pre-rendered snapshots with CSS-toggled layers.
 | SDD workflow and issue rules | `openspec/workflow/workflow-rules.md` |
 | Issue template | `openspec/templates/issue-template.md` |
 | Review checklist | `openspec/templates/checklist-review.md` |
+| **Generic agent adapter** | `AGENTS.md` |
 | **Agent workflow phases** | `docs/ai/workflow.md` |
 | **Agent behavior rules** | `docs/ai/agent-rules.md` |
 | **Context strategy** | `docs/ai/context-strategy.md` |
 | **Definition of Done (agent)** | `docs/ai/done-definition.md` |
 | **Current task template** | `docs/ai/current-task.template.md` |
+| **Execution record template** | `docs/ai/execution-record.template.md` |
 | **Current task state (local)** | `.ai/current-task.md` |
 | **Execution checklist** | `docs/ai/templates/checklist-execution.md` |
 | **AI prompt template** | `docs/ai/templates/ai-prompt.md` |

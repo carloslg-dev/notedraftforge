@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
 # validate.sh — Run during the VALIDATE phase.
-# Executes lint and tests if the Angular project exists.
+# Validates code: runs lint and tests if the Angular project exists.
+# Does not depend on .ai/current-task.md — safe to run in CI without local state.
 # Exits cleanly with a warning if no Angular project is detected yet.
-# Designed to be called identically by the agent, by hooks, and by CI.
 set -euo pipefail
 
 LABEL="[validate]"
-TASK_FILE=".ai/current-task.md"
 FAILED=0
-
-# --- Task state must exist ---
-if [ ! -f "$TASK_FILE" ]; then
-  echo "$LABEL ERROR: $TASK_FILE not found." >&2
-  exit 1
-fi
 
 # --- Detect Angular project ---
 HAS_ANGULAR=0
@@ -58,10 +51,9 @@ fi
 # --- Result ---
 if [ "$FAILED" -eq 1 ]; then
   echo "$LABEL Validation FAILED." >&2
-  echo "$LABEL Update 'Validation result' to FAIL in $TASK_FILE." >&2
   exit 1
 fi
 
 echo "$LABEL Validation PASSED."
-echo "$LABEL Update 'Validation result' to PASS in $TASK_FILE."
+echo "$LABEL Remember to update 'Validation result' to PASS in .ai/current-task.md"
 exit 0
