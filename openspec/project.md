@@ -54,8 +54,9 @@ See `openspec/architecture.md` for full rules.
 
 ## Workflow
 
-See `openspec/workflow/workflow-rules.md` for full rules.
-See `openspec/workflow/agent-rules.md` for agent constraints.
+See `openspec/workflow/workflow-rules.md` for SDD process and issue rules.
+See `docs/ai/workflow.md` for agent execution phases.
+See `docs/ai/agent-rules.md` for agent behavior constraints.
 Track cross-spec decisions in `openspec/decisions/decisions.md`.
 Implementation order and issue breakdown: `openspec/backlog.md`.
 

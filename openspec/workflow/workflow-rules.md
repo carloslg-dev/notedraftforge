@@ -1,5 +1,10 @@
 # Workflow Rules
 
+> This document defines the SDD development process: flow, issue rules, commit convention, and anti-rules.
+> It applies to any contributor — human or agent.
+>
+> For the operational agent workflow (phases, context strategy, task state, DoD), see `docs/ai/`.
+
 ## General Principle
 
 This project follows Spec-Driven Development (SDD).

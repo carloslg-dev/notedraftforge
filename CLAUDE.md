@@ -2,8 +2,9 @@
 
 ## Start here
 
-Before any task, read `openspec/project.md`.
-It provides orientation, the specs index, and the workflow summary.
+Before any task, read in this order:
+1. `openspec/project.md` — project orientation, specs index, and workflow summary.
+2. `docs/ai/workflow.md` — mandatory agent phases (PLAN → CONTEXT → IMPLEMENT → VALIDATE → REVIEW → RETRO).
 
 ---
 
@@ -35,12 +36,17 @@ Visualization uses pre-rendered snapshots with CSS-toggled layers.
 | Non-functional requirements | `openspec/non-functional.md` |
 | Cross-spec decisions | `openspec/decisions/decisions.md` |
 | Epics and issue backlog | `openspec/backlog.md` |
-| Workflow rules | `openspec/workflow/workflow-rules.md` |
-| Agent behavior rules | `openspec/workflow/agent-rules.md` |
+| SDD workflow and issue rules | `openspec/workflow/workflow-rules.md` |
 | Issue template | `openspec/templates/issue-template.md` |
-| Execution checklist | `openspec/templates/checklist-execution.md` |
 | Review checklist | `openspec/templates/checklist-review.md` |
-| AI prompt template | `openspec/templates/ai-prompt.md` |
+| **Agent workflow phases** | `docs/ai/workflow.md` |
+| **Agent behavior rules** | `docs/ai/agent-rules.md` |
+| **Context strategy** | `docs/ai/context-strategy.md` |
+| **Definition of Done (agent)** | `docs/ai/done-definition.md` |
+| **Current task template** | `docs/ai/current-task.template.md` |
+| **Current task state (local)** | `.ai/current-task.md` |
+| **Execution checklist** | `docs/ai/templates/checklist-execution.md` |
+| **AI prompt template** | `docs/ai/templates/ai-prompt.md` |
 
 ---
 
