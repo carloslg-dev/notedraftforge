@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pre-edit-hook.sh"
+            "command": "bash -lc 'cd \"$(git rev-parse --show-toplevel)\" && .claude/hooks/pre-edit-hook.sh'"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/post-edit-hook.sh"
+            "command": "bash -lc 'cd \"$(git rev-parse --show-toplevel)\" && .claude/hooks/post-edit-hook.sh'"
           }
         ]
       }
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/stop-hook.sh"
+            "command": "bash -lc 'cd \"$(git rev-parse --show-toplevel)\" && .claude/hooks/stop-hook.sh'"
           }
         ]
       }
