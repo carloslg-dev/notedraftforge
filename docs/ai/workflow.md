@@ -139,8 +139,12 @@ Update `.ai/current-task.md` at the start and end of each phase.
 **Closing gate:**
 
 Run `./scripts/ai/final-review.sh <change-name>` at the end of this phase.
-The script blocks if retrospective notes are empty.
-The script validates `execution-record.md` if `<change-name>` is provided.
+`<change-name>` is mandatory. It must match:
+- The `Change reference` field in `.ai/current-task.md` (canonical source during local work)
+- The folder name under `openspec/changes/`
+- In future CI runs: derived from branch name or PR metadata
+
+The script blocks if retrospective notes are empty or if `execution-record.md` is incomplete.
 Only after it passes is the task ready for commit.
 
 ---
@@ -159,3 +163,11 @@ Only after it passes is the task ready for commit.
 | Execution record template | `docs/ai/execution-record.template.md` |
 | Execution checklist | `docs/ai/templates/checklist-execution.md` |
 | Review checklist | `openspec/templates/checklist-review.md` |
+
+### Script scope
+
+| Script | CI-safe | Purpose |
+|---|---|---|
+| `validate.sh` | Yes | Code validation only — no local state required |
+| `final-review.sh` | No | Local/agent closure gate — reads `.ai/current-task.md` |
+| `ci-review.sh` | Yes (future) | Will read only versioned artifacts in `openspec/changes/` |

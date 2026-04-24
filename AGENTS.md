@@ -44,7 +44,19 @@ Keep `.ai/current-task.md` updated at each phase transition.
 | Before editing | `./scripts/ai/pre-edit.sh` | Blocks if phase or authorization is wrong |
 | After editing | `./scripts/ai/post-edit.sh` | Lists changes, reminds next steps (no block) |
 | VALIDATE phase | `./scripts/ai/validate.sh` | Runs lint and tests |
-| End of RETRO | `./scripts/ai/final-review.sh [change-name]` | Quality gate for task closure |
+| End of RETRO | `./scripts/ai/final-review.sh <change-name>` | Quality gate for task closure |
+
+`<change-name>` is the folder name under `openspec/changes/` for the current task.
+It must match the `Change reference` field in `.ai/current-task.md`.
+In future CI runs it can be derived from the branch name or PR metadata.
+
+### Script scope
+
+| Script | Safe in CI | Purpose |
+|---|---|---|
+| `validate.sh` | Yes | Code validation only — no local state required |
+| `final-review.sh` | No (requires `.ai/`) | Local/agent closure gate — reads live task state |
+| `ci-review.sh` | Yes (future) | Will read only versioned artifacts in `openspec/changes/` |
 
 > Scripts are V1 minimum guardrails. They enforce a structural baseline
 > but do not replace agent judgment or human review.

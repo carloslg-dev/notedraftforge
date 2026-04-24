@@ -9,6 +9,12 @@
 
 <!-- GitHub issue number or identifier, e.g. #12 -->
 
+## Change reference
+
+<!-- Folder name under openspec/changes/, e.g. feat-annotation-crud
+     This is the canonical change-name used when running:
+       ./scripts/ai/final-review.sh <change-name> -->
+
 ## Goal
 
 <!-- What this task must achieve, in domain terms -->

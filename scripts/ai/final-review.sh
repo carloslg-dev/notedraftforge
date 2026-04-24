@@ -166,7 +166,7 @@ else
   RECORD_VALIDATION=$(awk '
     /^## Validation result/ { found=1; next }
     found && /^## /         { exit }
-    found && NF && !/^<!--/ { print; exit }
+    found && NF && !/^<!--/ && !/^---/ { print; exit }
   ' "$RECORD_PATH" | tr -d '[:space:]')
 
   if [ "${RECORD_VALIDATION}" != "PASS" ]; then
@@ -182,6 +182,7 @@ else
     found && /^## /             { exit }
     found                       { print }
   ' "$RECORD_PATH" | grep -v '^[[:space:]]*$' \
+    | grep -v '^[[:space:]]*---[[:space:]]*$' \
     | grep -viE '^\s*-?\s*<!--.*-->\s*$' \
     | grep -v '^[[:space:]]*-[[:space:]]*$' \
     || true)
@@ -191,6 +192,75 @@ else
     FAILED=1
   else
     echo "$LABEL   Retrospective summary: OK"
+  fi
+
+  # 6. Context used table must have at least one data row
+  CONTEXT_DATA=$(awk '
+    /^## Context used/ { f=1; next }
+    f && /^## /        { exit }
+    f && /^\|/         { print }
+  ' "$RECORD_PATH" \
+    | grep -v '^|[-: |]*$' \
+    | grep -vF '| Source |' \
+    | grep -v '^| *|' \
+    || true)
+
+  if [ -z "$CONTEXT_DATA" ]; then
+    echo "$LABEL FAIL: execution-record: 'Context used' table is empty." >&2
+    FAILED=1
+  else
+    echo "$LABEL   Context used: OK"
+  fi
+
+  # 7. Files changed must have at least one non-placeholder entry
+  FILES_CHANGED=$(awk '
+    /^## Files changed/ { found=1; next }
+    found && /^## /     { exit }
+    found               { print }
+  ' "$RECORD_PATH" | grep -v '^[[:space:]]*$' \
+    | grep -v '^[[:space:]]*---[[:space:]]*$' \
+    | grep -viE '^\s*-?\s*<!--.*-->\s*$' \
+    | grep -v '^[[:space:]]*-[[:space:]]*$' \
+    || true)
+
+  if [ -z "$FILES_CHANGED" ]; then
+    echo "$LABEL FAIL: execution-record: 'Files changed' is empty." >&2
+    FAILED=1
+  else
+    echo "$LABEL   Files changed: OK"
+  fi
+
+  # 8. Date completed must not be empty
+  DATE_COMPLETED=$(awk '
+    /^## Date completed/ { found=1; next }
+    found && /^## /      { exit }
+    found && NF && !/^<!--/ { print; exit }
+  ' "$RECORD_PATH" | tr -d '[:space:]')
+
+  if [ -z "$DATE_COMPLETED" ]; then
+    echo "$LABEL FAIL: execution-record: 'Date completed' is empty." >&2
+    FAILED=1
+  else
+    echo "$LABEL   Date completed: OK ($DATE_COMPLETED)"
+  fi
+
+  # 9. Decisions made must have content (None / N/A / No decisions are accepted)
+  DECISIONS_CONTENT=$(awk '
+    /^## Decisions made/ { found=1; next }
+    found && /^## /      { exit }
+    found                { print }
+  ' "$RECORD_PATH" | grep -v '^[[:space:]]*$' \
+    | grep -v '^[[:space:]]*---[[:space:]]*$' \
+    | grep -viE '^\s*-?\s*<!--.*-->\s*$' \
+    | grep -v '^[[:space:]]*-[[:space:]]*$' \
+    || true)
+
+  if [ -z "$DECISIONS_CONTENT" ]; then
+    echo "$LABEL FAIL: execution-record: 'Decisions made' is empty." >&2
+    echo "$LABEL       Use 'None', 'N/A', or 'No decisions' if none were made." >&2
+    FAILED=1
+  else
+    echo "$LABEL   Decisions made: OK"
   fi
 fi
 
