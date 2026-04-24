@@ -1,4 +1,4 @@
-## 🧠 Execution Checklist
+## Execution Checklist
 
 - [ ] I fully understand the goal
 - [ ] I am not reinventing existing logic
