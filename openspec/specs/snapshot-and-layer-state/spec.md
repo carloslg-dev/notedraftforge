@@ -98,6 +98,8 @@ Visualization mode SHALL render `PieceSnapshot.html` directly.
 
 If snapshot exists but is stale, system SHALL show stale snapshot immediately and regenerate in background.
 
+Annotation actions SHALL remain disabled while the displayed snapshot is stale. Annotation actions SHALL become available only after the rendered snapshot is current (`PieceSnapshot.sourceRevision === Piece.revision`).
+
 ### SL-REQ-11 — Generation boundaries
 Snapshot generation SHALL run in infrastructure and SHALL be independent of UI framework specifics.
 
@@ -135,7 +137,7 @@ Renderer and snapshot persistence SHALL remain behind ports/adapters.
 ### SL-SCN-06 — Stale snapshot fast-load
 **GIVEN** a stored snapshot with `sourceRevision < Piece.revision`
 **WHEN** user opens visualization mode
-**THEN** stale snapshot is shown immediately and replaced automatically once fresh snapshot finishes.
+**THEN** stale snapshot is shown immediately, annotation actions are disabled, and the view is replaced automatically once fresh snapshot finishes.
 
 ### SL-SCN-07 — Selection mapping metadata
 **GIVEN** visualization mode with rendered snapshot HTML

@@ -34,7 +34,7 @@ If both are present, list presentation SHALL show the consistent type value.
 Filtering SHALL operate on `TagRef[]` structure, not plain string arrays.
 
 Filter controls SHALL support:
-- type tags (`kind="type"`)
+- MVP user-facing type tags (`kind="type"`) for `text` and `poem`
 - user tags (`kind="user"`)
 
 Type and user filters SHALL NOT rely on mixed plain-string matching.
@@ -42,7 +42,7 @@ Type and user filters SHALL NOT rely on mixed plain-string matching.
 ### WL-REQ-05 — User tag matching rules
 User tag filter matching SHALL be case-insensitive on `TagRef.value`.
 
-Type tags SHALL match by normalized type value (`text | poem | song`).
+Type tags SHALL match by normalized type value. MVP user-facing filters SHALL expose `text` and `poem` only.
 
 ### WL-REQ-06 — Filter application behavior
 Selected filters SHALL be applied client-side to loaded list data.
@@ -60,15 +60,17 @@ The system SHALL support two empty states:
    - show no-results message
    - preserve current filters until user clears/changes them
 
-### WL-REQ-08 — Song type visibility in list
-Song content is represented in the domain/data model for MVP2 readiness, but song UX is out of MVP.
+### WL-REQ-08 — Song type hidden from MVP list
+Song content is represented in the domain/data model for MVP2 readiness, but song UX is out of MVP1.
 
-If pieces of type `song` exist (for example from restored data or development fixtures), the Work List SHALL display them with a `song` badge and an explicit disabled/not-implemented state.
+MVP1 user-facing Work List SHALL NOT display pieces of type `song`.
 
-Song list items SHALL NOT navigate to song creation, editing, or viewing flows in MVP.
+If pieces of type `song` exist in storage (for example from restored data or development fixtures), they SHALL remain preserved as data but SHALL NOT navigate to song creation, editing, or viewing flows in MVP1.
 
 ### WL-REQ-09 — Navigation behavior
 Tapping a list item SHALL navigate to the piece flow entry defined by editor-mode specs.
+
+This navigation behavior applies only to MVP-supported visible item types (`text` and `poem`).
 
 List behavior SHALL remain independent from editor implementation internals.
 
@@ -126,10 +128,10 @@ The overlay SHALL NOT render a flat unfiltered list of all tags — this design 
 **WHEN** filters are applied
 **THEN** no-results state is shown while filters remain active.
 
-### WL-SCN-07 — Song entries disabled
+### WL-SCN-07 — Song entries hidden
 **GIVEN** at least one piece of type `song`
 **WHEN** Work List is displayed
-**THEN** song pieces appear with a `song` type badge and disabled/not-implemented state, without navigation to song UX.
+**THEN** song pieces are not shown in the MVP1 user-facing list and no song UX navigation is available.
 
 ### WL-SCN-08 — Tag search overlay filters in real time
 **GIVEN** the user opens the "···" tag overflow overlay and types "stage"

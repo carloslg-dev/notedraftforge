@@ -21,8 +21,7 @@ Define the minimal user path for MVP wireframes.
 4. **Visualization interactions**
    - Toggle layers
    - Add annotation from selection (snapshot required)
-   - Resolve `needsReview` (confirm / retarget / delete)
-   - Start/stop auto-scroll only if retained by final MVP decision
+   - `needsReview` annotations stay visible with warning indicator; resolve flow is deferred to post-MVP
    - Switch to editing mode
 
 5. **Editing interactions**

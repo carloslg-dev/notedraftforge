@@ -54,7 +54,7 @@ No React, no IndexedDB, no side effects. Unit-testable in isolation.
 | `Piece` entity | Type, rules, `revision` increment, `updatedAt`, tag/type invariants |
 | `Annotation` entity | `AnnotationContent` union (`BreathContent`, `NoteAnnotationContent`), kind/layer assignment rule, status (D-23) |
 | `ChordContent` rules | Root validation, modifier ordering, `display` derivation |
-| Domain invariants | Unit tests for all 14 invariants in `domain-model.md` |
+| Domain invariants | Unit tests for all invariants in `domain-model.md` |
 
 ---
 
@@ -68,16 +68,16 @@ Piece CRUD, Markdown import/export adapters, JSON backup/restore, and the work l
 | Issue | Scope |
 |---|---|
 | Create piece use case | Input validation, id generation, type-as-tag rule, persist via port; domain supports `song`, MVP UI offers `text`/`poem` only |
-| Update piece metadata | Title, type, language, tags; update `updatedAt`; type-as-tag enforcement |
+| Update piece metadata | Title, language, user tags; update `updatedAt`; type remains immutable in MVP except through a future migration flow |
 | Delete piece use case | Cascade delete annotations, snapshots, and other piece-scoped artifacts via ports |
 | Export piece to Markdown | Map structured content to clean `.md`; no internal metadata (PM-REQ-10) |
 | Import Markdown file | Parse text-oriented Markdown; degrade unsupported structures (D-05) |
 | Work list component | List all pieces, sort by `updatedAt` desc |
-| Filter by tags | Unified type/tag filter model (D-08); badge + tag display |
+| Filter by tags | Unified type/tag filter model (D-08); badge + tag display; MVP user-facing type filters expose `text`/`poem` only |
 | Tag search overlay | "···" chip → real-time search overlay; empty state; no flat list (WL-REQ-11) |
 | Navigation to work | Route from work list to work view |
-| JSON backup export | Full JSON export of all pieces + annotations + layer visibility state; download as `.json` before version updates (PM-REQ-11, D-22) |
-| JSON backup restore | Paste or upload JSON; Zod validation; replace-all with warning (PM-REQ-12, D-20, D-22) |
+| JSON backup export | Full JSON export of all pieces + annotations + required layer visibility state; download as `.json` before version updates (PM-REQ-11, D-22) |
+| JSON backup restore | Paste or upload JSON; Zod validation; reject inconsistent piece type metadata; replace-all with warning while preserving layer visibility (PM-REQ-12, D-20, D-22, D-24) |
 
 ---
 
@@ -95,9 +95,9 @@ No annotation management or snapshot generation here — only the mode container
 | Work view component (shell) | Container that switches between visualization and editing sub-views |
 | Editing mode — Tiptap editor | Tiptap OSS adapter, structured content mapping, autosave debounce 800ms (D-15) |
 | Content autosave use case | Debounce, persist `Piece.content`, increment `revision`, `updatedAt` update |
-| Selection toolbar component | Contextual toolbar above selection; edit mode (format actions only) / visualization mode (annotation kinds); frosted white theme (EM-REQ-05) |
+| Selection toolbar component | Contextual toolbar above selection; edit mode format actions (`bold`, `italic`, `underline`) / visualization mode annotation kinds; frosted white theme (EM-REQ-05, D-24) |
 | Selection Refinement modal | Char-by-char boundary adjuster, 8-char context window, nudge ←→, confirm (EM-REQ-06) |
-| Language preference UI | ES / EN segmented control in app header; persisted in UI state |
+| Language preference UI | ES / EN segmented control in app header; persisted in UI state; does not infer or mutate `Piece.language` |
 | Settings placeholder | Settings button in app header; no-op in MVP; reserved space for future settings |
 | Double-action protection | `isProcessing` flag or debounce on all action triggers |
 
@@ -134,12 +134,12 @@ Snapshot generation pipeline, stale detection, fallback behavior, and layer togg
 |---|---|
 | Piece renderer | Pure function: `Piece + Annotation[]` → HTML string; CSS classes per layer and status |
 | Snapshot generation use case | Generate `PieceSnapshot`, set `sourceRevision`, persist via port |
-| Snapshot invalidation service | Detect stale snapshots (`sourceRevision < revision`); trigger regeneration |
+| Snapshot invalidation service | Detect stale snapshots (`sourceRevision < revision`); trigger regeneration; keep annotation actions disabled until current snapshot is ready |
 | Snapshot inactivity debounce | 5s debounce in editing mode; immediate generation on exit |
 | Load snapshot in visualization | Load + inject HTML; stale → inject current + regenerate in background |
 | No-snapshot fallback | Show base text (read-only), disable annotation actions, generate first snapshot (D-04) |
 | Toggle layer visibility | Update `layerVisibility`, apply CSS class on container, persist; zero re-render |
-| Recovery copies | Store up to 3 rendered copies per piece; prune oldest automatically (D-02) |
+| ~~Recovery copies~~ | Deferred to MVP2 — recovery-copy lifecycle will be designed once annotation-integrity flows are validated in practice (D-02) |
 
 ---
 
@@ -170,3 +170,4 @@ Snapshot generation pipeline, stale detection, fallback behavior, and layer togg
 | D-21 Dexie for IndexedDB | E-01 (adapter stubs) |
 | D-22 JSON backup format | E-03 (export/restore issues) |
 | D-23 shortNote/extendedNote content model | E-02 (domain), E-05 (annotation modal) |
+| D-24 MVP clarification batch | E-02, E-03, E-04, E-06 |

@@ -45,8 +45,10 @@ No Angular or Markdown-editor assumptions SHALL be used in mode behavior.
 When the user makes a text selection in either mode, the system SHALL show a contextual **selection toolbar** positioned above the selection (or below if near the top of the viewport).
 
 In `editing` mode, the toolbar SHALL expose:
-- Inline format actions: Bold, Italic, Underline, Strikethrough
+- Inline format actions: Bold, Italic, Underline
 - A **Refine** action to open the Selection Refinement modal
+
+`Strikethrough` SHALL NOT be exposed in MVP because crossed-out text reduces legibility for stage-reading and poetry workflows.
 
 In `visualization` mode, the toolbar SHALL expose:
 - Annotation kind actions: Intent, Comment, Breath
@@ -85,9 +87,11 @@ Selection mapping logic SHALL belong to infrastructure adapters (editor/renderer
 When selection happens over rendered snapshot content, renderer metadata SHALL expose enough information to resolve selections back to `AnnotationTarget` values.
 
 ### EM-REQ-09 — Snapshot dependency for annotation actions
-Annotation actions in MVP visualization mode SHALL require a valid snapshot.
+Annotation actions in MVP visualization mode SHALL require a current, ready snapshot.
 
-If snapshot is not yet available, annotation actions SHALL remain disabled until the first snapshot is generated.
+A snapshot is ready for annotation actions only when `PieceSnapshot.sourceRevision === Piece.revision`.
+
+If snapshot is not yet available or the available snapshot is stale, annotation actions SHALL remain disabled until a current snapshot is generated.
 
 Snapshot lifecycle SHALL be infrastructure-driven.
 
@@ -98,10 +102,9 @@ The system SHALL NOT include anchor regeneration logic.
 
 The system SHALL NOT auto-repair `needsReview` in MVP.
 
-Resolution actions SHALL be explicit user flows:
-- confirm
-- retarget
-- delete
+`needsReview` annotations SHALL remain visible with warning-state rendering in visualization mode.
+
+The resolve flow (confirm / retarget / delete) is deferred to post-MVP and will be defined based on practical experience (see AS-REQ-11).
 
 ### EM-REQ-11 — Transition and persistence safety
 Mode transitions SHALL preserve user changes.
@@ -130,24 +133,24 @@ Markdown SHALL NOT be treated as internal editable source of truth in mode behav
 **THEN** the editor adapter maps edits to structured `PieceContent` and persistence stores domain data (not editor JSON).
 
 ### EM-SCN-03 — Editing selection does not create annotation
-**GIVEN** a piece in editing mode with a valid snapshot
+**GIVEN** a piece in editing mode with a current snapshot
 **WHEN** the user selects text
 **THEN** the selection toolbar exposes editor actions and Refine, but no annotation kind actions are available.
 
 ### EM-SCN-04 — Create annotation from visualization selection
-**GIVEN** a piece in visualization mode with a valid snapshot
+**GIVEN** a piece in visualization mode with a current snapshot
 **WHEN** the user selects rendered text and adds an annotation
 **THEN** renderer metadata enables mapping to `AnnotationTarget` and the annotation flow proceeds without direct content editing.
 
-### EM-SCN-05 — Annotation actions blocked without snapshot
-**GIVEN** a piece with no generated snapshot yet
+### EM-SCN-05 — Annotation actions blocked without current snapshot
+**GIVEN** a piece with no generated snapshot or only a stale snapshot
 **WHEN** user attempts annotation actions in visualization mode
-**THEN** actions remain disabled until first snapshot generation completes.
+**THEN** actions remain disabled until current snapshot generation completes.
 
-### EM-SCN-06 — needsReview resolution flow
+### EM-SCN-06 — needsReview visible with warning indicator
 **GIVEN** an annotation that became unresolved after content changes
-**WHEN** user opens review action
-**THEN** user must explicitly confirm, retarget, or delete; no automatic repair is performed.
+**WHEN** visualization mode renders
+**THEN** the annotation remains visible with `needsReview` warning styling regardless of layer toggle state; no resolve action is available in MVP.
 
 ### EM-SCN-07 — Selection toolbar appears on text selection (visualization)
 **GIVEN** a piece in visualization mode
@@ -157,7 +160,7 @@ Markdown SHALL NOT be treated as internal editable source of truth in mode behav
 ### EM-SCN-08 — Selection toolbar in editing mode shows format actions
 **GIVEN** a piece in editing mode
 **WHEN** the user selects text in the editor
-**THEN** the selection toolbar appears with Bold, Italic, Underline, Strikethrough, and Refine actions.
+**THEN** the selection toolbar appears with Bold, Italic, Underline, and Refine actions.
 
 ### EM-SCN-09 — Refine opens Selection Refinement modal
 **GIVEN** the selection toolbar is visible (either mode)
@@ -179,3 +182,6 @@ Markdown SHALL NOT be treated as internal editable source of truth in mode behav
 - No advanced multi-target annotation composition in mode workflows
 - No requirement to expose editor-internal JSON structures to domain/application layers
 - No automatic selection correction or AI-guided boundary suggestion
+- No Strikethrough formatting action in MVP
+- No `needsReview` resolve flow in MVP — deferred to post-MVP (EM-REQ-10, AS-REQ-11)
+- No auto-scroll — deferred to song UX (MVP2)

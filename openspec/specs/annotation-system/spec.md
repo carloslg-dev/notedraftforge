@@ -70,7 +70,7 @@ The system SHALL reject any annotation creation or update where:
 ### AS-REQ-06 — Annotation creation flow (UI)
 Annotation creation SHALL follow this interaction sequence:
 
-1. In `visualization` mode, the user selects text.
+1. In `visualization` mode, once a current snapshot is ready, the user selects text.
 2. A **selection toolbar** appears above (or below on scroll-overflow) the selection with annotation kind buttons (Intent / Comment / Breath) + Refine button.
 3. The user taps an annotation kind to open the **annotation modal**.
 4. The annotation modal collects:
@@ -81,6 +81,8 @@ Annotation creation SHALL follow this interaction sequence:
 The **Refine** action opens the **Selection Refinement modal** — a char-by-char boundary adjuster for fat-finger precision correction (primarily mobile). Selection refinement does not commit an annotation; in visualization mode it adjusts the selection boundary before proceeding to the annotation modal.
 
 Editing mode has its own selection toolbar for editor actions, but MVP editing mode does not expose annotation create/update/delete/resolve actions.
+
+If the visualization surface has no snapshot or only a stale snapshot, annotation creation controls SHALL remain disabled until a current snapshot is generated.
 
 ### AS-REQ-07 — Create annotation
 When a valid annotation create request is submitted, the system SHALL:
@@ -117,13 +119,12 @@ The system SHALL NOT attempt auto-repair in MVP.
 
 A `needsReview` annotation SHALL remain visible according to layer visibility rules and warning-state rendering.
 
-### AS-REQ-11 — Resolve needsReview
-The system SHALL allow resolving a `needsReview` annotation via explicit user action:
-- confirm current target as valid (if resolvable)
-- retarget annotation to a valid `AnnotationTarget`
-- delete annotation
+### AS-REQ-11 — Resolve needsReview (deferred)
+The resolve use case for `needsReview` annotations (confirm / retarget / delete) is deferred to a post-MVP iteration.
 
-Resolve actions SHALL persist updates and invalidate snapshot.
+Resolution will be defined based on practical experience once the marking behavior (AS-REQ-10) is in place. Whether a full resolve flow is needed depends on how often and in what form target invalidation actually occurs in practice.
+
+MVP behavior: the system marks affected annotations as `needsReview` and keeps them visible. No resolve action is available to the user in MVP.
 
 ### AS-REQ-12 — Layer visibility
 Layer toggles SHALL update `PieceSnapshot.layerVisibility` and apply CSS visibility changes without regenerating HTML.
@@ -202,3 +203,4 @@ Layer toggles SHALL update `PieceSnapshot.layerVisibility` and apply CSS visibil
 - No AI correction/auto-fix for invalid targets
 - No annotation create/update/delete/resolve actions in editing mode
 - No multi-target annotation composition beyond the defined `AnnotationTarget` variants
+- No `needsReview` resolve flow (confirm / retarget / delete) — deferred to post-MVP (AS-REQ-11)

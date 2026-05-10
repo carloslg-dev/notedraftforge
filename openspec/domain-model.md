@@ -29,9 +29,11 @@ type PieceType = 'text' | 'poem' | 'song';
 ### Rules
 - `id` is immutable after creation
 - `title` must be non-empty
+- `type` is a hard discriminator and must match `content.kind`
 - `content` is always structured domain data; editor formats and import/export formats are adapter concerns
 - `language` must be a valid ISO 639-1 two-letter code
 - `tags` uses explicit `TagRef.kind` semantics (no type-overloaded plain strings)
+- `tags` must contain exactly one `TagRef(kind="type")`, and its `value` must match `Piece.type`
 - Translations of a piece are separate `Piece` entities (no link in MVP)
 - A `Piece` has no reference to any workspace or collection in the MVP
 - `updatedAt` reflects the last user-visible change to content, metadata, or annotations
@@ -73,7 +75,7 @@ interface TextRun {
   marks?: TextMark[];
 }
 
-type TextMark = 'bold' | 'italic';
+type TextMark = 'bold' | 'italic' | 'underline';
 
 interface SongSection {
   id: string;
@@ -109,7 +111,8 @@ type MeterContent = string;
 
 ### Content rules
 - `TextPieceContent` and `PoemPieceContent` share block/run primitives and remain structurally distinct by discriminator
-- `TextRun` may carry optional inline marks (`bold`, `italic`) through `marks`
+- `TextRun` may carry optional inline marks (`bold`, `italic`, `underline`) through `marks`
+- `strikethrough` is not part of MVP text marks because stage-reading and poetry surfaces prioritize legibility
 - Song structure is represented through `SongSection` and `SongCell`
 - `SongCell` is the atomic musical/textual unit in songs
 - `chord` and `meter` live on `SongCell` when present
@@ -364,16 +367,18 @@ User-configurable snapshot generation timing:
 ## Invariants
 
 1. A `Piece` has structured `PieceContent` by discriminator (`text`, `poem`, `song`).
-2. A `Piece` has zero or more `Annotation` entities.
-3. A `Piece` with zero annotations is valid.
-4. An `Annotation` belongs to exactly one `Piece`, one `AnnotationTarget`, and one `Layer`.
-5. An `Annotation`'s `kind` must match its `Layer`'s compatible kind.
-6. Multiple annotations of different kinds may share the same `AnnotationTarget`.
-7. `Layer` definitions are fixed and visibility is per-piece, stored in `PieceSnapshot`.
-8. Markdown is an import/export concern only, never the domain source of truth.
-9. `chord` and `meter` values belong to `SongCell` in song content.
-10. There are exactly 5 fixed domain layers. MVP text/poem UX exposes only the annotation-driven layers.
-11. `PieceSnapshot.sourceRevision` must match `Piece.revision` at generation time.
-12. `BreathContent.mark` must be `'S'` or `'L'`.
-13. `NoteAnnotationContent.shortNote` must be a non-empty string.
-14. `extendedNote`, when present, must be a non-empty string.
+2. `Piece.type` must match `Piece.content.kind`.
+3. A `Piece` must have exactly one system-managed type tag whose value matches `Piece.type`.
+4. A `Piece` has zero or more `Annotation` entities.
+5. A `Piece` with zero annotations is valid.
+6. An `Annotation` belongs to exactly one `Piece`, one `AnnotationTarget`, and one `Layer`.
+7. An `Annotation`'s `kind` must match its `Layer`'s compatible kind.
+8. Multiple annotations of different kinds may share the same `AnnotationTarget`.
+9. `Layer` definitions are fixed and visibility is per-piece, stored in `PieceSnapshot`.
+10. Markdown is an import/export concern only, never the domain source of truth.
+11. `chord` and `meter` values belong to `SongCell` in song content.
+12. There are exactly 5 fixed domain layers. MVP text/poem UX exposes only the annotation-driven layers.
+13. `PieceSnapshot.sourceRevision` must match `Piece.revision` at generation time.
+14. `BreathContent.mark` must be `'S'` or `'L'`.
+15. `NoteAnnotationContent.shortNote` must be a non-empty string.
+16. `extendedNote`, when present, must be a non-empty string.

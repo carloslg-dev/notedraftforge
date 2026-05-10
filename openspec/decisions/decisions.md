@@ -30,7 +30,7 @@ It exists to keep architectural and product decisions traceable across chats and
 - **Date:** 2026-04-19
 - **Status:** Transferred
 - **Summary:** Use a conservative strategy: prioritize recovery and low false invalidation. After D-11/D-12, `AnnotationTarget` is the canonical link. Mark `needsReview` only when a target is genuinely unresolvable or bounds become invalid.
-- **Additional direction:** Maintain up to 3 rendered recovery copies per piece when entering visualization, and prune the oldest copy automatically when the limit is exceeded.
+- **Additional direction:** ~~Maintain up to 3 rendered recovery copies per piece~~ — deferred to MVP2. The recovery-copy mechanism (pre-change snapshot caching to protect against annotation drift during content edits) will be designed once the layer-state and annotation-integrity flows are validated in practice.
 - **Impacts:** Annotation System, Snapshot & Layer State, Editor Modes, Architecture
 - **Transfer status:** Transferred
 
@@ -191,11 +191,12 @@ It exists to keep architectural and product decisions traceable across chats and
 ### D-22 — JSON backup format (export/restore)
 - **Date:** 2026-05-01
 - **Status:** Transferred
-- **Summary:** The primary backup/restore mechanism for MVP is a JSON file containing all durable local user data needed before version updates: pieces, annotations, and per-piece layer visibility state. Format: `{ version, exportedAt, pieces: [{ ...piece, annotations: [], layerVisibility?: {} }] }`. Snapshot HTML is derived data and may be regenerated after restore. Binary or Markdown export/import flows are not part of MVP1 backup strategy.
+- **Summary:** The primary backup/restore mechanism for MVP is a JSON file containing all durable local user data needed before version updates: pieces, annotations, and per-piece layer visibility state. Format: `{ version, exportedAt, pieces: [{ ...piece, annotations: [], layerVisibility: {} }] }`. Snapshot HTML is derived data and may be regenerated after restore. Binary or Markdown export/import flows are not part of MVP1 backup strategy.
 - **Motivation:** IndexedDB does not persist across browser data clears and provides no cross-device access. A JSON backup is the only data-safety net available before a workspace/sync solution exists in MVP3. JSON is self-documenting and human-readable without additional tooling.
 - **Rules:**
   - Export is read-only; no mutation of stored data.
   - Export includes pieces, annotations, and per-piece layer visibility state.
+  - Per-piece layer visibility is durable visual state and must be preserved by backup/restore even though it does not invalidate domain content or snapshot HTML.
   - Import/restore replaces all current data atomically. User must be warned before proceeding.
   - Restore flow validates JSON structure (via Zod, per D-20) before applying.
   - Exported filename pattern: `notedraftforge-backup-<YYYY-MM-DD>.json`
@@ -215,6 +216,20 @@ It exists to keep architectural and product decisions traceable across chats and
 - **Impacts:** Domain Model (AnnotationContent types), Annotation System spec, Editor Modes spec
 - **Transfer status:** Transferred
 
+### D-24 — MVP clarification batch: marks, type, language, song visibility, snapshot gate
+- **Date:** 2026-05-06
+- **Status:** Transferred
+- **Summary:** Clarify MVP behavior before Gherkin/spec slicing so implementation issues do not rely on weak assumptions.
+- **Rules:**
+  - MVP text marks are `bold`, `italic`, and `underline`; `strikethrough` is excluded because crossed-out text reduces legibility for stage-reading and poetry workflows.
+  - `Piece.type` is a hard domain discriminator. It must match `Piece.content.kind` and the system-managed type tag; inconsistent restored/imported records are rejected at the boundary.
+  - The ES/EN selector in the app header is UI language preference only. It must not infer or mutate `Piece.language`, which represents the language of the authored content.
+  - Multi-language content is represented as separate `Piece` entities in MVP; future linking belongs to workspace-era specs.
+  - `song` remains in the domain/data model for MVP2 readiness, but MVP1 user-facing creation and Work List flows expose only `text` and `poem`.
+  - Annotation actions require a current ready snapshot (`PieceSnapshot.sourceRevision === Piece.revision`). Stale snapshots may be displayed for fast load, but annotation actions stay disabled until regeneration finishes.
+- **Impacts:** Domain Model, Piece Management, Work List, Editor Modes, Snapshot & Layer State, Layer Visibility
+- **Transfer status:** Transferred
+
 ---
 
 ## Documentation Transfer Checklist
@@ -227,7 +242,7 @@ These are the follow-up updates to fully transfer decisions into specs/docs.
 | Keep autosave contract explicit (debounce + boundaries) | `openspec/specs/piece-management/spec.md` | D-01 | Transferred |
 | Clarify integrity heuristic wording for MVP | `openspec/specs/annotation-system/spec.md` | D-01, D-02 | Transferred |
 | Keep snapshot stale detection explicit (revision counter) | `openspec/specs/snapshot-and-layer-state/spec.md`, `openspec/domain-model.md` | D-01 | Transferred |
-| Specify backup lifecycle (create/limit/prune) | `openspec/specs/snapshot-and-layer-state/spec.md` | D-02 | Transferred |
+| Specify rendered recovery-copy lifecycle (create/limit/prune) | `openspec/specs/snapshot-and-layer-state/spec.md` | D-02 | Deferred to MVP2 |
 | Keep immediate visual feedback path for visualization-mode annotation add | `openspec/specs/annotation-system/spec.md`, `openspec/specs/editor-modes/spec.md` | D-03 | Transferred |
 | Keep no-snapshot temporary state and annotation lock explicit | `openspec/specs/snapshot-and-layer-state/spec.md`, `openspec/specs/editor-modes/spec.md` | D-04 | Transferred |
 | Finalize import constraints for unsupported Markdown structures | `openspec/specs/piece-management/spec.md` | D-05 | Transferred |
@@ -249,3 +264,4 @@ These are the follow-up updates to fully transfer decisions into specs/docs.
 | Dexie as IndexedDB adapter reflected in architecture doc | `openspec/architecture.md` | D-21 | Transferred |
 | JSON backup export/restore requirements added to piece-management spec | `openspec/specs/piece-management/spec.md` | D-22 | Transferred |
 | shortNote/extendedNote content model updated in domain-model.md and annotation-system spec | `openspec/domain-model.md`, `openspec/specs/annotation-system/spec.md` | D-23 | Transferred |
+| MVP clarification batch transferred to affected specs | `openspec/domain-model.md`, `openspec/specs/piece-management/spec.md`, `openspec/specs/work-list/spec.md`, `openspec/specs/editor-modes/spec.md`, `openspec/specs/snapshot-and-layer-state/spec.md`, `openspec/specs/layer-visibility/spec.md` | D-24 | Transferred |

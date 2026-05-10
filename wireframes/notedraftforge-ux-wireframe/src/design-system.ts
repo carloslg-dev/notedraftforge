@@ -10,6 +10,7 @@ export type ScreenId =
   | 'AnnotationModal'     // unified modal: type selector + shortNote + extendedNote
   | 'SelectionRefine'     // char-by-char boundary adjuster (mobile fat-finger fix)
   | 'ExportImport'        // backup modal: export JSON / restore from JSON
+  | 'NewPiece'            // new work modal: title + type (text|poem) + content language
 
 export type WorkType = 'poem' | 'text'
 export type SnapshotState = 'ready' | 'stale' | 'generating'

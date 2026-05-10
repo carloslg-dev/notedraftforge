@@ -1,12 +1,13 @@
 // NoteDraftForge — UX Wireframe 2
 //
-// MVP screens (9):
+// MVP screens (10):
 //   WorkListDesktop · WorkListMobile
 //   VisualizationDesktop · VisualizationMobile
 //   EditorDesktop · EditorMobile
 //   AnnotationModal (unified: type selector + shortNote + extendedNote)
 //   SelectionRefineModal (char-by-char boundary adjuster)
 //   ExportImportModal (JSON backup: export + restore)
+//   NewPieceModal (title + type text|poem + content language)
 
 import { useState } from 'react'
 import { C, F, type ScreenId, type AnnotKind } from './design-system'
@@ -20,6 +21,7 @@ import { EditorMobile }         from './screens/EditorMobile'
 import { AnnotationModal }      from './screens/AnnotationModal'
 import { SelectionRefineModal } from './screens/SelectionRefineModal'
 import { ExportImportModal }    from './screens/ExportImportModal'
+import { NewPieceModal }        from './screens/NewPieceModal'
 
 const SCREEN_LIST: Array<{ id: ScreenId; label: string }> = [
   { id: 'WorkListDesktop',      label: 'Works / Desktop' },
@@ -31,6 +33,7 @@ const SCREEN_LIST: Array<{ id: ScreenId; label: string }> = [
   { id: 'AnnotationModal',      label: 'Modal: Annotation' },
   { id: 'SelectionRefine',      label: 'Modal: Selection Refine' },
   { id: 'ExportImport',         label: 'Modal: Backup' },
+  { id: 'NewPiece',             label: 'Modal: New Work' },
 ]
 
 export default function App() {
@@ -124,6 +127,9 @@ export default function App() {
         )}
         {screen === 'ExportImport' && (
           <ExportImportModal onBack={() => setScreen('WorkListDesktop')} />
+        )}
+        {screen === 'NewPiece' && (
+          <NewPieceModal onBack={() => setScreen('WorkListDesktop')} />
         )}
       </div>
     </div>

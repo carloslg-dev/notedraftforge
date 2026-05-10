@@ -40,6 +40,8 @@ Layer visibility SHALL be persisted through `SnapshotRepository`.
 
 The system SHALL NOT use a separate layer repository.
 
+Although layer visibility is visual state and does not invalidate domain content or snapshot HTML, it is durable per-piece state and SHALL be preserved by JSON backup export/restore.
+
 ### LV-REQ-04 — Toggle behavior
 When a user toggles a layer, the system SHALL:
 - update `PieceSnapshot.layerVisibility`

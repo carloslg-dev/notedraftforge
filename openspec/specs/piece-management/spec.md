@@ -13,9 +13,12 @@ Define the canonical behavior for creating, reading, updating, deleting, importi
 The domain/application model SHALL allow creating a new `Piece` with:
 - `title`
 - `type` (`text | poem | song`)
+- `language` (ISO 639-1 content language)
 - empty structured content matching `type`
 
 MVP user-facing creation UI SHALL expose `text` and `poem` only. `song` remains supported by the domain/data model for MVP2 readiness and restored data compatibility.
+
+`Piece.language` represents the language of the piece content chosen by the author. It SHALL NOT be inferred from or mutated by the application UI language selector (for example ES/EN). Translations or multi-language versions are separate `Piece` entities in MVP.
 
 The system SHALL initialize on creation:
 - `id` (UUID)
@@ -50,11 +53,13 @@ For MVP, metadata-only updates apply to:
 
 When metadata-only fields change, the system SHALL persist those changes without content migration.
 
-For MVP, changing `Piece.type` SHALL NOT be treated as a simple metadata update because it may require migration between `PieceContent` variants.
+`Piece.type` is a hard domain discriminator. It SHALL match `Piece.content.kind` and the system-managed `TagRef(kind="type", value=<piece type>)`.
+
+For MVP, changing `Piece.type` SHALL NOT be treated as a simple metadata update because it requires migration between `PieceContent` variants.
 
 `Piece.type` changes are either:
-- disabled in MVP, or
-- handled by a dedicated future migration flow defined in a separate spec/use case.
+- disabled in MVP, and
+- handled only by a dedicated future migration flow defined in a separate spec/use case.
 
 ### PM-REQ-06 — Structured tags
 The system SHALL store tags as `TagRef` objects.
@@ -64,6 +69,8 @@ The system SHALL store tags as `TagRef` objects.
 - `value`
 
 The system MUST keep exactly one system-managed type tag per piece and MUST allow user-defined tags as `kind="user"`.
+
+If a restored or imported record contains inconsistent type metadata (`Piece.type`, `Piece.content.kind`, or the system-managed type tag disagree), the system SHALL reject that record at the validation boundary instead of silently normalizing it.
 
 ### PM-REQ-07 — Revision tracking
 The system SHALL increment `Piece.revision` when:
@@ -87,6 +94,8 @@ Import defaults SHALL be:
 - structured text content (`TextPieceContent`)
 - system-managed type tag `TagRef(kind="type", value="text")`
 - `revision = 0`
+
+Import flow SHALL receive a valid content `language` for the resulting `Piece`; it SHALL NOT infer this value from the application UI language selector.
 
 ### PM-REQ-10 — Markdown export
 The system SHALL export structured `Piece.content` into Markdown as an external format.
@@ -112,13 +121,14 @@ The exported JSON SHALL conform to the following top-level structure:
   exportedAt: string,      // ISO 8601 datetime
   pieces: Array<Piece & {
     annotations: Annotation[],
-    layerVisibility?: Record<LayerKind, boolean>
+    layerVisibility: Record<LayerKind, boolean>
   }>
 }
 ```
 
 The export operation SHALL:
 - include all pieces, their associated annotations, and their layer visibility state
+- preserve layer visibility as durable per-piece visual state, even though it does not invalidate domain content or snapshot HTML
 - be read-only and SHALL NOT mutate any stored data
 - use the filename pattern `notedraftforge-backup-<YYYY-MM-DD>.json`
 - remain independent of any sync or backend; it is a local file download
@@ -137,6 +147,7 @@ The system SHALL reject any backup JSON that:
 - does not parse as valid JSON
 - fails schema validation
 - has an unsupported `version` value
+- contains inconsistent piece type metadata (`Piece.type`, `Piece.content.kind`, and type tag do not match)
 
 ---
 
@@ -145,12 +156,17 @@ The system SHALL reject any backup JSON that:
 ### PM-SCN-01 — Create empty text piece
 **GIVEN** the user creates a new piece
 **WHEN** type is `"text"`
-**THEN** the system creates a `Piece` with `TextPieceContent` and empty `blocks`.
+**THEN** the system creates a `Piece` with `TextPieceContent`, empty `blocks`, and a valid content language.
 
 ### PM-SCN-02 — Create piece with type tag
 **GIVEN** the user creates a new piece of type `"poem"`
 **WHEN** creation is persisted
 **THEN** the system assigns `TagRef(kind="type", value="poem")`.
+
+### PM-SCN-02a — Type discriminator stays consistent
+**GIVEN** the user creates a new piece of type `"poem"`
+**WHEN** creation is persisted
+**THEN** `Piece.type`, `Piece.content.kind`, and `TagRef(kind="type")` all use `"poem"`.
 
 ### PM-SCN-03 — Persist structured content update
 **GIVEN** an existing piece with structured content
@@ -180,7 +196,7 @@ The system SHALL reject any backup JSON that:
 ### PM-SCN-08 — Restore backup replaces all data
 **GIVEN** a user pastes valid backup JSON in the Restore tab
 **WHEN** the user confirms restore after reading the warning banner
-**THEN** the system validates the JSON, clears all existing data, and replaces it with the backup content.
+**THEN** the system validates the JSON, clears all existing data, and replaces it with the backup content including layer visibility.
 
 ### PM-SCN-09 — Restore rejects invalid JSON
 **GIVEN** a user pastes malformed JSON or JSON that fails schema validation
@@ -196,3 +212,5 @@ The system SHALL reject any backup JSON that:
 - No workspace/collection ownership in `Piece`
 - No requirement to preserve all advanced Markdown constructs losslessly in MVP import
 - No incremental/merge import (restore always replaces all data)
+- No piece type mutation flow in MVP
+- No coupling between app UI language selection and `Piece.language`

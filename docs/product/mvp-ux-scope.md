@@ -15,8 +15,8 @@ Define the minimum UX scope for wireframes, strictly limited to current MVP beha
 2. **Piece View — Visualization mode (default)**
    - Read-only snapshot view
    - Layer visibility toggles
-   - Add/resolve annotation interactions (only when snapshot exists)
-   - Start/stop auto-scroll only if retained by final MVP decision
+   - Add annotation interactions (only when snapshot exists)
+   - Annotations marked `needsReview` remain visible with warning indicator; resolve flow deferred to post-MVP
 
 3. **Piece View — Editing mode**
    - Structured text/poem content editing via Tiptap adapter
