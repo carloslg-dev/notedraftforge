@@ -13,11 +13,13 @@ This document adds the operational layer specific to AI-assisted tasks.
 ## Process
 
 - [ ] Task was documented in `.ai/current-task.md` before implementation started
+- [ ] Existing `.ai/current-task.md` was classified as continuation, side question, or new task before reuse
+- [ ] If `.ai/current-task.md` was reused for a new task, the previous state was appended to `.ai/task-log.md` first
 - [ ] All 6 phases (PLAN → CONTEXT → IMPLEMENT → VALIDATE → REVIEW → RETRO) were followed
 - [ ] Execution authorization set to `approved` before IMPLEMENT phase
 - [ ] Plan was documented before any code was written
 - [ ] Context used was documented with justification
-- [ ] `openspec/changes/<change>/execution-record.md` created and filled at end of RETRO
+- [ ] `openspec/changes/<change>/execution-record.md` created and filled when closing a versioned change, epic, or sprint checkpoint
 
 ## Scope
 
@@ -38,9 +40,10 @@ This document adds the operational layer specific to AI-assisted tasks.
 - [ ] Spec was updated if behavior changed
 - [ ] Decisions were logged in `openspec/decisions/decisions.md` if applicable
 - [ ] `.ai/current-task.md` reflects the final state (validation result, decisions, retro notes)
+- [ ] `.ai/task-log.md` contains the prior task summary before `.ai/current-task.md` is reset
 
 ## Review
 
 - [ ] Change was validated against the spec, not just the prompt
 - [ ] No open blockers remain
-- [ ] `./scripts/ai/final-review.sh <change-name>` passes at end of RETRO
+- [ ] `./scripts/ai/final-review.sh <change-name>` passes when closing a versioned change, epic, or sprint checkpoint

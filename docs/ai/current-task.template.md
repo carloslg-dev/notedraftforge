@@ -1,7 +1,10 @@
 # Current AI Task
 
-> Copy this file to `.ai/current-task.md` at the start of each task.
+> Copy this file to `.ai/current-task.md` at the start of each new task.
 > `.ai/` is gitignored — this file is local state, not version history.
+>
+> Do not overwrite an existing `.ai/current-task.md` until it has been rolled into
+> `.ai/task-log.md`, unless the user explicitly tells you to discard it.
 
 ---
 
@@ -16,6 +19,14 @@
 ## Goal
 
 <!-- What this task must achieve, in domain terms -->
+
+## Interaction classification
+
+<!-- Continuation | Side question | New task -->
+
+## Parent / continuation of
+
+<!-- Previous task ID or "None" -->
 
 ## Current phase
 
@@ -75,3 +86,7 @@ Reason:
 ## Retrospective notes
 
 - <!-- what context was missing? which doc helped most? what should be automated? -->
+
+## Rollover status
+
+<!-- Pending | Logged to .ai/task-log.md | Not needed: continuation -->

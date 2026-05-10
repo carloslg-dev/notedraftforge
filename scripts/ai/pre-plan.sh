@@ -15,6 +15,7 @@ REQUIRED_DOCS=(
   "docs/ai/context-strategy.md"
   "docs/ai/done-definition.md"
   "docs/ai/current-task.template.md"
+  "docs/ai/task-log.template.md"
   "docs/ai/execution-record.template.md"
 )
 
@@ -58,6 +59,14 @@ if [ ! -f ".ai/current-task.md" ]; then
   echo "$LABEL         cp docs/ai/current-task.template.md .ai/current-task.md"
 else
   echo "$LABEL   OK  .ai/current-task.md"
+fi
+
+if [ ! -f ".ai/task-log.md" ]; then
+  echo "$LABEL WARN: .ai/task-log.md not found."
+  echo "$LABEL       Create it before rolling over current task state:"
+  echo "$LABEL         cp docs/ai/task-log.template.md .ai/task-log.md"
+else
+  echo "$LABEL   OK  .ai/task-log.md"
 fi
 
 echo "$LABEL Ready to plan."

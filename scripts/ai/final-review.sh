@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# final-review.sh — Run at the end of RETRO phase, before committing.
+# final-review.sh — Run at the end of a versioned change/epic/sprint RETRO phase, before committing.
 # Quality gate for task closure:
 #   0. Validates <change-name> consistency across all sources.
 #   1. Checks .ai/current-task.md: authorization, validation result, blockers, retro.
 #   2. Checks openspec/changes/<change-name>/execution-record.md: existence and content.
+#
+# Ordinary continuation questions should update .ai/current-task.md in place and do not
+# require an execution record until a versioned closure checkpoint is being prepared.
 #
 # Usage:
 #   ./scripts/ai/final-review.sh <change-name>

@@ -16,6 +16,45 @@ PLAN → CONTEXT → IMPLEMENT → VALIDATE → REVIEW → RETRO
 Phases must not be skipped. No code changes before IMPLEMENT phase.
 Update `.ai/current-task.md` at the start and end of each phase.
 
+## Conversation continuity and task state
+
+`.ai/current-task.md` is **live state**, not long-term history. It must not be overwritten just because the user asks a follow-up question.
+
+Before starting PLAN for any user message, classify the message:
+
+| Classification | Meaning | Required state behavior |
+|---|---|---|
+| Continuation | Follow-up, clarification, correction, review, or next step for the active analysis/change | Keep the existing `.ai/current-task.md`; append new commands, decisions, blockers, and phase transitions to the same task |
+| Side question | Short question that does not change the active task scope | Keep `.ai/current-task.md`; answer directly; log only material decisions or constraints |
+| New task | New goal, unrelated scope, or explicit request to start different work | Roll the current task into `.ai/task-log.md` before reusing `.ai/current-task.md` |
+
+If unsure whether a message is a continuation or a new task, default to **continuation** and ask only if state separation matters.
+
+### Rollover rule
+
+Before replacing `.ai/current-task.md` for a new task:
+
+1. If `.ai/task-log.md` does not exist, create it from `docs/ai/task-log.template.md`.
+2. Append a summary of the current task to `.ai/task-log.md`.
+3. Include at least: task ID, change reference, goal, final phase, validation result, files changed, decisions, blockers, retrospective notes, and follow-up items.
+4. Only then reset `.ai/current-task.md` from `docs/ai/current-task.template.md` or rewrite it for the new task.
+
+Never discard `.ai/current-task.md` contents without either:
+- rolling them into `.ai/task-log.md`, or
+- explicit user instruction to discard the state.
+
+### Retrospective cadence
+
+Task-level retrospective notes remain in `.ai/current-task.md` and `.ai/task-log.md`.
+
+Versioned execution records under `openspec/changes/<change-name>/execution-record.md` are closure artifacts. They may be written:
+- per issue/change when a small change is being closed, or
+- per epic/sprint when the user wants to review a batch of completed tasks.
+
+For epic/sprint closure, synthesize the execution record from `.ai/task-log.md`, the current task, and the relevant `openspec/changes/` artifacts.
+
+`final-review.sh <change-name>` is still required before considering a versioned change/epic/sprint closure ready to commit, but ordinary follow-up questions must not force a new execution record.
+
 > **Scripts note:** Scripts in `scripts/ai/` are V1 minimum guardrails.
 > They enforce a structural baseline but do not replace agent judgment or human review.
 
@@ -24,6 +63,11 @@ Update `.ai/current-task.md` at the start and end of each phase.
 ## Phase 1: PLAN
 
 **Objective:** Understand the task, propose a strategy, identify risks and needed context.
+
+**Before PLAN:**
+- Classify the user message as continuation, side question, or new task.
+- If it is a new task, apply the rollover rule before resetting `.ai/current-task.md`.
+- If it is a continuation, update the existing `.ai/current-task.md` in place.
 
 **Inputs:**
 - GitHub issue (with spec reference, acceptance criteria, scope)
@@ -127,7 +171,8 @@ Update `.ai/current-task.md` at the start and end of each phase.
 
 **Outputs:**
 - Retrospective notes in `.ai/current-task.md` (mandatory — see below)
-- `openspec/changes/<change-name>/execution-record.md` created and filled
+- `.ai/task-log.md` updated before the task state is reused
+- `openspec/changes/<change-name>/execution-record.md` created and filled when closing a versioned change, epic, or sprint checkpoint
 
 **Questions to answer (required):**
 - What context was missing at the start?
@@ -138,7 +183,7 @@ Update `.ai/current-task.md` at the start and end of each phase.
 
 **Closing gate:**
 
-Run `./scripts/ai/final-review.sh <change-name>` at the end of this phase.
+Run `./scripts/ai/final-review.sh <change-name>` at the end of this phase when closing a versioned change, epic, or sprint checkpoint.
 `<change-name>` is mandatory. It must match:
 - The `Change reference` field in `.ai/current-task.md` (canonical source during local work)
 - The folder name under `openspec/changes/`
@@ -159,6 +204,8 @@ Only after it passes is the task ready for commit.
 | Definition of Done | `docs/ai/done-definition.md` |
 | Task state (local, not versioned) | `.ai/current-task.md` |
 | Task state template | `docs/ai/current-task.template.md` |
+| Rolling task log (local, not versioned) | `.ai/task-log.md` |
+| Rolling task log template | `docs/ai/task-log.template.md` |
 | Execution record (versioned, per change) | `openspec/changes/<change>/execution-record.md` |
 | Execution record template | `docs/ai/execution-record.template.md` |
 | Execution checklist | `docs/ai/templates/checklist-execution.md` |
