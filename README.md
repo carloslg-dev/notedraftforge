@@ -131,6 +131,6 @@ npm run lint     # ESLint
 
 ## Author
 
-**Carlos LG** — [carloslg-dev.github.io/site](https://carloslg-dev.github.io/site)
+**Carlos López García** — [carloslg-dev.github.io/site](https://carloslg-dev.github.io/site)
 
 This is a personal project, and a deliberate reflection of how I like to work: specification before code, explicit architecture boundaries, and AI agents used with discipline rather than improvisation.
