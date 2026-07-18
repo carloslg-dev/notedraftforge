@@ -1,4 +1,4 @@
-import type { PieceSnapshot } from '../domain/types/annotation';
+import type { PieceSnapshot } from '../domain/types/';
 
 export interface SnapshotRepository {
   getByPieceId(pieceId: string): Promise<PieceSnapshot | null>;

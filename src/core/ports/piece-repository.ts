@@ -1,4 +1,4 @@
-import type { Piece } from '../domain/types/piece';
+import type { Piece } from '../domain/types/';
 
 export interface PieceRepository {
   getAll(): Promise<Piece[]>;

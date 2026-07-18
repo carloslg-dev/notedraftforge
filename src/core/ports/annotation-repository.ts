@@ -1,4 +1,4 @@
-import type { Annotation } from '../domain/types/annotation';
+import type { Annotation } from '../domain/types/';
 
 export interface AnnotationRepository {
   getByPieceId(pieceId: string): Promise<Annotation[]>;
