@@ -80,6 +80,17 @@ describe('Annotation Factory', () => {
       }).toThrow(/shortNote must be a non-empty string/);
     });
 
+    it('sanitizes shortNote and extendedNote by trimming whitespace', () => {
+      const annotation = createAnnotation({
+        pieceId,
+        target: mockTarget,
+        kind: 'intent',
+        content: { shortNote: '  needs trim  ', extendedNote: '   also trim   ' },
+      });
+
+      expect(annotation.content).toEqual({ shortNote: 'needs trim', extendedNote: 'also trim' });
+    });
+
     it('rejects empty extendedNote if provided', () => {
       expect(() => {
         createAnnotation({
@@ -89,6 +100,18 @@ describe('Annotation Factory', () => {
           content: { shortNote: 'valid', extendedNote: '   ' },
         });
       }).toThrow(/extendedNote must be a non-empty string when present/);
+    });
+
+    it('rejects invalid target kind', () => {
+      expect(() => {
+        createAnnotation({
+          pieceId,
+          // @ts-expect-error Testing invalid runtime value
+          target: { kind: 'invalid-target' },
+          kind: 'breath',
+          content: { mark: 'S' },
+        });
+      }).toThrow(/Invalid target kind/);
     });
   });
 

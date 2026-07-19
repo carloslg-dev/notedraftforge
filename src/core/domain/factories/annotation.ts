@@ -22,12 +22,13 @@ function deriveLayerId(kind: AnnotationKind): LayerKind {
   }
 }
 
-function validateAnnotationContent(kind: AnnotationKind, content: AnnotationContent): void {
+function validateAnnotationContent(kind: AnnotationKind, content: AnnotationContent): AnnotationContent {
   if (kind === 'breath') {
     const breathContent = content as BreathContent;
     if (breathContent.mark !== 'S' && breathContent.mark !== 'L') {
       throw new Error("Breath annotation mark must be 'S' or 'L'");
     }
+    return breathContent;
   } else if (kind === 'intent' || kind === 'comment') {
     const noteContent = content as NoteAnnotationContent;
     if (!noteContent.shortNote || noteContent.shortNote.trim() === '') {
@@ -36,6 +37,13 @@ function validateAnnotationContent(kind: AnnotationKind, content: AnnotationCont
     if (noteContent.extendedNote !== undefined && noteContent.extendedNote.trim() === '') {
       throw new Error("extendedNote must be a non-empty string when present");
     }
+    const sanitized: NoteAnnotationContent = {
+      shortNote: noteContent.shortNote.trim(),
+    };
+    if (noteContent.extendedNote !== undefined) {
+      sanitized.extendedNote = noteContent.extendedNote.trim();
+    }
+    return sanitized;
   }
 }
 
@@ -48,7 +56,12 @@ export function createAnnotation(input: CreateAnnotationInput): Annotation {
     throw new Error('target is required');
   }
 
-  validateAnnotationContent(input.kind, input.content);
+  const validTargetKinds = ['text-range', 'text-node', 'song-cell', 'song-cell-range'];
+  if (!input.target.kind || !validTargetKinds.includes(input.target.kind)) {
+    throw new Error(`Invalid target kind. Must be one of: ${validTargetKinds.join(', ')}`);
+  }
+
+  const sanitizedContent = validateAnnotationContent(input.kind, input.content);
 
   const layerId = deriveLayerId(input.kind);
 
@@ -57,7 +70,7 @@ export function createAnnotation(input: CreateAnnotationInput): Annotation {
     pieceId: input.pieceId,
     target: input.target,
     kind: input.kind,
-    content: input.content,
+    content: sanitizedContent,
     layerId,
     status: 'valid',
   };
