@@ -8,9 +8,17 @@ export interface CreatePieceInput {
   tags?: string[];
 }
 
+
+function isValidLanguage(language: string): boolean {
+  return typeof language === 'string' && language.length === 2 && /^[a-zA-Z]{2}$/.test(language);
+}
+
 export function createPiece(input: CreatePieceInput): Piece {
   if (!input.title || input.title.trim() === '') {
     throw new Error('Piece title cannot be empty');
+  }
+  if (!isValidLanguage(input.language)) {
+    throw new Error('Language must be a valid ISO 639-1 two-letter code');
   }
 
   const now = new Date().toISOString();
@@ -76,31 +84,51 @@ export interface UpdatePieceMetadataInput {
 }
 
 export function updatePieceMetadata(piece: Piece, input: UpdatePieceMetadataInput): Piece {
-  const updates: Partial<Piece> = {
-    updatedAt: new Date().toISOString(),
-  };
+  const updates: Partial<Piece> = {};
+  let hasChanges = false;
 
   if (input.title !== undefined) {
     if (input.title.trim() === '') {
       throw new Error('Piece title cannot be empty');
     }
-    updates.title = input.title.trim();
+    if (piece.title !== input.title.trim()) {
+      updates.title = input.title.trim();
+      hasChanges = true;
+    }
   }
 
   if (input.language !== undefined) {
-    updates.language = input.language;
+    if (!isValidLanguage(input.language)) {
+      throw new Error('Language must be a valid ISO 639-1 two-letter code');
+    }
+    if (piece.language !== input.language) {
+      updates.language = input.language;
+      hasChanges = true;
+    }
   }
 
   if (input.tags !== undefined) {
-    const newTags: TagRef[] = [
-      { kind: 'type', value: piece.type }
-    ];
+    const currentTags = piece.tags || [];
+    const typeTag = currentTags.find(tag => tag.kind === 'type') || { kind: 'type', value: piece.type };
+    const newTags: TagRef[] = [typeTag];
     for (const tagValue of input.tags) {
       if (tagValue.trim() !== '') {
         newTags.push({ kind: 'user', value: tagValue.trim() });
       }
     }
-    updates.tags = newTags;
+
+    // Check if tags changed
+    const currentUserTags = currentTags.filter(t => t.kind === 'user').map(t => t.value).sort().join(',');
+    const newUserTags = newTags.filter(t => t.kind === 'user').map(t => t.value).sort().join(',');
+
+    if (currentUserTags !== newUserTags) {
+      updates.tags = newTags;
+      hasChanges = true;
+    }
+  }
+
+  if (hasChanges) {
+    updates.updatedAt = new Date().toISOString();
   }
 
   return {
