@@ -56,7 +56,7 @@ export function createPiece(input: CreatePieceInput): Piece {
     title: input.title.trim(),
     type: input.type,
     content,
-    language: input.language,
+    language: input.language.trim().toLowerCase(),
     tags,
     createdAt: now,
     updatedAt: now,
@@ -101,8 +101,9 @@ export function updatePieceMetadata(piece: Piece, input: UpdatePieceMetadataInpu
     if (!isValidLanguage(input.language)) {
       throw new Error('Language must be a valid ISO 639-1 two-letter code');
     }
-    if (piece.language !== input.language) {
-      updates.language = input.language;
+    const normalizedLang = input.language.trim().toLowerCase();
+    if (piece.language !== normalizedLang) {
+      updates.language = normalizedLang;
       hasChanges = true;
     }
   }
