@@ -1,0 +1,7 @@
+feat(foundation): architecture lint rules
+
+Configures `eslint.config.js` to strictly enforce the hexagonal architecture
+import boundaries for the application and domain layers.
+The rule prevents dependencies on React, Dexie, Tiptap, Zod, and UI/Infrastructure
+folders across restricted internal packages, fully completing the acceptance criteria for
+issue #7.

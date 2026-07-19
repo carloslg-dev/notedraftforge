@@ -3,6 +3,7 @@ import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
+import boundaries from 'eslint-plugin-boundaries';
 
 export default tseslint.config(
   // Ignore output dirs and wireframes prototype (separate package)
@@ -17,10 +18,49 @@ export default tseslint.config(
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      boundaries,
+    },
+    settings: {
+      'boundaries/elements': [
+        { type: 'domain', pattern: 'src/core/domain/**/*' },
+        { type: 'application', pattern: 'src/core/application/**/*' },
+        { type: 'ports', pattern: 'src/core/ports/**/*' },
+        { type: 'infrastructure', pattern: 'src/core/infrastructure/**/*' },
+        { type: 'ui', pattern: 'src/ui/**/*' },
+      ],
+      'boundaries/include': ['src/**/*'],
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'boundaries/element-types': [
+        'error',
+        {
+          default: 'allow',
+          rules: [
+            {
+              from: 'domain',
+              disallow: ['application', 'ports', 'infrastructure', 'ui'],
+              message: '[domain] Domain layer must not depend on any other layer.',
+            },
+            {
+              from: 'application',
+              disallow: ['infrastructure', 'ui'],
+              message: '[application] Application layer must not depend on infrastructure or ui.',
+            },
+            {
+              from: 'ports',
+              disallow: ['application', 'infrastructure', 'ui'],
+              message: '[ports] Ports must not depend on application, infrastructure or ui.',
+            },
+            {
+              from: 'infrastructure',
+              disallow: ['ui'],
+              message: '[infrastructure] Infrastructure must not depend on ui.',
+            },
+          ],
+        },
+      ],
     },
   },
 
@@ -31,30 +71,52 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
-          patterns: [
+          paths: [
             {
-              group: ['react', 'react-dom', 'react-router-dom'],
-              message: '[domain] Must not import React or router.',
+              name: 'react',
+              message: '[domain] Must not import React.',
             },
+            {
+              name: 'react-dom',
+              message: '[domain] Must not import React DOM.',
+            },
+            {
+              name: 'react-router-dom',
+              message: '[domain] Must not import React Router.',
+            },
+            {
+              name: 'dexie',
+              message: '[domain] Must not import Dexie.',
+            },
+            {
+              name: 'zod',
+              message: '[domain] Must not import Zod.',
+            },
+          ],
+          patterns: [
             {
               group: ['@tiptap/*'],
               message: '[domain] Must not import Tiptap.',
             },
             {
-              group: ['dexie', 'dexie-*'],
-              message: '[domain] Must not import Dexie.',
+              group: ['dexie-*'],
+              message: '[domain] Must not import Dexie plugins.',
             },
             {
-              group: ['zod'],
-              message: '[domain] Must not import Zod.',
-            },
-            {
-              group: ['@/core/infrastructure/*'],
+              group: ['@/core/infrastructure/*', '**/infrastructure/*'],
               message: '[domain] Must not import from infrastructure layer.',
             },
             {
-              group: ['@/ui/*'],
+              group: ['@/ui/*', '**/ui/*'],
               message: '[domain] Must not import from ui layer.',
+            },
+            {
+              group: ['@/core/application/*', '**/application/*'],
+              message: '[domain] Must not import from application layer.',
+            },
+            {
+              group: ['@/core/ports/*', '**/ports/*'],
+              message: '[domain] Must not import from ports.',
             },
           ],
         },
@@ -69,29 +131,43 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
-          patterns: [
+          paths: [
             {
-              group: ['react', 'react-dom'],
+              name: 'react',
               message: '[application] Must not import React.',
             },
+            {
+              name: 'react-dom',
+              message: '[application] Must not import React DOM.',
+            },
+            {
+              name: 'react-router-dom',
+              message: '[application] Must not import React Router.',
+            },
+            {
+              name: 'dexie',
+              message: '[application] Must not import Dexie.',
+            },
+            {
+              name: 'zod',
+              message: '[application] Must not import Zod.',
+            },
+          ],
+          patterns: [
             {
               group: ['@tiptap/*'],
               message: '[application] Must not import Tiptap.',
             },
             {
-              group: ['dexie', 'dexie-*'],
-              message: '[application] Must not import Dexie.',
+              group: ['dexie-*'],
+              message: '[application] Must not import Dexie plugins.',
             },
             {
-              group: ['zod'],
-              message: '[application] Must not import Zod.',
-            },
-            {
-              group: ['@/core/infrastructure/*'],
+              group: ['@/core/infrastructure/*', '**/infrastructure/*'],
               message: '[application] Must not import from infrastructure directly. Use ports.',
             },
             {
-              group: ['@/ui/*'],
+              group: ['@/ui/*', '**/ui/*'],
               message: '[application] Must not import from ui.',
             },
           ],
