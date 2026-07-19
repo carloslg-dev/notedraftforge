@@ -31,7 +31,7 @@ type PieceType = 'text' | 'poem' | 'song';
 - `title` must be non-empty
 - `type` is a hard discriminator and must match `content.kind`
 - `content` is always structured domain data; editor formats and import/export formats are adapter concerns
-- `language` must be a valid ISO 639-1 two-letter code
+- `language` must be a valid ISO 639-1 two-letter code, stored strictly in lowercase
 - `tags` uses explicit `TagRef.kind` semantics (no type-overloaded plain strings)
 - `tags` must contain exactly one `TagRef(kind="type")`, and its `value` must match `Piece.type`
 - Translations of a piece are separate `Piece` entities (no link in MVP)

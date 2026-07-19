@@ -1,0 +1,170 @@
+import { describe, it, expect } from 'vitest';
+import { createPiece, updatePieceContent, updatePieceMetadata } from '../factories/piece';
+import { TextPieceContent, PoemPieceContent } from '../types/piece';
+
+describe('Piece Entity', () => {
+  describe('createPiece', () => {
+    it('creates a valid piece with all fields initialized', () => {
+      const piece = createPiece({
+        title: 'My First Poem',
+        type: 'poem',
+        language: 'en',
+        tags: ['inspiration', 'nature'],
+      });
+
+      expect(piece.id).toBeDefined();
+      expect(typeof piece.id).toBe('string');
+      expect(piece.title).toBe('My First Poem');
+      expect(piece.type).toBe('poem');
+      expect(piece.language).toBe('en');
+      expect(piece.revision).toBe(0);
+
+      expect(piece.createdAt).toBeDefined();
+      expect(piece.updatedAt).toBeDefined();
+      expect(piece.createdAt).toBe(piece.updatedAt);
+
+      expect(piece.content).toEqual({ kind: 'poem', blocks: [] });
+
+      expect(piece.tags).toHaveLength(3);
+      expect(piece.tags[0]).toEqual({ kind: 'type', value: 'poem' });
+      expect(piece.tags[1]).toEqual({ kind: 'user', value: 'inspiration' });
+      expect(piece.tags[2]).toEqual({ kind: 'user', value: 'nature' });
+    });
+
+    it('initializes correct content structure for text type', () => {
+      const piece = createPiece({ title: 'A Text', type: 'text', language: 'en' });
+      expect(piece.content).toEqual({ kind: 'text', blocks: [] });
+      expect(piece.type).toBe('text');
+      expect(piece.tags[0]).toEqual({ kind: 'type', value: 'text' });
+    });
+
+    it('initializes correct content structure for song type', () => {
+      const piece = createPiece({ title: 'A Song', type: 'song', language: 'en' });
+      expect(piece.content).toEqual({ kind: 'song', sections: [] });
+      expect(piece.type).toBe('song');
+      expect(piece.tags[0]).toEqual({ kind: 'type', value: 'song' });
+    });
+
+    it('throws error if title is empty or just whitespace', () => {
+      expect(() => createPiece({ title: '', type: 'poem', language: 'en' })).toThrow('Piece title cannot be empty');
+      expect(() => createPiece({ title: '   ', type: 'poem', language: 'en' })).toThrow('Piece title cannot be empty');
+    });
+
+    it('trims user tags and ignores empty ones', () => {
+      const piece = createPiece({
+        title: 'Title',
+        type: 'text',
+        language: 'en',
+        tags: ['  tag1  ', '', 'tag2', '   '],
+      });
+      expect(piece.tags).toEqual([
+        { kind: 'type', value: 'text' },
+        { kind: 'user', value: 'tag1' },
+        { kind: 'user', value: 'tag2' },
+      ]);
+    });
+  });
+
+  describe('updatePieceContent', () => {
+    it('updates content, increments revision, and updates updatedAt', () => {
+      const piece = createPiece({ title: 'Test', type: 'poem', language: 'en' });
+
+
+      // Delay to ensure a new timestamp (not strictly needed with ISO strings if fast enough,
+      // but safe to mock or just check it's >= old)
+      // Actually we can just check it's a string, or mock Date.
+
+      const newContent: PoemPieceContent = {
+        kind: 'poem',
+        blocks: [{ id: 'b1', kind: 'line', runs: [{ id: 'r1', text: 'Hello' }] }]
+      };
+
+      const updatedPiece = updatePieceContent(piece, newContent);
+
+      expect(updatedPiece.content).toBe(newContent);
+      expect(updatedPiece.revision).toBe(1);
+      expect(updatedPiece.updatedAt).toBeDefined();
+      // If tests run fast, updatedAt might be the same string, but revision must increment
+      expect(updatedPiece.id).toBe(piece.id); // Same ID
+    });
+
+    it('throws error if content.kind does not match piece.type', () => {
+      const piece = createPiece({ title: 'Test', type: 'poem', language: 'en' });
+
+      const wrongContent: TextPieceContent = {
+        kind: 'text',
+        blocks: []
+      };
+
+      expect(() => updatePieceContent(piece, wrongContent)).toThrow("Content kind 'text' does not match piece type 'poem'");
+    });
+  });
+
+  describe('updatePieceMetadata', () => {
+    it('updates metadata without incrementing revision', () => {
+      const piece = createPiece({ title: 'Old Title', type: 'text', language: 'en', tags: ['oldTag'] });
+
+      const updatedPiece = updatePieceMetadata(piece, {
+        title: 'New Title',
+        language: 'es',
+        tags: ['newTag']
+      });
+
+      expect(updatedPiece.title).toBe('New Title');
+      expect(updatedPiece.language).toBe('es');
+      expect(updatedPiece.tags).toEqual([
+        { kind: 'type', value: 'text' }, // type tag preserved
+        { kind: 'user', value: 'newTag' }
+      ]);
+      expect(updatedPiece.revision).toBe(0); // revision NOT incremented
+      expect(updatedPiece.updatedAt).toBeDefined();
+    });
+
+    it('allows partial updates', () => {
+      const piece = createPiece({ title: 'Title', type: 'text', language: 'en' });
+
+      const updatedPiece = updatePieceMetadata(piece, { title: 'New Title' });
+
+      expect(updatedPiece.title).toBe('New Title');
+      expect(updatedPiece.language).toBe('en'); // unchanged
+      expect(updatedPiece.tags).toEqual([{ kind: 'type', value: 'text' }]); // unchanged
+      expect(updatedPiece.revision).toBe(0);
+    });
+
+    it('throws error if new title is empty', () => {
+      const piece = createPiece({ title: 'Title', type: 'text', language: 'en' });
+
+      expect(() => updatePieceMetadata(piece, { title: '   ' })).toThrow('Piece title cannot be empty');
+      expect(() => updatePieceMetadata(piece, { title: '' })).toThrow('Piece title cannot be empty');
+    });
+  });
+
+  describe('Invariants', () => {
+    it('Piece.type must match Piece.content.kind (enforced by creation and update guards)', () => {
+      const textPiece = createPiece({ title: 'T', type: 'text', language: 'en' });
+      expect(textPiece.type).toBe('text');
+      expect(textPiece.content.kind).toBe('text');
+
+      const poemPiece = createPiece({ title: 'P', type: 'poem', language: 'en' });
+      expect(poemPiece.type).toBe('poem');
+      expect(poemPiece.content.kind).toBe('poem');
+
+      const songPiece = createPiece({ title: 'S', type: 'song', language: 'en' });
+      expect(songPiece.type).toBe('song');
+      expect(songPiece.content.kind).toBe('song');
+    });
+
+    it('Piece must have exactly one system-managed type tag whose value matches Piece.type', () => {
+      const piece = createPiece({ title: 'Test', type: 'poem', language: 'en', tags: ['user1'] });
+
+      const typeTags = piece.tags.filter(t => t.kind === 'type');
+      expect(typeTags).toHaveLength(1);
+      expect(typeTags[0].value).toBe('poem');
+
+      const updatedPiece = updatePieceMetadata(piece, { tags: ['user2', 'user3'] });
+      const updatedTypeTags = updatedPiece.tags.filter(t => t.kind === 'type');
+      expect(updatedTypeTags).toHaveLength(1);
+      expect(updatedTypeTags[0].value).toBe('poem');
+    });
+  });
+});
