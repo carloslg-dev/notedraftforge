@@ -4,10 +4,6 @@ import { useAppError } from '@/ui/hooks/use-app-error';
 export function WorkListPage() {
   const { handleError } = useAppError();
 
-  const TriggerCrash = () => {
-    throw new Error('Simulated react render error');
-  };
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8">
       <h1 className="text-2xl font-semibold tracking-tight">My Works</h1>
