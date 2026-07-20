@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createChord, deriveChordDisplay } from '../factories/chord';
+import { SongCell } from '../types/piece';
 
 describe('Chord Domain Logic', () => {
   describe('createChord', () => {
@@ -81,6 +82,22 @@ describe('Chord Domain Logic', () => {
       expect(deriveChordDisplay({ root: 'A', modifiers: ['minor'] })).toBe('Am');
       expect(deriveChordDisplay({ root: 'E', modifiers: ['major', 'seventh'] })).toBe('EM7');
       expect(deriveChordDisplay({ root: 'G♯', modifiers: ['sharp', 'minor', 'seventh'] })).toBe('G♯♯m7');
+    });
+  });
+  describe('Invariants', () => {
+    it('Invariant 11: chord and meter values belong to SongCell in song content', () => {
+      // In the domain types, chord and meter are optional properties on SongCell.
+      // This test acts as a structural validation that these types exist where specified.
+      const cell: SongCell = {
+        id: 'cell-1',
+        text: 'lyrics',
+        chord: createChord('C', ['major']),
+        meter: '4/4'
+      };
+
+      expect(cell.chord).toBeDefined();
+      expect(cell.chord?.root).toBe('C');
+      expect(cell.meter).toBe('4/4');
     });
   });
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createPiece, updatePieceContent, updatePieceMetadata } from '../factories/piece';
-import { TextPieceContent, PoemPieceContent } from '../types/piece';
+import { TextPieceContent, PoemPieceContent, PieceContent, PieceSnapshot } from '../types/piece';
 
 describe('Piece Entity', () => {
   describe('createPiece', () => {
@@ -140,31 +140,77 @@ describe('Piece Entity', () => {
   });
 
   describe('Invariants', () => {
-    it('Piece.type must match Piece.content.kind (enforced by creation and update guards)', () => {
+    it('Invariant 1: A Piece has structured PieceContent by discriminator (text, poem, song)', () => {
       const textPiece = createPiece({ title: 'T', type: 'text', language: 'en' });
-      expect(textPiece.type).toBe('text');
-      expect(textPiece.content.kind).toBe('text');
+      expect(textPiece.content).toHaveProperty('kind', 'text');
+      expect(textPiece.content).toHaveProperty('blocks');
 
       const poemPiece = createPiece({ title: 'P', type: 'poem', language: 'en' });
-      expect(poemPiece.type).toBe('poem');
-      expect(poemPiece.content.kind).toBe('poem');
+      expect(poemPiece.content).toHaveProperty('kind', 'poem');
+      expect(poemPiece.content).toHaveProperty('blocks');
 
       const songPiece = createPiece({ title: 'S', type: 'song', language: 'en' });
-      expect(songPiece.type).toBe('song');
-      expect(songPiece.content.kind).toBe('song');
+      expect(songPiece.content).toHaveProperty('kind', 'song');
+      expect(songPiece.content).toHaveProperty('sections');
     });
 
-    it('Piece must have exactly one system-managed type tag whose value matches Piece.type', () => {
-      const piece = createPiece({ title: 'Test', type: 'poem', language: 'en', tags: ['user1'] });
+    it('Invariant 2: Piece.type must match Piece.content.kind', () => {
+      const piece = createPiece({ title: 'T', type: 'text', language: 'en' });
+      expect(piece.type).toBe(piece.content.kind);
+
+      const invalidContent: PieceContent = { kind: 'poem', blocks: [] };
+      expect(() => updatePieceContent(piece, invalidContent)).toThrow("Content kind 'poem' does not match piece type 'text'");
+    });
+
+    it('Invariant 3: A Piece must have exactly one system-managed type tag whose value matches Piece.type', () => {
+      const piece = createPiece({ title: 'Test', type: 'poem', language: 'en', tags: ['user1', 'poem'] });
 
       const typeTags = piece.tags.filter(t => t.kind === 'type');
       expect(typeTags).toHaveLength(1);
       expect(typeTags[0].value).toBe('poem');
 
-      const updatedPiece = updatePieceMetadata(piece, { tags: ['user2', 'user3'] });
+      const updatedPiece = updatePieceMetadata(piece, { tags: ['user2'] });
       const updatedTypeTags = updatedPiece.tags.filter(t => t.kind === 'type');
       expect(updatedTypeTags).toHaveLength(1);
       expect(updatedTypeTags[0].value).toBe('poem');
+    });
+
+    it('Invariant 4 & 5: A Piece has zero or more Annotation entities, and zero is valid', () => {
+      const piece = createPiece({ title: 'T', type: 'text', language: 'en' });
+      // The Piece domain object does not hold an annotations array,
+      // confirming annotations are managed externally and a zero-annotation piece is valid.
+      expect(piece).not.toHaveProperty('annotations');
+    });
+
+    it('Invariant 9 & 13: PieceSnapshot contains layer visibility and sourceRevision matching Piece.revision', () => {
+      const piece = createPiece({ title: 'T', type: 'text', language: 'en' });
+
+      const snapshot: PieceSnapshot = {
+        pieceId: piece.id,
+        html: '<div></div>',
+        layerVisibility: {
+          chord: true,
+          meter: false,
+          breath: false,
+          intention: false,
+          comments: false
+        },
+        sourceRevision: piece.revision,
+        generatedAt: new Date().toISOString()
+      };
+
+      // Ensure snapshot revision strictly matches piece revision
+      expect(snapshot.sourceRevision).toStrictEqual(piece.revision);
+
+      const updatedPiece = updatePieceContent(piece, { kind: 'text', blocks: [] });
+      expect(snapshot.sourceRevision).not.toStrictEqual(updatedPiece.revision); // Stale snapshot
+    });
+
+    it('Invariant 10: Markdown is an import/export concern only, never the domain source of truth', () => {
+      const piece = createPiece({ title: 'T', type: 'text', language: 'en' });
+      // The content structure must be our explicit objects (blocks/runs), not a string of markdown
+      expect(typeof piece.content).not.toBe('string');
+      expect(piece.content).toHaveProperty('blocks');
     });
   });
 });
