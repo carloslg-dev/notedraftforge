@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createPiece, updatePieceContent, updatePieceMetadata } from '../factories/piece';
-import { TextPieceContent, PoemPieceContent, PieceContent, PieceSnapshot } from '../types/piece';
+import { TextPieceContent, PoemPieceContent, PieceContent } from '../types/piece';
+import { PieceSnapshot } from '../types/annotation';
 
 describe('Piece Entity', () => {
   describe('createPiece', () => {
