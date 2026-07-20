@@ -45,6 +45,7 @@ function validateAnnotationContent(kind: AnnotationKind, content: AnnotationCont
     }
     return sanitized;
   }
+  throw new Error(`Invalid kind: ${kind}`);
 }
 
 export function createAnnotation(input: CreateAnnotationInput): Annotation {
