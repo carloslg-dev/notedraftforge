@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mocked } from 'vitest';
 import { GetPieceUseCase } from './get-piece.use-case';
 import { PieceRepository } from '../../ports';
 import { Piece } from '../../domain/types/';
 
 describe('GetPieceUseCase', () => {
-  let mockRepository: vi.Mocked<PieceRepository>;
+  let mockRepository: Mocked<PieceRepository>;
   let useCase: GetPieceUseCase;
 
   beforeEach(() => {
