@@ -1,19 +1,18 @@
 import type { PieceSnapshot } from '../../../domain/types/';
 import type { SnapshotRepository } from '../../../ports';
+import { db } from './db';
 
 export class DexieSnapshotRepository implements SnapshotRepository {
   async getByPieceId(pieceId: string): Promise<PieceSnapshot | null> {
-    void pieceId;
-    return Promise.reject(new Error('Not implemented'));
+    const snapshot = await db.snapshots.get(pieceId);
+    return snapshot ?? null;
   }
 
   async save(snapshot: PieceSnapshot): Promise<void> {
-    void snapshot;
-    return Promise.reject(new Error('Not implemented'));
+    await db.snapshots.put(snapshot);
   }
 
   async deleteByPieceId(pieceId: string): Promise<void> {
-    void pieceId;
-    return Promise.reject(new Error('Not implemented'));
+    await db.snapshots.delete(pieceId);
   }
 }
