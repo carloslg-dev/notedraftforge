@@ -5,6 +5,8 @@ import { Badge } from '@/ui/components/ui/badge';
 import { useAppError } from '@/ui/hooks/use-app-error';
 import { useWorkList } from './use-work-list';
 import { computeVisiblePieces, computeAvailableUserTags, computeFilteredPieces } from './filter-logic';
+import { useMediaQuery } from '@/ui/hooks/use-media-query';
+import { TagSearchOverlay } from './components/TagSearchOverlay';
 
 export function WorkListPage() {
   const { handleError } = useAppError();
@@ -21,6 +23,11 @@ export function WorkListPage() {
   }, [pieces]);
 
   const availableUserTags = useMemo(() => computeAvailableUserTags(visiblePieces), [visiblePieces]);
+
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const visibleLimit = isDesktop ? 4 : 2;
+  const visibleTags = availableUserTags.slice(0, visibleLimit);
+  const overflowTags = availableUserTags.slice(visibleLimit);
 
   const filteredPieces = useMemo(() => computeFilteredPieces(visiblePieces, activeTypeFilters, activeUserFilters), [visiblePieces, activeTypeFilters, activeUserFilters]);
 
@@ -104,16 +111,24 @@ export function WorkListPage() {
 
           {availableUserTags.length > 0 && (
             <div className="flex gap-2 items-center">
-              {availableUserTags.slice(0, 4).map((tag, idx) => (
+              {visibleTags.map((tag) => (
                 <Badge
                   key={tag}
                   variant={activeUserFilters.includes(tag) ? "default" : "outline"}
-                  className={`cursor-pointer hover:bg-primary/80 ${idx >= 2 ? 'hidden md:inline-flex' : ''}`}
+                  className="cursor-pointer hover:bg-primary/80"
                   onClick={() => toggleUserFilter(tag)}
                 >
                   {tag}
                 </Badge>
               ))}
+              {overflowTags.length > 0 && (
+                <TagSearchOverlay
+                  availableTags={overflowTags}
+                  activeTags={activeUserFilters}
+                  onSelectTag={toggleUserFilter}
+                  isDesktop={isDesktop}
+                />
+              )}
             </div>
           )}
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Piece, PieceType } from '../../../../core/domain/types';
+import type { Piece, PieceType } from '../../../../core/domain/types/';
 import { computeVisiblePieces, computeAvailableUserTags, computeFilteredPieces } from '../filter-logic';
 
 describe('Work List Filtering Logic', () => {
@@ -38,7 +38,7 @@ describe('Work List Filtering Logic', () => {
     const visible = computeVisiblePieces(pieces);
     const textOnly = computeFilteredPieces(visible, ['text'], []);
     expect(textOnly.length).toBe(2);
-    expect(textOnly.every(p => p.tags.find(t => t.kind === 'type')?.value === 'text')).toBe(true);
+    expect(textOnly.every(p => p.tags!.find(t => t.kind === 'type')?.value === 'text')).toBe(true);
   });
 
   it('filters by user tags AND logic (case insensitive)', () => {

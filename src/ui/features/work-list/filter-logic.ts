@@ -1,4 +1,4 @@
-import type { Piece } from '../../../core/domain/types';
+import type { Piece } from '../../../core/domain/types/';
 
 export function computeVisiblePieces(pieces: Piece[]): Piece[] {
   return pieces.filter(piece => {
