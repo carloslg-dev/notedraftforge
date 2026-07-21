@@ -12,6 +12,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.20",
+    "@radix-ui/react-popover": "^1.1.20",
     "@radix-ui/react-slot": "^1.1.1",
     "@tiptap/core": "^2.10.3",
     "@tiptap/extension-bold": "^2.10.3",
