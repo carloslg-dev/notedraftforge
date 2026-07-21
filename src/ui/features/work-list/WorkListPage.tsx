@@ -4,6 +4,7 @@ import { Button } from '@/ui/components/ui/button';
 import { Badge } from '@/ui/components/ui/badge';
 import { useAppError } from '@/ui/hooks/use-app-error';
 import { useWorkList } from './use-work-list';
+import { useExportBackup } from './use-export-backup';
 import { computeVisiblePieces, computeAvailableUserTags, computeFilteredPieces } from './filter-logic';
 import { useMediaQuery } from '@/ui/hooks/use-media-query';
 import { TagSearchOverlay } from './components/TagSearchOverlay';
@@ -11,6 +12,7 @@ import { TagSearchOverlay } from './components/TagSearchOverlay';
 export function WorkListPage() {
   const { handleError } = useAppError();
   const { pieces, loading, error } = useWorkList();
+  const { exportBackup, isExporting } = useExportBackup();
 
   const MVP_VISIBLE_TYPES = ['text', 'poem'];
 
@@ -80,6 +82,9 @@ export function WorkListPage() {
         <div className="flex gap-4">
           <Button>New Work</Button>
           <Button variant="outline">Restore Backup</Button>
+          <Button variant="outline" onClick={exportBackup} disabled={isExporting}>
+            {isExporting ? 'Exporting...' : 'Export Backup'}
+          </Button>
         </div>
       </main>
     );
@@ -90,6 +95,9 @@ export function WorkListPage() {
       <div className="w-full flex justify-between items-center">
         <h1 className="text-2xl font-semibold tracking-tight">My Works</h1>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={exportBackup} disabled={isExporting}>
+            {isExporting ? 'Exporting...' : 'Export Backup'}
+          </Button>
           <Button>New Work</Button>
         </div>
       </div>
