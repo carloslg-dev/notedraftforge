@@ -1,8 +1,7 @@
 import { ChordContent, MusicalModifier, MusicalRoot } from '../types/piece';
 
 export function deriveChordDisplay(chord: { root: MusicalRoot; modifiers: MusicalModifier[] }): string {
-  // Replace ASCII # and b in the root with their correct unicode counterparts for display
-  let display = chord.root.replace(/#/g, '♯').replace(/b/g, '♭');
+  let display = chord.root;
 
   for (const mod of chord.modifiers) {
     switch (mod) {
@@ -33,44 +32,54 @@ export function createChord(root: string, modifiers: string[] = []): ChordConten
     throw new Error(`Invalid root note: ${root}. Must be A-G with optional accidental.`);
   }
 
-  // Normalize accidentals
-  const normalizedRoot = root.replace(/#/g, '♯').replace(/b/g, '♭');
+  const baseNote = root[0] as MusicalRoot;
+  const accidental = root[1];
+  const rootAlteration: MusicalModifier | null = accidental
+    ? (accidental === '#' || accidental === '♯' ? 'sharp' : 'flat')
+    : null;
 
-  // Group modifiers for validation
-  const validModifiers: MusicalModifier[] = [];
+  const inputAlterations = modifiers.filter(m => m === 'sharp' || m === 'flat') as MusicalModifier[];
+  const allAlterations: MusicalModifier[] = [];
+  if (rootAlteration) {
+    allAlterations.push(rootAlteration);
+  }
+  allAlterations.push(...inputAlterations);
 
-  const alterations = modifiers.filter(m => m === 'sharp' || m === 'flat');
-  if (alterations.length > 1) {
+  if (allAlterations.length > 1) {
     throw new Error('A chord cannot have multiple alterations (sharp/flat are mutually exclusive).');
   }
 
-  const modes = modifiers.filter(m => m === 'minor' || m === 'major');
+  const modes = modifiers.filter(m => m === 'minor' || m === 'major') as MusicalModifier[];
   if (modes.length > 1) {
     throw new Error('A chord cannot have multiple modes (minor/major are mutually exclusive).');
   }
 
-  const extensions = modifiers.filter(m => m === 'seventh');
+  const extensions = modifiers.filter(m => m === 'seventh') as MusicalModifier[];
   if (extensions.length > 1) {
     throw new Error('A chord cannot have multiple identical extensions.');
   }
 
-  // Ensure no invalid modifiers are passed
   const allowedMods = ['sharp', 'flat', 'minor', 'major', 'seventh'];
   const invalidMods = modifiers.filter(m => !allowedMods.includes(m));
   if (invalidMods.length > 0) {
     throw new Error(`Invalid modifiers found: ${invalidMods.join(', ')}`);
   }
 
-  // Modifier order: alteration, mode, extension
-  if (alterations.length > 0) validModifiers.push(alterations[0] as MusicalModifier);
-  if (modes.length > 0) validModifiers.push(modes[0] as MusicalModifier);
-  if (extensions.length > 0) validModifiers.push(extensions[0] as MusicalModifier);
-
-  const typedRoot = normalizedRoot as MusicalRoot;
+  const finalModifiers: MusicalModifier[] = [];
+  if (allAlterations.length > 0) {
+    finalModifiers.push(allAlterations[0]);
+  }
+  if (modes.length > 0) {
+    finalModifiers.push(modes[0]);
+  }
+  if (extensions.length > 0) {
+    finalModifiers.push(extensions[0]);
+  }
 
   return {
-    root: typedRoot,
-    modifiers: validModifiers,
-    display: deriveChordDisplay({ root: typedRoot, modifiers: validModifiers }),
+    root: baseNote,
+    modifiers: finalModifiers,
+    display: deriveChordDisplay({ root: baseNote, modifiers: finalModifiers }),
   };
 }
+

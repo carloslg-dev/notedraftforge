@@ -63,9 +63,7 @@ export interface ChordContent {
   display: string;                // derived and stored, e.g. "C#m7"
 }
 
-export type BaseNote = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
-export type Accidental = '♭' | '♯' | '#' | 'b';
-export type MusicalRoot = BaseNote | `${BaseNote}${Accidental}`;
+export type MusicalRoot = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 
 // Modifier order is always: [alteration?, mode?, extension?]
 // alteration: sharp | flat (mutually exclusive)
