@@ -94,7 +94,7 @@ No annotation management or snapshot generation here — only the mode container
 | Mode state (Zustand) | **Done (#23)** | Visualization / editing state, transitions, restrictions per mode |
 | Work view component (shell) | **Done (#24)** | Container that switches between visualization and editing sub-views |
 | Editing mode — Tiptap editor | **Done (#25)** | Tiptap OSS adapter, structured content mapping, autosave debounce 800ms (D-15) |
-| Content autosave use case | **Open (#26)** | Debounce, persist `Piece.content`, increment `revision`, `updatedAt` update |
+| Content autosave use case | **Done (#26)** | Debounce, persist `Piece.content`, increment `revision`, `updatedAt` update |
 | Selection toolbar component | **Open (#27)** | Contextual toolbar above selection; edit mode format actions (`bold`, `italic`, `underline`) / visualization mode annotation kinds; frosted white theme (EM-REQ-05, D-24) |
 | Selection Refinement modal | **Open (#28)** | Char-by-char boundary adjuster, 8-char context window, nudge ←→, confirm (EM-REQ-06) |
 | Language preference UI | **Done (#29)** | ES / EN segmented control in app header; persisted in UI state; does not infer or mutate `Piece.language` |
