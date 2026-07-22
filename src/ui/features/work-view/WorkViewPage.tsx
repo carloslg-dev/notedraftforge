@@ -10,6 +10,59 @@ import { AutosavePieceUseCase } from '../../../core/application/piece-management
 import { DexiePieceRepository } from '../../../core/infrastructure/adapters/dexie/piece-repository';
 import { toast } from 'sonner';
 
+function renderBaseContent(content: PieceContent) {
+  if (content.kind === 'song') {
+    return <p className="text-[#80868b]">Song visualization is not supported in MVP.</p>;
+  }
+
+  return (
+    <div className="space-y-4 font-serif leading-relaxed text-[#202124] select-text">
+      {content.blocks.map((block) => {
+        const renderedRuns = block.runs.map((run) => {
+          let classes = '';
+          if (run.marks?.includes('bold')) classes += ' font-bold';
+          if (run.marks?.includes('italic')) classes += ' italic';
+          if (run.marks?.includes('underline')) classes += ' underline';
+
+          return (
+            <span key={run.id} className={classes}>
+              {run.text}
+            </span>
+          );
+        });
+
+        switch (block.kind) {
+          case 'heading':
+            return (
+              <h2 key={block.id} className="text-xl font-bold tracking-tight text-[#202124] mt-6 mb-2">
+                {renderedRuns}
+              </h2>
+            );
+          case 'quote':
+            return (
+              <blockquote key={block.id} className="border-l-4 border-[#dadce0] pl-4 italic text-[#5f6368] my-4">
+                {renderedRuns}
+              </blockquote>
+            );
+          case 'line':
+            return (
+              <div key={block.id} className="min-h-[1.5rem] select-text">
+                {renderedRuns.length > 0 ? renderedRuns : <br />}
+              </div>
+            );
+          case 'paragraph':
+          default:
+            return (
+              <p key={block.id} className="min-h-[1.5rem] select-text">
+                {renderedRuns.length > 0 ? renderedRuns : <br />}
+              </p>
+            );
+        }
+      })}
+    </div>
+  );
+}
+
 export function WorkViewPage() {
   const { pieceId } = useParams<{ pieceId: string }>();
   const { piece, loading, error, refresh } = useWorkView(pieceId);
@@ -141,13 +194,12 @@ export function WorkViewPage() {
 
       <div className="flex-1 bg-white rounded-xl border border-[#e8eaed] p-6 min-h-[400px] shadow-sm">
         {activeMode === 'visualization' ? (
-          <div className="visualization-view">
+          <div className="visualization-view select-text">
             <h2 className="text-lg font-medium mb-4 text-[#80868b] uppercase text-xs tracking-wider">
-              {t('readingPreview')} (Read-only)
+              {t('readingPreview')}
             </h2>
-            <div className="prose dark:prose-invert">
-              <p>This is a placeholder for the read-only visualization view. (E-06)</p>
-              <p>Current piece ID: {piece.id}</p>
+            <div className="prose dark:prose-invert select-text">
+              {renderBaseContent(piece.content)}
             </div>
           </div>
         ) : (

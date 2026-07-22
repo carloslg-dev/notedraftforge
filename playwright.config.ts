@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5173/notedraftforge/',
+    baseURL: 'http://localhost:4173/notedraftforge/',
     trace: 'on-first-retry',
   },
   projects: [
@@ -18,9 +18,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173/notedraftforge/',
-    reuseExistingServer: true,
+    command: 'npm run preview',
+    url: 'http://localhost:4173/notedraftforge/',
+    reuseExistingServer: false,
     timeout: 15 * 1000,
   },
 });

@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Piece Lifecycle E2E', () => {
   test('creates a piece, views it, and edits its content', async ({ page }) => {
+    // Fail the test if there are any uncaught exceptions or runtime errors in the browser console
+    page.on('pageerror', (exception) => {
+      throw new Error(`Uncaught browser exception: ${exception.stack || exception.message}`);
+    });
+
     // 1. Visit home page
     await page.goto('/');
 
@@ -46,6 +51,14 @@ test.describe('Piece Lifecycle E2E', () => {
     // Wait 1.5 seconds to trigger the 800ms debounce autosave and let state refresh
     await page.waitForTimeout(1500);
 
+    // Click "Finish Editing" or "Terminar Edición" to switch back to visualization mode
+    const finishBtn = page.locator('button:has-text("Terminar Edición"), button:has-text("Finish Editing")').first();
+    await finishBtn.click();
+
+    // Verify redirect/transition to visualization mode is finished and content is visible
+    await expect(page.locator('.visualization-view')).toBeVisible();
+    await expect(page.locator('.visualization-view')).toContainText('Hello, this is persistent E2E text!');
+
     // 6. Go back to main list
     const backBtn = page.locator('button:has-text("Obras"), button:has-text("Works")').first();
     await backBtn.click();
@@ -53,7 +66,12 @@ test.describe('Piece Lifecycle E2E', () => {
     // Verify redirect to list
     await expect(page).toHaveURL(/\/$/);
 
-    // 7. Verify the new piece appears in the list
-    await expect(page.locator('button:has-text("E2E Test Piece"), a:has-text("E2E Test Piece")').first()).toBeVisible();
+    // 7. Verify the new piece appears in the list and preview pane displays the typed text
+    const pieceListItem = page.locator('button:has-text("E2E Test Piece"), a:has-text("E2E Test Piece")').first();
+    await expect(pieceListItem).toBeVisible();
+    await pieceListItem.click();
+
+    // Verify the preview pane (on desktop) shows the edited text
+    await expect(page.locator('main')).toContainText('Hello, this is persistent E2E text!');
   });
 });
