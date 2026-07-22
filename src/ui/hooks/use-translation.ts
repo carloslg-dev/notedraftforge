@@ -45,7 +45,15 @@ const translations = {
     restoreConfirm: 'Confirm Restore',
     invalidJson: 'Selected file is not valid JSON.',
     emptyTags: 'No tags available.',
-    pieceCreationNotif: 'New piece creation will be fully configured in the upcoming IndexedDB persistence integration epic (E-07/#73).'
+    pieceCreationNotif: 'New piece creation will be fully configured in the upcoming IndexedDB persistence integration epic (E-07/#73).',
+    createPieceTitle: 'Create New Work',
+    titleLabel: 'Title',
+    typeLabel: 'Type',
+    languageLabel: 'Content Language',
+    createButton: 'Create',
+    poemOption: 'Poem',
+    textOption: 'Free Text',
+    pieceTitlePlaceholder: 'Enter work title...'
   },
   es: {
     works: 'Obras',
@@ -91,7 +99,15 @@ const translations = {
     restoreConfirm: 'Confirmar Restauración',
     invalidJson: 'El archivo seleccionado no es un JSON válido.',
     emptyTags: 'No hay etiquetas disponibles.',
-    pieceCreationNotif: 'La creación de nuevas obras se configurará por completo en la próxima épica de integración de persistencia con IndexedDB (E-07/#73).'
+    pieceCreationNotif: 'La creación de nuevas obras se configurará por completo en la próxima épica de integración de persistencia con IndexedDB (E-07/#73).',
+    createPieceTitle: 'Crear Nueva Obra',
+    titleLabel: 'Título',
+    typeLabel: 'Tipo',
+    languageLabel: 'Idioma del Contenido',
+    createButton: 'Crear',
+    poemOption: 'Poema',
+    textOption: 'Texto Libre',
+    pieceTitlePlaceholder: 'Introduce el título de la obra...'
   }
 };
 

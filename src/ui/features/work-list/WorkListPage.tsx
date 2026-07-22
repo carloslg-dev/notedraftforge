@@ -6,11 +6,11 @@ import { useExportBackup } from './use-export-backup';
 import { computeVisiblePieces, computeAvailableUserTags, computeFilteredPieces } from './filter-logic';
 import { useMediaQuery } from '@/ui/hooks/use-media-query';
 import { RestoreBackupModal } from './components/RestoreBackupModal';
+import { CreatePieceModal } from './components/CreatePieceModal';
 import { WorkListDesktop } from './components/WorkListDesktop';
 import { WorkListMobile } from './components/WorkListMobile';
 import { useUIStore } from '@/ui/state/ui-store';
 import { useTranslation } from '@/ui/hooks/use-translation';
-import { toast } from 'sonner';
 import type { Piece } from '@/core/domain/types/';
 
 export function WorkListPage() {
@@ -21,6 +21,7 @@ export function WorkListPage() {
   const { enterEditing } = useUIStore();
   const { t, uiLanguage, setUILanguage } = useTranslation();
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
 
   const [activeTypeFilters, setActiveTypeFilters] = useState<string[]>([]);
@@ -71,7 +72,14 @@ export function WorkListPage() {
   };
 
   const handleNewWorkClick = () => {
-    toast.info(t('pieceCreationNotif'));
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCreateSuccess = (pieceId: string) => {
+    refresh();
+    setSelectedPieceId(pieceId);
+    enterEditing(pieceId);
+    navigate(`/work/${pieceId}`);
   };
 
   const getPiecePreviewText = (piece: Piece) => {
@@ -151,6 +159,12 @@ export function WorkListPage() {
         isOpen={isRestoreModalOpen}
         onClose={() => setIsRestoreModalOpen(false)}
         onSuccess={refresh}
+      />
+
+      <CreatePieceModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
       />
     </>
   );
