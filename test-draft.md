@@ -1,4 +1,0 @@
-To satisfy "Atomic replace-all", if we just delete one by one and it fails midway, it's not atomic.
-If we add an explicit transaction port, it will be complex.
-We can instead do a "clear all and save all" port method in Dexie, or just do an `importData()` port on `PieceRepository`?
-Wait, since Dexie adapters are currently just throwing "Not Implemented" in the main branch (as seen in `src/core/infrastructure/adapters/dexie/piece-repository.ts`), we only need to write the application logic and mock it in tests. The implementation in the Dexie adapters can just be the definition. But wait, `useExportBackup` creates `DexiePieceRepository`, meaning it's used. Maybe there is a branch or we just write what's there? Wait, `piece-repository.ts` in Dexie adapter was empty. Let's check `src/core/infrastructure/adapters/dexie/piece-repository.ts` again.
