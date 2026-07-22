@@ -3,7 +3,8 @@ import { Button } from '@/ui/components/ui/button';
 import { useWorkView } from './use-work-view';
 import { useUIStore } from '../../state/ui-store';
 import { useTranslation } from '@/ui/hooks/use-translation';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { Lightbulb, MessageSquare, Wind } from 'lucide-react';
 import { TiptapEditor } from '../../../core/infrastructure/editor/components/TiptapEditor';
 import { PieceContent } from '../../../core/domain/types/';
 import { AutosavePieceUseCase } from '../../../core/application/piece-management/autosave-piece.use-case';
@@ -70,6 +71,47 @@ export function WorkViewPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const [selectionRect, setSelectionRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [selectedText, setSelectedText] = useState('');
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      if (activeMode !== 'visualization') {
+        setSelectionRect(null);
+        setSelectedText('');
+        return;
+      }
+
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+        setSelectionRect(null);
+        setSelectedText('');
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const container = document.querySelector('.visualization-view');
+      if (!container || !container.contains(range.commonAncestorContainer)) {
+        setSelectionRect(null);
+        setSelectedText('');
+        return;
+      }
+
+      const rect = range.getBoundingClientRect();
+      setSelectionRect({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+      });
+      setSelectedText(selection.toString().trim());
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, [activeMode]);
+
   const pendingContentRef = useRef<PieceContent | null>(null);
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -131,6 +173,14 @@ export function WorkViewPage() {
         triggerAutosave(content);
       }
     }, 800);
+  };
+
+  const handleAnnotationClick = (kind: string) => {
+    toast.info(`Annotation: ${kind} for "${selectedText}"`);
+  };
+
+  const handleRefineClick = () => {
+    toast.info(`${t('refine')}: "${selectedText}"`);
   };
 
   const handleBackClick = async (e: React.MouseEvent) => {
@@ -218,6 +268,60 @@ export function WorkViewPage() {
           </div>
         )}
       </div>
+
+      {selectionRect && selectedText && (
+        <div
+          className="fixed z-50 flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md -translate-x-1/2 -translate-y-full select-none"
+          style={{
+            top: `${Math.max(10, selectionRect.top - 12)}px`,
+            left: `${selectionRect.left + selectionRect.width / 2}px`,
+          }}
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => handleAnnotationClick('intent')}
+            className="h-8 px-2 flex items-center gap-1.5 cursor-pointer text-[#5f6368] hover:text-[#202124] hover:bg-muted"
+            title={t('intent')}
+          >
+            <Lightbulb className="h-3.5 w-3.5 text-[#e37400]" />
+            <span className="text-[11px] font-medium">{t('intent')}</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => handleAnnotationClick('comment')}
+            className="h-8 px-2 flex items-center gap-1.5 cursor-pointer text-[#5f6368] hover:text-[#202124] hover:bg-muted"
+            title={t('comment')}
+          >
+            <MessageSquare className="h-3.5 w-3.5 text-[#1a73e8]" />
+            <span className="text-[11px] font-medium">{t('comment')}</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => handleAnnotationClick('breath')}
+            className="h-8 px-2 flex items-center gap-1.5 cursor-pointer text-[#5f6368] hover:text-[#202124] hover:bg-muted"
+            title={t('breath')}
+          >
+            <Wind className="h-3.5 w-3.5 text-[#137333]" />
+            <span className="text-[11px] font-medium">{t('breath')}</span>
+          </Button>
+          <div className="h-4 w-[1px] bg-[#dadce0] mx-1" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleRefineClick}
+            className="h-8 px-2.5 py-0 text-[11px] font-semibold tracking-tight text-[#1a73e8] hover:bg-[#e8f0fe] cursor-pointer"
+          >
+            {t('refine')}
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

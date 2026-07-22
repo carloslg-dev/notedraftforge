@@ -48,6 +48,15 @@ test.describe('Piece Lifecycle E2E', () => {
     await editor.click();
     await page.keyboard.type('Hello, this is persistent E2E text!');
 
+    // Select text in editor to trigger formatting BubbleMenu
+    await editor.dblclick();
+
+    // Verify editing mode BubbleMenu shows formatting options + Refine
+    await expect(page.locator('button[title="Bold"]')).toBeVisible();
+    await expect(page.locator('button[title="Italic"]')).toBeVisible();
+    await expect(page.locator('button[title="Underline"]')).toBeVisible();
+    await expect(page.locator('button:has-text("Ajustar"), button:has-text("Refine")')).toBeVisible();
+
     // Wait 1.5 seconds to trigger the 800ms debounce autosave and let state refresh
     await page.waitForTimeout(1500);
 
@@ -58,6 +67,16 @@ test.describe('Piece Lifecycle E2E', () => {
     // Verify redirect/transition to visualization mode is finished and content is visible
     await expect(page.locator('.visualization-view')).toBeVisible();
     await expect(page.locator('.visualization-view')).toContainText('Hello, this is persistent E2E text!');
+
+    // Double click word in visualization mode to trigger annotation toolbar
+    const vizParagraph = page.locator('.visualization-view span').first();
+    await vizParagraph.dblclick();
+
+    // Verify visualization selection toolbar is visible with annotation kinds + Refine
+    await expect(page.locator('button[title="Intención"], button[title="Intent"]')).toBeVisible();
+    await expect(page.locator('button[title="Comentario"], button[title="Comment"]')).toBeVisible();
+    await expect(page.locator('button[title="Respiración"], button[title="Breath"]')).toBeVisible();
+    await expect(page.locator('button:has-text("Ajustar"), button:has-text("Refine")').last()).toBeVisible();
 
     // 6. Go back to main list
     const backBtn = page.locator('button:has-text("Obras"), button:has-text("Works")').first();

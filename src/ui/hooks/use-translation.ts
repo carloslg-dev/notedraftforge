@@ -53,7 +53,11 @@ const translations = {
     createButton: 'Create',
     poemOption: 'Poem',
     textOption: 'Free Text',
-    pieceTitlePlaceholder: 'Enter work title...'
+    pieceTitlePlaceholder: 'Enter work title...',
+    refine: 'Refine',
+    intent: 'Intent',
+    comment: 'Comment',
+    breath: 'Breath'
   },
   es: {
     works: 'Obras',
@@ -107,7 +111,11 @@ const translations = {
     createButton: 'Crear',
     poemOption: 'Poema',
     textOption: 'Texto Libre',
-    pieceTitlePlaceholder: 'Introduce el título de la obra...'
+    pieceTitlePlaceholder: 'Introduce el título de la obra...',
+    refine: 'Ajustar',
+    intent: 'Intención',
+    comment: 'Comentario',
+    breath: 'Respiración'
   }
 };
 
