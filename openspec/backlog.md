@@ -97,7 +97,7 @@ No annotation management or snapshot generation here — only the mode container
 | Content autosave use case | **Open (#26)** | Debounce, persist `Piece.content`, increment `revision`, `updatedAt` update |
 | Selection toolbar component | **Open (#27)** | Contextual toolbar above selection; edit mode format actions (`bold`, `italic`, `underline`) / visualization mode annotation kinds; frosted white theme (EM-REQ-05, D-24) |
 | Selection Refinement modal | **Open (#28)** | Char-by-char boundary adjuster, 8-char context window, nudge ←→, confirm (EM-REQ-06) |
-| Language preference UI | **Open (#29)** | ES / EN segmented control in app header; persisted in UI state; does not infer or mutate `Piece.language` |
+| Language preference UI | **Done (#29)** | ES / EN segmented control in app header; persisted in UI state; does not infer or mutate `Piece.language` |
 | Settings placeholder | **Open (#30)** | Settings button in app header; no-op in MVP; reserved space for future settings |
 | Double-action protection | **Open (#31)** | `isProcessing` flag or debounce on all action triggers |
 
