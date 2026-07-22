@@ -3,6 +3,8 @@ import { Button } from '@/ui/components/ui/button';
 import { useWorkView } from './use-work-view';
 import { useUIStore } from '../../state/ui-store';
 import { useEffect } from 'react';
+import { TiptapEditor } from '../../../core/infrastructure/editor/components/TiptapEditor';
+import { PieceContent } from '../../../core/domain/types/';
 
 export function WorkViewPage() {
   const { pieceId } = useParams<{ pieceId: string }>();
@@ -77,10 +79,16 @@ export function WorkViewPage() {
         ) : (
           <div className="editing-view">
              <h2 className="text-lg font-medium mb-4 text-blue-600 dark:text-blue-400">Editing Sub-view (Editable)</h2>
-             <div className="prose dark:prose-invert">
-               <p>This is a placeholder for the Tiptap editor view. (E-04-3)</p>
-               <p>Current piece ID: {piece.id}</p>
-             </div>
+             {piece.content.kind === 'song' ? (
+               <p>Song editing is not supported in MVP.</p>
+             ) : (
+               <TiptapEditor
+                 initialContent={piece.content}
+                 onUpdate={(newContent: PieceContent) => {
+                   console.log('Domain content updated (autosave E-04-4 stub):', newContent);
+                 }}
+               />
+             )}
           </div>
         )}
       </div>
