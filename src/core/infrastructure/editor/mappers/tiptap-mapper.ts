@@ -95,8 +95,16 @@ function tiptapToBlock(node: JSONContent): TextBlock | null {
     }
   }
 
+  let blockId = node.attrs?.id;
+  if (typeof blockId === 'function') {
+    blockId = (blockId as () => string)();
+  }
+  if (!blockId || typeof blockId !== 'string') {
+    blockId = randomUUID();
+  }
+
   return {
-    id: node.attrs?.id || randomUUID(),
+    id: blockId,
     kind,
     runs,
   };
