@@ -1,24 +1,92 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/ui/components/ui/button';
 import { useWorkView } from './use-work-view';
 import { useUIStore } from '../../state/ui-store';
 import { useTranslation } from '@/ui/hooks/use-translation';
-import { useEffect } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { TiptapEditor } from '../../../core/infrastructure/editor/components/TiptapEditor';
 import { PieceContent } from '../../../core/domain/types/';
+import { AutosavePieceUseCase } from '../../../core/application/piece-management/autosave-piece.use-case';
+import { DexiePieceRepository } from '../../../core/infrastructure/adapters/dexie/piece-repository';
+import { toast } from 'sonner';
 
 export function WorkViewPage() {
   const { pieceId } = useParams<{ pieceId: string }>();
-  const { piece, loading, error } = useWorkView(pieceId);
+  const { piece, loading, error, refresh } = useWorkView(pieceId);
   const { activeMode, enterEditing, enterVisualization } = useUIStore();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const pendingContentRef = useRef<PieceContent | null>(null);
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const triggerAutosave = useCallback(async (contentToSave: PieceContent) => {
+    if (!pieceId) return;
+    try {
+      const repository = new DexiePieceRepository();
+      const useCase = new AutosavePieceUseCase(repository);
+      await useCase.execute({
+        pieceId,
+        content: contentToSave
+      });
+      refresh();
+    } catch (err) {
+      console.error('Autosave failed:', err);
+      toast.error('Failed to autosave changes.');
+    }
+  }, [pieceId, refresh]);
+
+  const flushAutosave = useCallback(async () => {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
+    if (pendingContentRef.current) {
+      const content = pendingContentRef.current;
+      pendingContentRef.current = null;
+      await triggerAutosave(content);
+    }
+  }, [triggerAutosave]);
 
   useEffect(() => {
-    // Reset to visualization mode when unmounting or changing piece
     return () => {
+      // Flush pending content immediately on unmount/exit
+      if (pendingContentRef.current) {
+        const content = pendingContentRef.current;
+        const repository = new DexiePieceRepository();
+        const useCase = new AutosavePieceUseCase(repository);
+        if (pieceId) {
+          useCase.execute({ pieceId, content }).catch(console.error);
+        }
+      }
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
       enterVisualization().catch(console.error);
     };
   }, [enterVisualization, pieceId]);
+
+  const handleUpdate = (newContent: PieceContent) => {
+    pendingContentRef.current = newContent;
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+    autosaveTimerRef.current = setTimeout(() => {
+      if (pendingContentRef.current) {
+        const content = pendingContentRef.current;
+        pendingContentRef.current = null;
+        triggerAutosave(content);
+      }
+    }, 800);
+  };
+
+  const handleBackClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (activeMode === 'editing') {
+      await flushAutosave();
+    }
+    navigate('/');
+  };
 
   if (loading) {
     return (
@@ -43,15 +111,16 @@ export function WorkViewPage() {
   return (
     <main className="flex min-h-screen flex-col gap-4 p-8 max-w-3xl mx-auto w-full bg-[#f8f9fa] text-[#202124]">
       <nav className="flex justify-between items-center mb-4 bg-white border border-[#e8eaed] rounded-xl p-3 shadow-sm">
-        <Button variant="ghost" asChild className="text-[#5f6368] hover:text-[#202124]">
-          <Link to="/">← {t('works')}</Link>
+        <Button variant="ghost" onClick={handleBackClick} className="text-[#5f6368] hover:text-[#202124]">
+          ← {t('works')}
         </Button>
         <Button
           variant={activeMode === 'editing' ? 'default' : 'outline'}
           className={activeMode === 'editing' ? 'bg-[#1a73e8] hover:bg-[#1557b0] text-white border-0' : 'text-[#5f6368]'}
-          onClick={() => {
+          onClick={async () => {
             if (activeMode === 'editing') {
-              enterVisualization().catch(console.error);
+              await flushAutosave();
+              await enterVisualization();
             } else {
               enterEditing(piece.id);
             }
@@ -91,9 +160,7 @@ export function WorkViewPage() {
              ) : (
                <TiptapEditor
                  initialContent={piece.content}
-                 onUpdate={(newContent: PieceContent) => {
-                   console.log('Domain content updated (autosave E-04-4 stub):', newContent);
-                 }}
+                 onUpdate={handleUpdate}
                />
              )}
           </div>
