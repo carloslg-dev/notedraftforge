@@ -55,7 +55,27 @@ test.describe('Piece Lifecycle E2E', () => {
     await expect(page.locator('button[title="Bold"]')).toBeVisible();
     await expect(page.locator('button[title="Italic"]')).toBeVisible();
     await expect(page.locator('button[title="Underline"]')).toBeVisible();
-    await expect(page.locator('button:has-text("Ajustar"), button:has-text("Refine")')).toBeVisible();
+    
+    const refineBtn = page.locator('button:has-text("Ajustar"), button:has-text("Refine")').first();
+    await expect(refineBtn).toBeVisible();
+
+    // Click Refine button in BubbleMenu
+    await refineBtn.click();
+
+    // Verify Selection Refinement modal is visible
+    const modalHeading = page.locator('h2:has-text("Ajustar Selección"), h2:has-text("Refine Selection")');
+    await expect(modalHeading).toBeVisible();
+
+    // Nudge start right inside the modal
+    const nudgeStartRight = page.locator('button:has-text("→")').first();
+    await nudgeStartRight.click();
+
+    // Confirm refinement
+    const confirmBtn = page.locator('button:has-text("Confirmar"), button:has-text("Confirm")').first();
+    await confirmBtn.click();
+
+    // Verify modal is closed
+    await expect(modalHeading).not.toBeVisible();
 
     // Wait 1.5 seconds to trigger the 800ms debounce autosave and let state refresh
     await page.waitForTimeout(1500);
@@ -76,7 +96,18 @@ test.describe('Piece Lifecycle E2E', () => {
     await expect(page.locator('button[title="Intención"], button[title="Intent"]')).toBeVisible();
     await expect(page.locator('button[title="Comentario"], button[title="Comment"]')).toBeVisible();
     await expect(page.locator('button[title="Respiración"], button[title="Breath"]')).toBeVisible();
-    await expect(page.locator('button:has-text("Ajustar"), button:has-text("Refine")').last()).toBeVisible();
+
+    const refineBtnViz = page.locator('button:has-text("Ajustar"), button:has-text("Refine")').last();
+    await expect(refineBtnViz).toBeVisible();
+
+    // Open refinement modal from visualization view selection toolbar
+    await refineBtnViz.click();
+    await expect(modalHeading).toBeVisible();
+
+    // Close the modal
+    const cancelBtn = page.locator('button:has-text("Cancelar"), button:has-text("Cancel")').first();
+    await cancelBtn.click();
+    await expect(modalHeading).not.toBeVisible();
 
     // 6. Go back to main list
     const backBtn = page.locator('button:has-text("Obras"), button:has-text("Works")').first();

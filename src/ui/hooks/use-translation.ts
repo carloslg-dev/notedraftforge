@@ -57,7 +57,12 @@ const translations = {
     refine: 'Refine',
     intent: 'Intent',
     comment: 'Comment',
-    breath: 'Breath'
+    breath: 'Breath',
+    refineSelection: 'Refine Selection',
+    startBoundary: 'Start Boundary',
+    endBoundary: 'End Boundary',
+    previewLabel: 'Preview',
+    confirm: 'Confirm'
   },
   es: {
     works: 'Obras',
@@ -115,7 +120,12 @@ const translations = {
     refine: 'Ajustar',
     intent: 'Intención',
     comment: 'Comentario',
-    breath: 'Respiración'
+    breath: 'Respiración',
+    refineSelection: 'Ajustar Selección',
+    startBoundary: 'Inicio de la selección',
+    endBoundary: 'Fin de la selección',
+    previewLabel: 'Vista previa',
+    confirm: 'Confirmar'
   }
 };
 

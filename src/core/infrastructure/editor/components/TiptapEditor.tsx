@@ -1,4 +1,5 @@
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
+import { useState } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { BlockIdExtension } from '../extensions/block-id';
@@ -7,7 +8,7 @@ import { PieceContent } from '../../../domain/types/';
 import { Button } from '@/ui/components/ui/button';
 import { Bold, Italic, Underline as UnderlineIcon } from 'lucide-react';
 import { useTranslation } from '@/ui/hooks/use-translation';
-import { toast } from 'sonner';
+import { RefineSelectionModal } from '@/ui/features/work-view/components/RefineSelectionModal';
 
 interface TiptapEditorProps {
   initialContent: PieceContent;
@@ -37,11 +38,30 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     },
   });
 
+  const [isRefineOpen, setIsRefineOpen] = useState(false);
+  const [refineText, setRefineText] = useState('');
+  const [refineStart, setRefineStart] = useState(0);
+  const [refineEnd, setRefineEnd] = useState(0);
+
   const handleRefineClick = () => {
     if (!editor) return;
-    const { from, to } = editor.state.selection;
-    const selectedText = editor.state.doc.textBetween(from, to, ' ');
-    toast.info(`${t('refine')}: "${selectedText}"`);
+    const { $from, $to } = editor.state.selection;
+    const blockText = $from.parent.textContent;
+    setRefineText(blockText);
+    setRefineStart($from.parentOffset);
+    setRefineEnd($to.parentOffset);
+    setIsRefineOpen(true);
+  };
+
+  const handleRefineConfirm = (newStart: number, newEnd: number) => {
+    if (!editor) return;
+    const { $from } = editor.state.selection;
+    const blockStartPos = $from.start();
+    editor.commands.setTextSelection({
+      from: blockStartPos + newStart,
+      to: blockStartPos + newEnd,
+    });
+    editor.commands.focus();
   };
 
   if (!editor) {
@@ -134,6 +154,15 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
       <div className="border rounded-md p-4">
         <EditorContent editor={editor} />
       </div>
+
+      <RefineSelectionModal
+        isOpen={isRefineOpen}
+        onClose={() => setIsRefineOpen(false)}
+        text={refineText}
+        selectionStart={refineStart}
+        selectionEnd={refineEnd}
+        onConfirm={handleRefineConfirm}
+      />
     </div>
   );
 }

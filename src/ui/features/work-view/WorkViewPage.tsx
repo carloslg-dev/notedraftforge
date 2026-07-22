@@ -10,6 +10,7 @@ import { PieceContent } from '../../../core/domain/types/';
 import { AutosavePieceUseCase } from '../../../core/application/piece-management/autosave-piece.use-case';
 import { DexiePieceRepository } from '../../../core/infrastructure/adapters/dexie/piece-repository';
 import { toast } from 'sonner';
+import { RefineSelectionModal } from './components/RefineSelectionModal';
 
 function renderBaseContent(content: PieceContent) {
   if (content.kind === 'song') {
@@ -64,6 +65,57 @@ function renderBaseContent(content: PieceContent) {
   );
 }
 
+function getRangeOffsetsRelativeToElement(element: HTMLElement, range: Range) {
+  const preSelectionRange = range.cloneRange();
+  preSelectionRange.selectNodeContents(element);
+  preSelectionRange.setEnd(range.startContainer, range.startOffset);
+  const start = preSelectionRange.toString().length;
+  const end = start + range.toString().length;
+  return { start, end };
+}
+
+function setRangeOffsetsRelativeToElement(element: HTMLElement, start: number, end: number) {
+  const range = document.createRange();
+  let charCount = 0;
+  let startNode: Node | null = null;
+  let startOffset = 0;
+  let endNode: Node | null = null;
+  let endOffset = 0;
+
+  function traverse(node: Node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const textLen = node.textContent?.length || 0;
+      const nextCount = charCount + textLen;
+      if (!startNode && start >= charCount && start <= nextCount) {
+        startNode = node;
+        startOffset = start - charCount;
+      }
+      if (!endNode && end >= charCount && end <= nextCount) {
+        endNode = node;
+        endOffset = end - charCount;
+      }
+      charCount = nextCount;
+    } else {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        traverse(node.childNodes[i]);
+        if (startNode && endNode) break;
+      }
+    }
+  }
+
+  traverse(element);
+
+  if (startNode && endNode) {
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+}
+
 export function WorkViewPage() {
   const { pieceId } = useParams<{ pieceId: string }>();
   const { piece, loading, error, refresh } = useWorkView(pieceId);
@@ -73,6 +125,10 @@ export function WorkViewPage() {
 
   const [selectionRect, setSelectionRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const [selectedText, setSelectedText] = useState('');
+  const [isRefineOpen, setIsRefineOpen] = useState(false);
+  const [refineText, setRefineText] = useState('');
+  const [refineStart, setRefineStart] = useState(0);
+  const [refineEnd, setRefineEnd] = useState(0);
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -180,7 +236,29 @@ export function WorkViewPage() {
   };
 
   const handleRefineClick = () => {
-    toast.info(`${t('refine')}: "${selectedText}"`);
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
+    const blockElement = range.commonAncestorContainer.parentElement?.closest('p, h2, blockquote, div');
+    if (!blockElement) return;
+
+    const blockText = blockElement.textContent || '';
+    const { start, end } = getRangeOffsetsRelativeToElement(blockElement as HTMLElement, range);
+
+    setRefineText(blockText);
+    setRefineStart(start);
+    setRefineEnd(end);
+    setIsRefineOpen(true);
+  };
+
+  const handleRefineConfirm = (newStart: number, newEnd: number) => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
+    const blockElement = range.commonAncestorContainer.parentElement?.closest('p, h2, blockquote, div');
+    if (!blockElement) return;
+
+    setRangeOffsetsRelativeToElement(blockElement as HTMLElement, newStart, newEnd);
   };
 
   const handleBackClick = async (e: React.MouseEvent) => {
@@ -322,6 +400,15 @@ export function WorkViewPage() {
           </Button>
         </div>
       )}
+
+      <RefineSelectionModal
+        isOpen={isRefineOpen}
+        onClose={() => setIsRefineOpen(false)}
+        text={refineText}
+        selectionStart={refineStart}
+        selectionEnd={refineEnd}
+        onConfirm={handleRefineConfirm}
+      />
     </main>
   );
 }
