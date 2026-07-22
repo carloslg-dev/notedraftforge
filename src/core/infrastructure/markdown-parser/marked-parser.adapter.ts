@@ -57,43 +57,61 @@ export class MarkedParserAdapter implements MarkdownParserPort {
     }
   }
 
-  private mapRuns(tokens: Token[]): TextRun[] {
+  private mapRuns(tokens: Token[], isUnderlined = false): TextRun[] {
     const runs: TextRun[] = [];
+    let currentUnderline = isUnderlined;
 
     for (const token of tokens) {
-      if (token.type === 'text') {
-        runs.push(this.createTextRun(token.text));
+      if (token.type === 'html') {
+        if (token.raw === '<u>') {
+          currentUnderline = true;
+        } else if (token.raw === '</u>') {
+          currentUnderline = false;
+        }
+      } else if (token.type === 'text') {
+        const run = this.createTextRun(token.text);
+        if (currentUnderline) {
+          run.marks = [...(run.marks || []), 'underline'];
+        }
+        runs.push(run);
       } else if (token.type === 'strong') {
-        const strongRuns = this.mapRuns(token.tokens || [{ type: 'text', raw: token.text, text: token.text } as Token]);
+        const strongRuns = this.mapRuns(
+          token.tokens || [{ type: 'text', raw: token.raw, text: token.raw } as Token],
+          currentUnderline
+        );
         for (const run of strongRuns) {
           run.marks = [...(run.marks || []), 'bold'];
           runs.push(run);
         }
       } else if (token.type === 'em') {
-        const emRuns = this.mapRuns(token.tokens || [{ type: 'text', raw: token.text, text: token.text } as Token]);
+        const emRuns = this.mapRuns(
+          token.tokens || [{ type: 'text', raw: token.raw, text: token.raw } as Token],
+          currentUnderline
+        );
         for (const run of emRuns) {
           run.marks = [...(run.marks || []), 'italic'];
           runs.push(run);
         }
       } else if (token.type === 'del' || token.type === 'codespan' || token.type === 'link') {
-        // For strikethrough, inline code, and links, we just extract text without specific marks
-        // Note: marked tokens types might include 'del', 'codespan' and 'link'.
-        // We'll treat them as plain text or map their children if they have any.
         if ('tokens' in token && token.tokens) {
-          runs.push(...this.mapRuns(token.tokens));
-        } else if ('text' in token && typeof token.text === 'string') {
-          runs.push(this.createTextRun(token.text));
+          runs.push(...this.mapRuns(token.tokens, currentUnderline));
         } else {
-          runs.push(this.createTextRun(token.raw));
+          const text = 'text' in token && typeof token.text === 'string' ? token.text : token.raw;
+          const run = this.createTextRun(text);
+          if (currentUnderline) {
+            run.marks = [...(run.marks || []), 'underline'];
+          }
+          runs.push(run);
         }
       } else if (token.type === 'escape' || token.type === 'br') {
-        // Simple string extraction
-        runs.push(this.createTextRun(token.raw));
+        const run = this.createTextRun(token.raw);
+        if (currentUnderline) {
+          run.marks = [...(run.marks || []), 'underline'];
+        }
+        runs.push(run);
       }
-      // Image and other inline unsupported types are silently skipped
     }
 
-    // Filter out empty runs just in case
     return runs.filter(run => run.text.length > 0);
   }
 
