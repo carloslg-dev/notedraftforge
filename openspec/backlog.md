@@ -152,7 +152,7 @@ Production deployment setup to host NoteDraftForge on GitHub Pages as a static, 
 
 | Issue | Status | Scope |
 |---|---|---|
-| Configure GitHub Pages deployment pipeline | **Proposed** | Configure Vite repository URL base path (`vite.config.ts`); switch `BrowserRouter` to `HashRouter` in `App.tsx` to handle static direct URLs without 404 errors; create GitHub Actions deployment workflow `.github/workflows/deploy.yml` triggered on push to `main`. |
+| Configure GitHub Pages deployment pipeline | **Open (#79)** | Configure Vite repository URL base path (`vite.config.ts`); switch `BrowserRouter` to `HashRouter` in `App.tsx` to handle static direct URLs without 404 errors; create GitHub Actions deployment workflow `.github/workflows/deploy.yml` triggered on push to `main`. |
 | Real Dexie DB transactions and schema | **Open (#73)** | Implement full transactional safety in Dexie adapter and strict schema parsing boundaries. |
 
 ---
