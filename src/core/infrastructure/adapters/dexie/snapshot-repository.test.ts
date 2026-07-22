@@ -1,20 +1,40 @@
-import { describe, it, expect } from 'vitest';
+import 'fake-indexeddb/auto';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { DexieSnapshotRepository } from './snapshot-repository';
+import { db } from './db';
 import type { PieceSnapshot } from '../../../domain/types/';
 
-describe('DexieSnapshotRepository stub', () => {
-  it('throws Not implemented for getByPieceId', async () => {
-    const repo = new DexieSnapshotRepository();
-    await expect(repo.getByPieceId('some-piece-id')).rejects.toThrow('Not implemented');
+describe('DexieSnapshotRepository', () => {
+  const repo = new DexieSnapshotRepository();
+
+  beforeEach(async () => {
+    await db.snapshots.clear();
   });
 
-  it('throws Not implemented for save', async () => {
-    const repo = new DexieSnapshotRepository();
-    await expect(repo.save({} as unknown as PieceSnapshot)).rejects.toThrow('Not implemented');
+  const dummySnapshot: PieceSnapshot = {
+    pieceId: 'piece-1',
+    html: '<p>Reading text</p>',
+    sourceRevision: 1,
+    layerVisibility: { comments: true, intention: true, breath: true, chord: true, meter: true },
+    generatedAt: new Date().toISOString()
+  };
+
+  it('saves and retrieves a snapshot by pieceId', async () => {
+    await repo.save(dummySnapshot);
+    const retrieved = await repo.getByPieceId('piece-1');
+    expect(retrieved).not.toBeNull();
+    expect(retrieved?.html).toBe('<p>Reading text</p>');
   });
 
-  it('throws Not implemented for deleteByPieceId', async () => {
-    const repo = new DexieSnapshotRepository();
-    await expect(repo.deleteByPieceId('some-piece-id')).rejects.toThrow('Not implemented');
+  it('returns null if snapshot does not exist', async () => {
+    const retrieved = await repo.getByPieceId('non-existent');
+    expect(retrieved).toBeNull();
+  });
+
+  it('deletes a snapshot by pieceId', async () => {
+    await repo.save(dummySnapshot);
+    await repo.deleteByPieceId('piece-1');
+    const retrieved = await repo.getByPieceId('piece-1');
+    expect(retrieved).toBeNull();
   });
 });

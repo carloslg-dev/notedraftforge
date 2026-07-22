@@ -19,37 +19,10 @@ export function useWorkView(pieceId: string | undefined) {
       setLoading(true);
       setError(null);
 
-      // In MVP architecture, DI is handled via direct instantiation in the UI layer
       const repository = new DexiePieceRepository();
       const useCase = new GetPieceUseCase(repository);
-
-      try {
-        const fetchedPiece = await useCase.execute(pieceId);
-        setPiece(fetchedPiece);
-      } catch (err: unknown) {
-        // Fallback to mock data for now, as Dexie adapters are currently stubbed throwing 'Not implemented'
-        // as per memory rules: "backend Dexie adapters are currently stubbed (throwing 'Not implemented')"
-        if (err instanceof Error && err.message === 'Not implemented') {
-          console.warn('DexiePieceRepository is stubbed. Using mock data for piece fetch.');
-          if (pieceId === '999') {
-            setPiece(null);
-          } else {
-             setPiece({
-              id: pieceId,
-              title: `Mock Piece ${pieceId}`,
-              type: 'text',
-              content: { kind: 'text', blocks: [] },
-              language: 'en',
-              tags: [],
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              revision: 1
-            });
-          }
-        } else {
-          throw err;
-        }
-      }
+      const fetchedPiece = await useCase.execute(pieceId);
+      setPiece(fetchedPiece);
       setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));

@@ -1,25 +1,51 @@
-import { describe, it, expect } from 'vitest';
+import 'fake-indexeddb/auto';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { DexiePieceRepository } from './piece-repository';
+import { db } from './db';
 import type { Piece } from '../../../domain/types/';
 
-describe('DexiePieceRepository stub', () => {
-  it('throws Not implemented for getAll', async () => {
-    const repo = new DexiePieceRepository();
-    await expect(repo.getAll()).rejects.toThrow('Not implemented');
+describe('DexiePieceRepository', () => {
+  const repo = new DexiePieceRepository();
+
+  beforeEach(async () => {
+    await db.pieces.clear();
   });
 
-  it('throws Not implemented for getById', async () => {
-    const repo = new DexiePieceRepository();
-    await expect(repo.getById('some-id')).rejects.toThrow('Not implemented');
+  const dummyPiece: Piece = {
+    id: 'piece-1',
+    title: 'Poem of Fire',
+    type: 'poem',
+    content: { kind: 'poem', blocks: [] },
+    language: 'es',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    revision: 1,
+    tags: []
+  };
+
+  it('saves and retrieves a piece', async () => {
+    await repo.save(dummyPiece);
+    const retrieved = await repo.getById('piece-1');
+    expect(retrieved).not.toBeNull();
+    expect(retrieved?.title).toBe('Poem of Fire');
   });
 
-  it('throws Not implemented for save', async () => {
-    const repo = new DexiePieceRepository();
-    await expect(repo.save({} as unknown as Piece)).rejects.toThrow('Not implemented');
+  it('returns null if piece does not exist', async () => {
+    const retrieved = await repo.getById('non-existent');
+    expect(retrieved).toBeNull();
   });
 
-  it('throws Not implemented for delete', async () => {
-    const repo = new DexiePieceRepository();
-    await expect(repo.delete('some-id')).rejects.toThrow('Not implemented');
+  it('retrieves all pieces', async () => {
+    await repo.save(dummyPiece);
+    const list = await repo.getAll();
+    expect(list).toHaveLength(1);
+    expect(list[0].id).toBe('piece-1');
+  });
+
+  it('deletes a piece', async () => {
+    await repo.save(dummyPiece);
+    await repo.delete('piece-1');
+    const retrieved = await repo.getById('piece-1');
+    expect(retrieved).toBeNull();
   });
 });

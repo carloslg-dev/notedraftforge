@@ -1,23 +1,22 @@
 import type { Piece } from '../../../domain/types/';
 import type { PieceRepository } from '../../../ports';
+import { db } from './db';
 
 export class DexiePieceRepository implements PieceRepository {
   async getAll(): Promise<Piece[]> {
-    return Promise.reject(new Error('Not implemented'));
+    return db.pieces.toArray();
   }
 
   async getById(id: string): Promise<Piece | null> {
-    void id;
-    return Promise.reject(new Error('Not implemented'));
+    const piece = await db.pieces.get(id);
+    return piece ?? null;
   }
 
   async save(piece: Piece): Promise<void> {
-    void piece;
-    return Promise.reject(new Error('Not implemented'));
+    await db.pieces.put(piece);
   }
 
   async delete(id: string): Promise<void> {
-    void id;
-    return Promise.reject(new Error('Not implemented'));
+    await db.pieces.delete(id);
   }
 }
