@@ -9,6 +9,7 @@ import { RestoreBackupModal } from './components/RestoreBackupModal';
 import { WorkListDesktop } from './components/WorkListDesktop';
 import { WorkListMobile } from './components/WorkListMobile';
 import { useUIStore } from '@/ui/state/ui-store';
+import { useTranslation } from '@/ui/hooks/use-translation';
 import { toast } from 'sonner';
 import type { Piece } from '@/core/domain/types/';
 
@@ -18,6 +19,7 @@ export function WorkListPage() {
   const { pieces, loading, error, refresh } = useWorkList();
   const { exportBackup, isExporting } = useExportBackup();
   const { enterEditing } = useUIStore();
+  const { t, uiLanguage, setUILanguage } = useTranslation();
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
 
@@ -42,9 +44,9 @@ export function WorkListPage() {
 
   useEffect(() => {
     if (error) {
-      handleError(error, { severity: 'error', title: 'Failed to load works' });
+      handleError(error, { severity: 'error', title: t('failedLoadWorks') });
     }
-  }, [error, handleError]);
+  }, [error, handleError, t]);
 
   const toggleTypeFilter = (type: string) => {
     setActiveTypeFilters(prev =>
@@ -69,23 +71,23 @@ export function WorkListPage() {
   };
 
   const handleNewWorkClick = () => {
-    toast.info('New piece creation will be fully configured in the upcoming IndexedDB persistence integration epic (E-07/#73).');
+    toast.info(t('pieceCreationNotif'));
   };
 
   const getPiecePreviewText = (piece: Piece) => {
     if (!piece.content || piece.content.kind === 'song' || !piece.content.blocks) {
-      return ['No content yet. Open editor to start writing.'];
+      return [t('noContentYet')];
     }
     const lines = piece.content.blocks
       .map(block => block.runs.map(run => run.text).join(''))
       .filter(text => text.trim().length > 0);
-    return lines.length > 0 ? lines.slice(0, 5) : ['No content yet. Open editor to start writing.'];
+    return lines.length > 0 ? lines.slice(0, 5) : [t('noContentYet')];
   };
 
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center p-8 bg-[#f8f9fa]">
-        <p className="text-[#5f6368] text-sm">Loading works...</p>
+        <p className="text-[#5f6368] text-sm">{t('loadingWorks')}</p>
       </main>
     );
   }
@@ -93,7 +95,7 @@ export function WorkListPage() {
   if (error) {
     return (
       <main className="flex min-h-screen items-center justify-center p-8 bg-[#f8f9fa]">
-        <p className="text-[#5f6368] text-sm">Failed to load works.</p>
+        <p className="text-[#5f6368] text-sm">{t('failedLoadWorks')}</p>
       </main>
     );
   }
@@ -120,6 +122,9 @@ export function WorkListPage() {
           handleEditClick={handleEditClick}
           getPiecePreviewText={getPiecePreviewText}
           isDesktop={isDesktop}
+          t={t}
+          uiLanguage={uiLanguage}
+          setUILanguage={setUILanguage}
         />
       ) : (
         <WorkListMobile
@@ -136,6 +141,9 @@ export function WorkListPage() {
           setIsRestoreModalOpen={setIsRestoreModalOpen}
           handleNewWorkClick={handleNewWorkClick}
           isDesktop={isDesktop}
+          t={t}
+          uiLanguage={uiLanguage}
+          setUILanguage={setUILanguage}
         />
       )}
 

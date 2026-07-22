@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { Piece } from '@/core/domain/types/';
 import { toast } from 'sonner';
+import type { TranslationKey } from '@/ui/hooks/use-translation';
 
 interface WorkListDesktopProps {
   visiblePieces: Piece[];
@@ -35,6 +36,9 @@ interface WorkListDesktopProps {
   handleEditClick: (pieceId: string) => void;
   getPiecePreviewText: (piece: Piece) => string[];
   isDesktop: boolean;
+  t: (key: TranslationKey) => string;
+  uiLanguage: 'es' | 'en';
+  setUILanguage: (lang: 'es' | 'en') => void;
 }
 
 export function WorkListDesktop({
@@ -55,7 +59,10 @@ export function WorkListDesktop({
   handleNewWorkClick,
   handleEditClick,
   getPiecePreviewText,
-  isDesktop
+  isDesktop,
+  t,
+  uiLanguage,
+  setUILanguage
 }: WorkListDesktopProps) {
   const visibleLimit = 4;
   const visibleTags = availableUserTags.slice(0, visibleLimit);
@@ -74,10 +81,24 @@ export function WorkListDesktop({
         </div>
         <div className="flex items-center gap-2">
           <div className="inline-flex rounded-lg border border-[#dadce0] overflow-hidden">
-            <button className="h-[30px] px-[10px] text-xs font-semibold bg-[#202124] text-white border-0">ES</button>
-            <button className="h-[30px] px-[10px] text-xs font-semibold bg-transparent text-[#5f6368] border-0 hover:bg-[#f1f3f4]">EN</button>
+            <button
+              onClick={() => setUILanguage('es')}
+              className={`h-[30px] px-[10px] text-xs font-semibold border-0 cursor-pointer ${
+                uiLanguage === 'es' ? 'bg-[#202124] text-white' : 'bg-transparent text-[#5f6368] hover:bg-[#f1f3f4]'
+              }`}
+            >
+              ES
+            </button>
+            <button
+              onClick={() => setUILanguage('en')}
+              className={`h-[30px] px-[10px] text-xs font-semibold border-0 cursor-pointer ${
+                uiLanguage === 'en' ? 'bg-[#202124] text-white' : 'bg-transparent text-[#5f6368] hover:bg-[#f1f3f4]'
+              }`}
+            >
+              EN
+            </button>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => toast.info('Settings will be configured in a future update.')}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => toast.info(t('settings'))}>
             <Settings className="h-4 w-4" />
           </Button>
         </div>
@@ -88,18 +109,18 @@ export function WorkListDesktop({
         <aside className="w-[320px] shrink-0 border-r border-[#e8eaed] bg-white flex flex-col h-[calc(100vh-52px)] relative">
           {/* Sidebar header */}
           <div className="p-4 flex items-center justify-between border-b border-[#e8eaed]">
-            <span className="font-sans text-xs font-bold text-[#202124] uppercase tracking-wider">Works</span>
+            <span className="font-sans text-xs font-bold text-[#202124] uppercase tracking-wider">{t('works')}</span>
             <div className="flex gap-1">
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => toast.info('Search will be enabled in a future update.')}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => toast.info(t('search'))}>
                 <Search className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={handleNewWorkClick} title="New work">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={handleNewWorkClick} title={t('newWork')}>
                 <Plus className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => setIsRestoreModalOpen(true)} title="Restore backup">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => setIsRestoreModalOpen(true)} title={t('restoreBackup')}>
                 <Upload className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={exportBackup} disabled={isExporting} title="Export backup">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={exportBackup} disabled={isExporting} title={t('exportBackup')}>
                 <Download className="h-4 w-4" />
               </Button>
             </div>
@@ -116,7 +137,7 @@ export function WorkListDesktop({
                     : 'bg-transparent text-[#5f6368] border-[#dadce0] hover:bg-[#f1f3f4]'
                 }`}
               >
-                All
+                {t('allFilter')}
               </button>
               {MVP_VISIBLE_TYPES.map(type => {
                 const isActive = activeTypeFilters.includes(type);
@@ -164,7 +185,7 @@ export function WorkListDesktop({
           <div className="flex-1 overflow-y-auto">
             {filteredPieces.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-sm text-[#80868b]">No works match filters.</p>
+                <p className="text-sm text-[#80868b]">{t('noMatches')}</p>
               </div>
             ) : (
               filteredPieces.map((piece) => {
@@ -218,10 +239,10 @@ export function WorkListDesktop({
                       {currentPiece.type}
                     </span>
                     <span className="bg-[#dcfce7] text-[#166534] px-2.5 py-0.5 rounded-full text-[10px] font-semibold">
-                      Snapshot ready
+                      {t('snapshotReady')}
                     </span>
                     <span className="text-[11px] text-[#80868b]">
-                      {new Date(currentPiece.updatedAt).toLocaleDateString()}
+                      {t('updated')}: {new Date(currentPiece.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
                   <h2 className="font-sans text-2xl font-semibold text-[#202124] tracking-tight">
@@ -239,14 +260,14 @@ export function WorkListDesktop({
                 <div className="flex gap-2 shrink-0">
                   <Button variant="default" size="sm" asChild className="bg-[#1a73e8] hover:bg-[#1557b0] text-white">
                     <Link to={`/work/${currentPiece.id}`}>
-                      <Eye className="h-4 w-4 mr-1.5" /> View
+                      <Eye className="h-4 w-4 mr-1.5" /> {t('viewButton')}
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleEditClick(currentPiece.id)}>
-                    <Edit className="h-4 w-4 mr-1.5" /> Edit
+                    <Edit className="h-4 w-4 mr-1.5" /> {t('editButton')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={exportBackup} disabled={isExporting}>
-                    <Download className="h-4 w-4 mr-1.5" /> Backup
+                    <Download className="h-4 w-4 mr-1.5" /> {isExporting ? t('exporting') : t('exportBackup')}
                   </Button>
                 </div>
               </div>
@@ -254,7 +275,7 @@ export function WorkListDesktop({
               {/* Content preview card */}
               <div className="bg-white border border-[#e8eaed] rounded-xl p-8 shadow-sm mt-6 flex-1 min-h-[300px]">
                 <div className="text-[11px] font-bold text-[#80868b] uppercase tracking-widest border-b border-neutral-100 pb-3 mb-5">
-                  Reading preview
+                  {t('readingPreview')}
                 </div>
                 <div className={`font-serif text-lg leading-relaxed text-[#202124] ${currentPiece.type === 'poem' ? 'whitespace-pre-line' : ''}`}>
                   {getPiecePreviewText(currentPiece).map((line, idx) => (
@@ -265,7 +286,7 @@ export function WorkListDesktop({
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
-              <p className="text-[#80868b] text-sm">Select a piece from the rail to preview.</p>
+              <p className="text-[#80868b] text-sm">{t('noMatches')}</p>
             </div>
           )}
         </main>

@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/ui/components/ui/button';
 import { useWorkView } from './use-work-view';
 import { useUIStore } from '../../state/ui-store';
+import { useTranslation } from '@/ui/hooks/use-translation';
 import { useEffect } from 'react';
 import { TiptapEditor } from '../../../core/infrastructure/editor/components/TiptapEditor';
 import { PieceContent } from '../../../core/domain/types/';
@@ -10,6 +11,7 @@ export function WorkViewPage() {
   const { pieceId } = useParams<{ pieceId: string }>();
   const { piece, loading, error } = useWorkView(pieceId);
   const { activeMode, enterEditing, enterVisualization } = useUIStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Reset to visualization mode when unmounting or changing piece
@@ -20,32 +22,33 @@ export function WorkViewPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen flex-col gap-4 p-8 items-center justify-center">
-        <p className="text-muted-foreground text-sm">Loading piece...</p>
+      <main className="flex min-h-screen flex-col gap-4 p-8 items-center justify-center bg-[#f8f9fa]">
+        <p className="text-[#5f6368] text-sm">{t('loadingWorks')}</p>
       </main>
     );
   }
 
   if (error || !piece) {
     return (
-      <main className="flex min-h-screen flex-col gap-4 p-8 items-center justify-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Piece not found</h1>
-        <p className="text-muted-foreground text-sm">The piece you are looking for does not exist or an error occurred.</p>
-        <Button asChild>
-          <Link to="/">Go back to Works</Link>
+      <main className="flex min-h-screen flex-col gap-4 p-8 items-center justify-center bg-[#f8f9fa]">
+        <h1 className="text-2xl font-semibold tracking-tight text-[#202124]">{t('pieceNotFound')}</h1>
+        <p className="text-[#5f6368] text-sm">{t('pieceNotFoundDesc')}</p>
+        <Button asChild className="bg-[#1a73e8] hover:bg-[#1557b0] text-white">
+          <Link to="/">{t('goBackWorks')}</Link>
         </Button>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col gap-4 p-8 max-w-3xl mx-auto w-full">
-      <nav className="flex justify-between items-center mb-4">
-        <Button variant="ghost" asChild>
-          <Link to="/">← Works</Link>
+    <main className="flex min-h-screen flex-col gap-4 p-8 max-w-3xl mx-auto w-full bg-[#f8f9fa] text-[#202124]">
+      <nav className="flex justify-between items-center mb-4 bg-white border border-[#e8eaed] rounded-xl p-3 shadow-sm">
+        <Button variant="ghost" asChild className="text-[#5f6368] hover:text-[#202124]">
+          <Link to="/">← {t('works')}</Link>
         </Button>
         <Button
           variant={activeMode === 'editing' ? 'default' : 'outline'}
+          className={activeMode === 'editing' ? 'bg-[#1a73e8] hover:bg-[#1557b0] text-white border-0' : 'text-[#5f6368]'}
           onClick={() => {
             if (activeMode === 'editing') {
               enterVisualization().catch(console.error);
@@ -54,23 +57,25 @@ export function WorkViewPage() {
             }
           }}
         >
-          {activeMode === 'editing' ? 'Finish Editing' : 'Edit Piece'}
+          {activeMode === 'editing' ? t('finishEditing') : t('editPiece')}
         </Button>
       </nav>
 
-      <header className="mb-6 border-b pb-4">
-        <h1 className="text-3xl font-bold tracking-tight">{piece.title}</h1>
-        <div className="flex gap-2 text-sm text-muted-foreground mt-2">
-          <span>Type: {piece.type}</span>
+      <header className="mb-6 border-b border-[#e8eaed] pb-4 px-3">
+        <h1 className="text-3xl font-bold tracking-tight text-[#202124]">{piece.title}</h1>
+        <div className="flex gap-2 text-sm text-[#80868b] mt-2">
+          <span>{t('type')}: {piece.type}</span>
           <span>•</span>
-          <span>Updated: {new Date(piece.updatedAt).toLocaleDateString()}</span>
+          <span>{t('updated')}: {new Date(piece.updatedAt).toLocaleDateString()}</span>
         </div>
       </header>
 
-      <div className="flex-1 bg-card rounded-lg border p-6 min-h-[400px]">
+      <div className="flex-1 bg-white rounded-xl border border-[#e8eaed] p-6 min-h-[400px] shadow-sm">
         {activeMode === 'visualization' ? (
           <div className="visualization-view">
-            <h2 className="text-lg font-medium mb-4 text-muted-foreground">Visualization Sub-view (Read-only)</h2>
+            <h2 className="text-lg font-medium mb-4 text-[#80868b] uppercase text-xs tracking-wider">
+              {t('readingPreview')} (Read-only)
+            </h2>
             <div className="prose dark:prose-invert">
               <p>This is a placeholder for the read-only visualization view. (E-06)</p>
               <p>Current piece ID: {piece.id}</p>
@@ -78,9 +83,11 @@ export function WorkViewPage() {
           </div>
         ) : (
           <div className="editing-view">
-             <h2 className="text-lg font-medium mb-4 text-blue-600 dark:text-blue-400">Editing Sub-view (Editable)</h2>
+             <h2 className="text-lg font-medium mb-4 text-[#1a73e8] uppercase text-xs tracking-wider">
+               {t('editPiece')} (Editable)
+             </h2>
              {piece.content.kind === 'song' ? (
-               <p>Song editing is not supported in MVP.</p>
+               <p className="text-[#80868b]">Song editing is not supported in MVP.</p>
              ) : (
                <TiptapEditor
                  initialContent={piece.content}

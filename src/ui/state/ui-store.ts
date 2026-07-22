@@ -7,6 +7,7 @@ interface UIState {
   isAnnotationModalOpen: boolean;
   isRefinementModalOpen: boolean;
   activeSelection: AnnotationTarget | null;
+  uiLanguage: 'es' | 'en';
 }
 
 interface UIActions {
@@ -15,6 +16,7 @@ interface UIActions {
   setAnnotationModalOpen: (isOpen: boolean) => void;
   setRefinementModalOpen: (isOpen: boolean) => void;
   setActiveSelection: (selection: AnnotationTarget | null) => void;
+  setUILanguage: (lang: 'es' | 'en') => void;
 }
 
 export type UIStore = UIState & UIActions;
@@ -28,6 +30,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
   isAnnotationModalOpen: false,
   isRefinementModalOpen: false,
   activeSelection: null,
+  uiLanguage: 'es',
 
   enterEditing: (pieceId: string) =>
     set({
@@ -56,4 +59,5 @@ export const useUIStore = create<UIStore>((set, get) => ({
 
   setRefinementModalOpen: (isOpen: boolean) => set({ isRefinementModalOpen: isOpen }),
   setActiveSelection: (selection: AnnotationTarget | null) => set({ activeSelection: selection }),
+  setUILanguage: (lang: 'es' | 'en') => set({ uiLanguage: lang }),
 }));

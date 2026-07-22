@@ -1,0 +1,108 @@
+import { useUIStore } from '../state/ui-store';
+
+const translations = {
+  en: {
+    works: 'Works',
+    myWorks: 'My Works',
+    newWork: 'New Work',
+    exportBackup: 'Export Backup',
+    restoreBackup: 'Restore Backup',
+    exporting: 'Exporting...',
+    loadingWorks: 'Loading works...',
+    failedLoadWorks: 'Failed to load works.',
+    noWorksYet: 'No works yet. Create your first one.',
+    searchPlaceholder: 'Search tags...',
+    noMatches: 'No works match active filters.',
+    clearFilters: 'Clear Filters',
+    readingPreview: 'Reading preview',
+    viewButton: 'View',
+    editButton: 'Edit',
+    finishEditing: 'Finish Editing',
+    editPiece: 'Edit Piece',
+    pieceNotFound: 'Piece not found',
+    pieceNotFoundDesc: 'The piece you are looking for does not exist or an error occurred.',
+    goBackWorks: 'Go back to Works',
+    snapshotReady: 'Snapshot ready',
+    snapshotStale: 'Snapshot stale',
+    generating: 'Generating...',
+    allFilter: 'All',
+    searchTags: 'Search tags',
+    typeToSearch: 'Type to search your tags',
+    noTagsMatching: 'No tags matching',
+    done: 'Done',
+    settings: 'Settings',
+    search: 'Search',
+    sort: 'Sort',
+    type: 'Type',
+    updated: 'Updated',
+    noContentYet: 'No content yet. Open editor to start writing.',
+    backupWarning: 'Restoring a backup will replace all active database records. Make sure you have exported your current data first.',
+    selectBackupFile: 'Select Backup JSON File',
+    restoreProgress: 'Restoring backup...',
+    clickOrDragFile: 'Click or drag file here to restore',
+    selectedFile: 'Selected file',
+    cancel: 'Cancel',
+    restoreConfirm: 'Confirm Restore',
+    invalidJson: 'Selected file is not valid JSON.',
+    emptyTags: 'No tags available.',
+    pieceCreationNotif: 'New piece creation will be fully configured in the upcoming IndexedDB persistence integration epic (E-07/#73).'
+  },
+  es: {
+    works: 'Obras',
+    myWorks: 'Mis Obras',
+    newWork: 'Nueva Obra',
+    exportBackup: 'Exportar Copia',
+    restoreBackup: 'Restaurar Copia',
+    exporting: 'Exportando...',
+    loadingWorks: 'Cargando obras...',
+    failedLoadWorks: 'Error al cargar las obras.',
+    noWorksYet: 'Aún no hay obras. Crea tu primera obra.',
+    searchPlaceholder: 'Buscar etiquetas...',
+    noMatches: 'Ninguna obra coincide con los filtros activos.',
+    clearFilters: 'Limpiar Filtros',
+    readingPreview: 'Vista previa de lectura',
+    viewButton: 'Ver',
+    editButton: 'Editar',
+    finishEditing: 'Terminar Edición',
+    editPiece: 'Editar Obra',
+    pieceNotFound: 'Obra no encontrada',
+    pieceNotFoundDesc: 'La obra que buscas no existe o ha ocurrido un error.',
+    goBackWorks: 'Volver a Obras',
+    snapshotReady: 'Captura lista',
+    snapshotStale: 'Captura obsoleta',
+    generating: 'Generando...',
+    allFilter: 'Todo',
+    searchTags: 'Buscar etiquetas',
+    typeToSearch: 'Escribe para buscar tus etiquetas',
+    noTagsMatching: 'Ninguna etiqueta coincide con',
+    done: 'Aceptar',
+    settings: 'Ajustes',
+    search: 'Buscar',
+    sort: 'Ordenar',
+    type: 'Tipo',
+    updated: 'Actualizado',
+    noContentYet: 'Sin contenido aún. Abre el editor para empezar a escribir.',
+    backupWarning: 'Restaurar una copia reemplazará todos los registros activos en la base de datos. Asegúrate de haber exportado tus datos actuales primero.',
+    selectBackupFile: 'Seleccionar Archivo JSON de Copia',
+    restoreProgress: 'Restaurando copia...',
+    clickOrDragFile: 'Haz clic o arrastra un archivo aquí para restaurar',
+    selectedFile: 'Archivo seleccionado',
+    cancel: 'Cancelar',
+    restoreConfirm: 'Confirmar Restauración',
+    invalidJson: 'El archivo seleccionado no es un JSON válido.',
+    emptyTags: 'No hay etiquetas disponibles.',
+    pieceCreationNotif: 'La creación de nuevas obras se configurará por completo en la próxima épica de integración de persistencia con IndexedDB (E-07/#73).'
+  }
+};
+
+export function useTranslation() {
+  const uiLanguage = useUIStore((state) => state.uiLanguage);
+  const setUILanguage = useUIStore((state) => state.setUILanguage);
+  
+  const t = (key: keyof typeof translations.en) => {
+    return translations[uiLanguage]?.[key] || translations.en[key] || key;
+  };
+  
+  return { t, uiLanguage, setUILanguage };
+}
+export type TranslationKey = keyof typeof translations.en;

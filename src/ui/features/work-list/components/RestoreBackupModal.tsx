@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useRestoreBackup } from '../use-restore-backup';
 import { Button } from '@/ui/components/ui/button';
 import { AlertTriangle, Upload, Clipboard, Check } from 'lucide-react';
+import { useTranslation } from '@/ui/hooks/use-translation';
 
 interface RestoreBackupModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export function RestoreBackupModal({
   onSuccess
 }: RestoreBackupModalProps) {
   const { restoreBackup, isRestoring } = useRestoreBackup();
+  const { t, uiLanguage } = useTranslation();
   const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload');
   const [jsonText, setJsonText] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -94,10 +96,10 @@ export function RestoreBackupModal({
         {/* Header */}
         <div className="flex flex-col gap-1.5">
           <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
-            Restore Backup
+            {t('restoreBackup')}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Upload or paste your previously exported JSON backup file.
+            {t('selectBackupFile')}
           </p>
         </div>
 
@@ -106,10 +108,10 @@ export function RestoreBackupModal({
           <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1">
             <span className="font-semibold text-destructive-foreground dark:text-red-400">
-              WARNING: REPLACE ALL DATA
+              WARNING / ADVERTENCIA
             </span>
             <p className="text-muted-foreground text-xs">
-              This operation will clear all existing pieces, annotations, and snapshots. This action cannot be undone.
+              {t('backupWarning')}
             </p>
           </div>
         </div>
@@ -124,7 +126,7 @@ export function RestoreBackupModal({
             }`}
             onClick={() => setActiveTab('upload')}
           >
-            Upload File
+            {uiLanguage === 'es' ? 'Subir Archivo' : 'Upload File'}
           </button>
           <button
             className={`flex-1 pb-2 text-sm font-medium border-b-2 transition-colors ${
@@ -134,7 +136,7 @@ export function RestoreBackupModal({
             }`}
             onClick={() => setActiveTab('paste')}
           >
-            Paste JSON
+            {uiLanguage === 'es' ? 'Pegar JSON' : 'Paste JSON'}
           </button>
         </div>
 
@@ -171,7 +173,7 @@ export function RestoreBackupModal({
                     {uploadedFile.name}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {(uploadedFile.size / 1024).toFixed(2)} KB • Click to change
+                    {(uploadedFile.size / 1024).toFixed(2)} KB • {uiLanguage === 'es' ? 'Hacer clic para cambiar' : 'Click to change'}
                   </span>
                 </>
               ) : (
@@ -180,10 +182,10 @@ export function RestoreBackupModal({
                     <Upload className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <span className="font-medium text-sm mt-2">
-                    Drag and drop file here, or click to browse
+                    {t('clickOrDragFile')}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    Supports .json backup files
+                    {uiLanguage === 'es' ? 'Soporta archivos .json de copia de seguridad' : 'Supports .json backup files'}
                   </span>
                 </>
               )}
@@ -191,7 +193,7 @@ export function RestoreBackupModal({
           ) : (
             <div className="flex flex-col gap-1.5 h-full">
               <textarea
-                placeholder='Paste backup JSON content here (e.g. { "version": "1", ... })'
+                placeholder={uiLanguage === 'es' ? 'Pega el contenido JSON de la copia aquí...' : 'Paste backup JSON content here...'}
                 value={jsonText}
                 onChange={(e) => setJsonText(e.target.value)}
                 className="flex min-h-[160px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono"
@@ -203,7 +205,7 @@ export function RestoreBackupModal({
         {/* Footer Actions */}
         <div className="flex justify-end gap-3">
           <Button variant="ghost" onClick={onClose} disabled={isRestoring}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             variant="destructive"
@@ -213,14 +215,14 @@ export function RestoreBackupModal({
               (activeTab === 'upload' && !uploadedFile) ||
               (activeTab === 'paste' && !jsonText.trim())
             }
-            className="flex gap-2 items-center"
+            className="flex gap-2 items-center text-white"
           >
             {activeTab === 'paste' ? (
-              <Clipboard className="h-4 w-4" />
+              <Clipboard className="h-4 w-4 text-white" />
             ) : (
-              <Upload className="h-4 w-4" />
+              <Upload className="h-4 w-4 text-white" />
             )}
-            {isRestoring ? 'Restoring...' : 'Confirm Restore'}
+            {isRestoring ? t('restoreProgress') : t('restoreConfirm')}
           </Button>
         </div>
       </div>

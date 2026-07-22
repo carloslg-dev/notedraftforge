@@ -3,6 +3,7 @@ import { Badge } from '@/ui/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/ui/components/ui/popover';
 import { Sheet, SheetContent, SheetTrigger } from '@/ui/components/ui/sheet';
 import { Input } from '@/ui/components/ui/input';
+import { useTranslation } from '@/ui/hooks/use-translation';
 
 interface TagSearchOverlayProps {
   availableTags: string[];
@@ -17,6 +18,7 @@ export function TagSearchOverlay({
   onSelectTag,
   isDesktop
 }: TagSearchOverlayProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
 
@@ -60,7 +62,7 @@ export function TagSearchOverlay({
   const Content = (
     <div className="flex flex-col gap-4 py-4 md:py-0 w-full h-full" role="dialog" aria-label="Tag Search Overlay">
       <Input
-        placeholder="Search tags..."
+        placeholder={t('searchPlaceholder')}
         value={query}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
         className="w-full"
@@ -69,8 +71,8 @@ export function TagSearchOverlay({
 
       <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px]">
         {filteredTags.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No tags found
+          <p className="text-sm text-[#80868b] text-center py-4">
+            {t('noTagsMatching')} "{query}"
           </p>
         ) : (
           <div className="flex flex-wrap gap-2">

@@ -10,6 +10,7 @@ import {
   FileText
 } from 'lucide-react';
 import type { Piece } from '@/core/domain/types/';
+import type { TranslationKey } from '@/ui/hooks/use-translation';
 
 interface WorkListMobileProps {
   visiblePieces: Piece[];
@@ -25,6 +26,9 @@ interface WorkListMobileProps {
   setIsRestoreModalOpen: (open: boolean) => void;
   handleNewWorkClick: () => void;
   isDesktop: boolean;
+  t: (key: TranslationKey) => string;
+  uiLanguage: 'es' | 'en';
+  setUILanguage: (lang: 'es' | 'en') => void;
 }
 
 export function WorkListMobile({
@@ -40,7 +44,10 @@ export function WorkListMobile({
   exportBackup,
   setIsRestoreModalOpen,
   handleNewWorkClick,
-  isDesktop
+  isDesktop,
+  t,
+  uiLanguage,
+  setUILanguage
 }: WorkListMobileProps) {
   const visibleLimit = 2;
   const visibleTags = availableUserTags.slice(0, visibleLimit);
@@ -52,16 +59,31 @@ export function WorkListMobile({
     <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-[#202124] relative pb-20 select-none">
       {/* Mobile Header */}
       <header className="px-4 py-3 flex items-center justify-between bg-white border-b border-[#e8eaed] shrink-0 shadow-sm">
-        <span className="font-sans text-xl font-bold text-[#202124] tracking-tight">Works</span>
+        <span className="font-sans text-xl font-bold text-[#202124] tracking-tight">{t('works')}</span>
         <div className="flex items-center gap-1">
+          {/* Active Language toggle for mobile */}
           <div className="inline-flex rounded-lg border border-[#dadce0] overflow-hidden mr-1">
-            <button className="h-[26px] px-2 text-[10px] font-bold bg-[#202124] text-white border-0">ES</button>
-            <button className="h-[26px] px-2 text-[10px] font-bold bg-transparent text-[#5f6368] border-0">EN</button>
+            <button
+              onClick={() => setUILanguage('es')}
+              className={`h-[26px] px-2 text-[10px] font-bold border-0 cursor-pointer ${
+                uiLanguage === 'es' ? 'bg-[#202124] text-white' : 'bg-transparent text-[#5f6368]'
+              }`}
+            >
+              ES
+            </button>
+            <button
+              onClick={() => setUILanguage('en')}
+              className={`h-[26px] px-2 text-[10px] font-bold border-0 cursor-pointer ${
+                uiLanguage === 'en' ? 'bg-[#202124] text-white' : 'bg-transparent text-[#5f6368]'
+              }`}
+            >
+              EN
+            </button>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => setIsRestoreModalOpen(true)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => setIsRestoreModalOpen(true)} title={t('restoreBackup')}>
             <Upload className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={exportBackup} disabled={isExporting}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={exportBackup} disabled={isExporting} title={t('exportBackup')}>
             <Download className="h-4 w-4" />
           </Button>
         </div>
@@ -78,7 +100,7 @@ export function WorkListMobile({
                 : 'bg-transparent text-[#5f6368] border-[#dadce0]'
             }`}
           >
-            All
+            {t('allFilter')}
           </button>
           {MVP_VISIBLE_TYPES.map(type => {
             const isActive = activeTypeFilters.includes(type);
@@ -126,8 +148,8 @@ export function WorkListMobile({
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {filteredPieces.length === 0 ? (
           <div className="p-8 text-center border border-dashed rounded-xl bg-white border-[#dadce0]">
-            <p className="text-sm text-[#80868b] mb-4">No works match active filters.</p>
-            <Button variant="outline" size="sm" onClick={clearFilters}>Clear Filters</Button>
+            <p className="text-sm text-[#80868b] mb-4">{t('noMatches')}</p>
+            <Button variant="outline" size="sm" onClick={clearFilters}>{t('clearFilters')}</Button>
           </div>
         ) : (
           filteredPieces.map((piece) => {
@@ -173,7 +195,7 @@ export function WorkListMobile({
           className="bg-[#1a73e8] hover:bg-[#1557b0] text-white shadow-lg h-12 px-5 rounded-full flex items-center gap-2 font-semibold text-sm active:scale-95 transition-transform"
         >
           <Plus className="h-4.5 w-4.5 text-white" />
-          New work
+          {t('newWork')}
         </button>
       </div>
     </div>
