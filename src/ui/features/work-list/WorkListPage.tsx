@@ -8,11 +8,13 @@ import { useExportBackup } from './use-export-backup';
 import { computeVisiblePieces, computeAvailableUserTags, computeFilteredPieces } from './filter-logic';
 import { useMediaQuery } from '@/ui/hooks/use-media-query';
 import { TagSearchOverlay } from './components/TagSearchOverlay';
+import { RestoreBackupModal } from './components/RestoreBackupModal';
 
 export function WorkListPage() {
   const { handleError } = useAppError();
-  const { pieces, loading, error } = useWorkList();
+  const { pieces, loading, error, refresh } = useWorkList();
   const { exportBackup, isExporting } = useExportBackup();
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
 
   const MVP_VISIBLE_TYPES = ['text', 'poem'];
 
@@ -73,7 +75,6 @@ export function WorkListPage() {
     );
   }
 
-  // WL-REQ-07: Empty state when no pieces exist
   if (!loading && visiblePieces.length === 0) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8">
@@ -81,11 +82,16 @@ export function WorkListPage() {
         <p className="text-muted-foreground text-sm">No works yet. Create your first one.</p>
         <div className="flex gap-4">
           <Button>New Work</Button>
-          <Button variant="outline">Restore Backup</Button>
+          <Button variant="outline" onClick={() => setIsRestoreModalOpen(true)}>Restore Backup</Button>
           <Button variant="outline" onClick={exportBackup} disabled={isExporting}>
             {isExporting ? 'Exporting...' : 'Export Backup'}
           </Button>
         </div>
+        <RestoreBackupModal
+          isOpen={isRestoreModalOpen}
+          onClose={() => setIsRestoreModalOpen(false)}
+          onSuccess={refresh}
+        />
       </main>
     );
   }
@@ -97,6 +103,9 @@ export function WorkListPage() {
         <div className="flex gap-2">
           <Button variant="outline" onClick={exportBackup} disabled={isExporting}>
             {isExporting ? 'Exporting...' : 'Export Backup'}
+          </Button>
+          <Button variant="outline" onClick={() => setIsRestoreModalOpen(true)}>
+            Restore Backup
           </Button>
           <Button>New Work</Button>
         </div>
@@ -201,6 +210,11 @@ export function WorkListPage() {
           })
         )}
       </div>
+      <RestoreBackupModal
+        isOpen={isRestoreModalOpen}
+        onClose={() => setIsRestoreModalOpen(false)}
+        onSuccess={refresh}
+      />
     </main>
   );
 }
