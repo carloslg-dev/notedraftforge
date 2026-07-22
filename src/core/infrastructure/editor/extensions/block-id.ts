@@ -1,4 +1,5 @@
 import { Extension } from '@tiptap/core';
+import { randomUUID } from '../../../domain/uuid';
 
 export const BlockIdExtension = Extension.create({
   name: 'blockId',
@@ -9,7 +10,7 @@ export const BlockIdExtension = Extension.create({
         types: ['paragraph', 'heading', 'blockquote'],
         attributes: {
           id: {
-            default: () => crypto.randomUUID(),
+            default: () => randomUUID(),
             keepOnSplit: false,
             parseHTML: element => element.getAttribute('data-id'),
             renderHTML: attributes => {

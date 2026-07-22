@@ -1,5 +1,6 @@
 import { Annotation, AnnotationContent, AnnotationTarget, BreathContent, NoteAnnotationContent } from '../types/annotation';
 import { AnnotationKind, LayerKind } from '../types/layer';
+import { randomUUID } from '../uuid';
 
 export interface CreateAnnotationInput {
   pieceId: string;
@@ -67,7 +68,7 @@ export function createAnnotation(input: CreateAnnotationInput): Annotation {
   const layerId = deriveLayerId(input.kind);
 
   return {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     pieceId: input.pieceId,
     target: input.target,
     kind: input.kind,

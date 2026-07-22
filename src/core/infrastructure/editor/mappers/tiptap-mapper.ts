@@ -1,5 +1,6 @@
 import type { PieceContent, TextBlock, TextRun, TextMark, TextPieceContent, PoemPieceContent } from '../../../domain/types/';
 import type { JSONContent } from '@tiptap/core';
+import { randomUUID } from '../../../domain/uuid';
 
 export function domainToTiptap(content: PieceContent): JSONContent {
   if (content.kind === 'song') {
@@ -81,13 +82,13 @@ function tiptapToBlock(node: JSONContent): TextBlock | null {
           }
         }
         runs.push({
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           text: child.text,
           ...(marks.length > 0 ? { marks } : {}),
         });
       } else if (child.type === 'hardBreak') {
         runs.push({
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           text: '\n',
         });
       }
@@ -95,7 +96,7 @@ function tiptapToBlock(node: JSONContent): TextBlock | null {
   }
 
   return {
-    id: node.attrs?.id || crypto.randomUUID(),
+    id: node.attrs?.id || randomUUID(),
     kind,
     runs,
   };

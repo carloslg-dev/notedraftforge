@@ -1,6 +1,7 @@
 import { marked, Token } from 'marked';
 import type { TextBlock, TextRun, TextMark } from '../../domain/types/';
 import type { MarkdownParserPort } from '../../ports/';
+import { randomUUID } from '../../domain/uuid';
 
 export class MarkedParserAdapter implements MarkdownParserPort {
   parse(markdown: string): TextBlock[] {
@@ -21,13 +22,13 @@ export class MarkedParserAdapter implements MarkdownParserPort {
     switch (token.type) {
       case 'heading':
         return {
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           kind: 'heading',
           runs: this.mapRuns(token.tokens || []),
         };
       case 'paragraph':
         return {
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           kind: 'paragraph',
           runs: this.mapRuns(token.tokens || []),
         };
@@ -46,7 +47,7 @@ export class MarkedParserAdapter implements MarkdownParserPort {
         }) || [this.createTextRun(token.text)];
 
         return {
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           kind: 'quote',
           runs: runs.length > 0 ? runs : [this.createTextRun(token.text)],
         };
@@ -117,7 +118,7 @@ export class MarkedParserAdapter implements MarkdownParserPort {
 
   private createTextRun(text: string, marks?: TextMark[]): TextRun {
     const run: TextRun = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       text,
     };
     if (marks && marks.length > 0) {

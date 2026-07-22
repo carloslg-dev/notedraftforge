@@ -1,5 +1,6 @@
 import { Piece, PieceContent, TagRef } from '../types/piece';
 import { PieceType } from '../types';
+import { randomUUID } from '../uuid';
 
 export interface CreatePieceInput {
   title: string;
@@ -52,7 +53,7 @@ export function createPiece(input: CreatePieceInput): Piece {
   }
 
   return {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     title: input.title.trim(),
     type: input.type,
     content,

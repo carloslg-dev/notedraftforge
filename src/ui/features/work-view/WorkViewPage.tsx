@@ -32,7 +32,7 @@ export function WorkViewPage() {
       refresh();
     } catch (err) {
       console.error('Autosave failed:', err);
-      toast.error('Failed to autosave changes.');
+      toast.error('Failed to autosave changes: ' + (err instanceof Error ? err.message : String(err)));
     }
   }, [pieceId, refresh]);
 
