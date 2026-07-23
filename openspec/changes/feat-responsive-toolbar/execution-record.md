@@ -4,7 +4,7 @@
 
 ## Task reference
 
-Adapt Selection Toolbar to mobile layout (#27, EM-REQ-05)
+Adapt Selection Toolbar to mobile layout and optimize layout spacing (#27, EM-REQ-05, EM-REQ-13)
 
 ## Change reference
 
@@ -15,7 +15,7 @@ feat-responsive-toolbar
 Status: approved
 Source: human
 Approved by: carloslg-dev
-Reason: User approved implementation plan for mobile responsive layout.
+Reason: User approved implementation plan for mobile responsive layout and spacing.
 
 ---
 
@@ -23,8 +23,8 @@ Reason: User approved implementation plan for mobile responsive layout.
 
 | Source | Why needed | Confidence |
 |---|---|---|
-| src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles on selection toolbar | High |
-| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar for mobile viewports | High |
+| src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles on selection toolbar and page containers | High |
+| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar and remove mobile canvas borders | High |
 | src/ui/hooks/use-media-query.ts | Synchronously initialize layout matching state | High |
 | openspec/specs/editor-modes/spec.md | Update specification behavior rules for mobile viewports | High |
 
@@ -50,8 +50,10 @@ PASS
 ## Decisions made
 
 - Initialize `useMediaQuery` state synchronously using `window.matchMedia(query).matches` to prevent initial render mismatch in react lifecycle.
-- Implement mobile selection toolbar using custom React rendering in Tiptap editing mode to bypass Tippy.js absolute layout calculation conflicts on small touchscreens.
-- Refactor Playwright tests to use programmatic DOM text selection, ensuring 100% viewport and touch emulation stability.
+- Remove Tiptap editor border and margins on mobile devices to prevent double borders.
+- Switch layout to full bleed width (100% width, no margins, rounded corners, card borders or card shadows) on mobile devices to optimize horizontal reading and writing space.
+- Minimize vertical heights of headers, navbars and metadata blocks to leave maximum space for creative input.
+- Remove redundant labels "Reading Preview" and "Edit Piece (Editable)" inside panels to keep flow clean.
 
 ---
 
