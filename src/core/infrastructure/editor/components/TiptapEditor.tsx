@@ -127,7 +127,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
         </Button>
       </BubbleMenu>
 
-      <div className="border rounded-md p-4">
+      <div className="border-0 md:border md:rounded-md p-2 md:p-4">
         <EditorContent editor={editor} />
       </div>
 

@@ -118,6 +118,12 @@ Markdown SHALL be treated only as external import/export format concern.
 
 Markdown SHALL NOT be treated as internal editable source of truth in mode behavior.
 
+### EM-REQ-13 — Full width bleed and clean flow (Mobile)
+The system SHALL optimize space and editing flows on mobile viewports (under 768px wide):
+- The system SHALL NOT render any visual mode indicator or text label (e.g. 'Reading Preview' or 'Edit Piece') inside the panels, to allow text to flow naturally without headers.
+- The content panel SHALL span the full width of the screen (100% width) on mobile viewports, removing card borders, card shadows, rounded corners, and margins.
+- The navigation bar and page header SHALL be compact, reducing their height on mobile screens to maximize vertical screen workspace.
+
 ---
 
 ## Scenarios

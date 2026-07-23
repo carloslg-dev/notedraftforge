@@ -292,8 +292,8 @@ export function WorkViewPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col gap-4 p-8 max-w-3xl mx-auto w-full bg-[#f8f9fa] text-[#202124]">
-      <nav className="flex justify-between items-center mb-4 bg-white border border-[#e8eaed] rounded-xl p-3 shadow-sm">
+    <main className="flex min-h-screen flex-col gap-2 md:gap-4 px-0 md:px-8 py-3 md:py-8 max-w-3xl mx-auto w-full bg-[#f8f9fa] text-[#202124]">
+      <nav className="flex justify-between items-center mb-2 md:mb-4 bg-white border-y md:border border-[#e8eaed] rounded-none md:rounded-xl p-3 shadow-sm shrink-0">
         <Button variant="ghost" onClick={handleBackClick} className="text-[#5f6368] hover:text-[#202124]">
           ← {t('works')}
         </Button>
@@ -313,30 +313,24 @@ export function WorkViewPage() {
         </Button>
       </nav>
 
-      <header className="mb-6 border-b border-[#e8eaed] pb-4 px-3">
-        <h1 className="text-3xl font-bold tracking-tight text-[#202124]">{piece.title}</h1>
-        <div className="flex gap-2 text-sm text-[#80868b] mt-2">
+      <header className="mb-3 md:mb-6 border-b border-[#e8eaed] pb-2 md:pb-4 px-4 md:px-3">
+        <h1 className="text-xl md:text-3xl font-bold tracking-tight text-[#202124]">{piece.title}</h1>
+        <div className="flex gap-2 text-xs md:text-sm text-[#80868b] mt-1 md:mt-2">
           <span>{t('type')}: {piece.type}</span>
           <span>•</span>
           <span>{t('updated')}: {new Date(piece.updatedAt).toLocaleDateString()}</span>
         </div>
       </header>
 
-      <div className="flex-1 bg-white rounded-xl border border-[#e8eaed] p-6 min-h-[400px] shadow-sm">
+      <div className="flex-1 bg-white border-y md:border border-[#e8eaed] rounded-none md:rounded-xl p-4 md:p-6 min-h-[400px] shadow-none md:shadow-sm w-full">
         {activeMode === 'visualization' ? (
           <div className="visualization-view select-text">
-            <h2 className="text-lg font-medium mb-4 text-[#80868b] uppercase text-xs tracking-wider">
-              {t('readingPreview')}
-            </h2>
             <div className="prose dark:prose-invert select-text">
               {renderBaseContent(piece.content)}
             </div>
           </div>
         ) : (
           <div className="editing-view">
-             <h2 className="text-lg font-medium mb-4 text-[#1a73e8] uppercase text-xs tracking-wider">
-               {t('editPiece')} (Editable)
-             </h2>
              {piece.content.kind === 'song' ? (
                <p className="text-[#80868b]">Song editing is not supported in MVP.</p>
              ) : (
