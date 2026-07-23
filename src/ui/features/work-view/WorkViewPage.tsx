@@ -131,6 +131,28 @@ export function WorkViewPage() {
   const [refineText, setRefineText] = useState('');
   const [refineStart, setRefineStart] = useState(0);
   const [refineEnd, setRefineEnd] = useState(0);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const handleResize = () => {
+      const vv = window.visualViewport;
+      if (vv) {
+        const offset = window.innerHeight - vv.height;
+        setKeyboardHeight(Math.max(0, offset));
+      }
+    };
+
+    window.visualViewport.addEventListener('resize', handleResize);
+    window.visualViewport.addEventListener('scroll', handleResize);
+    handleResize();
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('scroll', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -348,7 +370,7 @@ export function WorkViewPage() {
           className={
             isDesktop
               ? "visualization-selection-toolbar fixed z-50 flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md -translate-x-1/2 -translate-y-full select-none"
-              : "visualization-selection-toolbar fixed bottom-4 left-4 right-4 z-50 flex items-center justify-around p-2 bg-white/95 border border-[#dadce0] rounded-xl shadow-lg backdrop-blur-md select-none animate-in fade-in slide-in-from-bottom-2 duration-200"
+              : "visualization-selection-toolbar fixed left-4 right-4 z-50 flex items-center justify-around p-2 bg-white/95 border border-[#dadce0] rounded-xl shadow-lg backdrop-blur-md select-none animate-in fade-in slide-in-from-bottom-2 duration-200"
           }
           style={
             isDesktop
@@ -356,7 +378,7 @@ export function WorkViewPage() {
                   top: `${Math.max(10, selectionRect.top - 12)}px`,
                   left: `${selectionRect.left + selectionRect.width / 2}px`,
                 }
-              : undefined
+              : { bottom: `${keyboardHeight + 16}px` }
           }
         >
           <Button
@@ -368,7 +390,7 @@ export function WorkViewPage() {
             title={t('intent')}
           >
             <Lightbulb className="h-3.5 w-3.5 text-[#e37400]" />
-            <span className="text-[11px] font-medium">{t('intent')}</span>
+            {isDesktop && <span className="text-[11px] font-medium">{t('intent')}</span>}
           </Button>
           <Button
             variant="ghost"
@@ -379,7 +401,7 @@ export function WorkViewPage() {
             title={t('comment')}
           >
             <MessageSquare className="h-3.5 w-3.5 text-[#1a73e8]" />
-            <span className="text-[11px] font-medium">{t('comment')}</span>
+            {isDesktop && <span className="text-[11px] font-medium">{t('comment')}</span>}
           </Button>
           <Button
             variant="ghost"
@@ -390,7 +412,7 @@ export function WorkViewPage() {
             title={t('breath')}
           >
             <Wind className="h-3.5 w-3.5 text-[#137333]" />
-            <span className="text-[11px] font-medium">{t('breath')}</span>
+            {isDesktop && <span className="text-[11px] font-medium">{t('breath')}</span>}
           </Button>
           <div className="h-4 w-[1px] bg-[#dadce0] mx-1" />
           <Button

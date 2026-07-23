@@ -227,7 +227,7 @@ test.describe('Piece Lifecycle E2E', () => {
     });
 
     // Verify mobile selection toolbar is rendered at the bottom (fixed bottom bar)
-    const mobileBubbleMenu = page.locator('.editor-bubble-menu.fixed.bottom-4');
+    const mobileBubbleMenu = page.locator('.editor-bubble-menu.fixed');
     await expect(mobileBubbleMenu).toBeVisible();
 
     // Switch to visualization mode
@@ -258,7 +258,7 @@ test.describe('Piece Lifecycle E2E', () => {
     });
 
     // Verify visualization selection toolbar is rendered at the bottom (fixed bottom bar)
-    const mobileVizToolbar = page.locator('.visualization-selection-toolbar.fixed.bottom-4');
+    const mobileVizToolbar = page.locator('.visualization-selection-toolbar.fixed');
     await expect(mobileVizToolbar).toBeVisible();
   });
 });

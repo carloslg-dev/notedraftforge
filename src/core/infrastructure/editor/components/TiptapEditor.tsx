@@ -1,5 +1,5 @@
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { BlockIdExtension } from '../extensions/block-id';
@@ -45,6 +45,28 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
   const [refineText, setRefineText] = useState('');
   const [refineStart, setRefineStart] = useState(0);
   const [refineEnd, setRefineEnd] = useState(0);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const handleResize = () => {
+      const vv = window.visualViewport;
+      if (vv) {
+        const offset = window.innerHeight - vv.height;
+        setKeyboardHeight(Math.max(0, offset));
+      }
+    };
+
+    window.visualViewport.addEventListener('resize', handleResize);
+    window.visualViewport.addEventListener('scroll', handleResize);
+    handleResize();
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('scroll', handleResize);
+    };
+  }, []);
 
   const handleRefineClick = () => {
     if (!editor) return;
@@ -132,7 +154,10 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
       </div>
 
       {hasSelection && !isDesktop && (
-        <div className="editor-bubble-menu fixed bottom-4 left-4 right-4 z-50 flex items-center justify-around p-2 bg-white/95 border border-[#dadce0] rounded-xl shadow-lg backdrop-blur-md select-none animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div
+          className="editor-bubble-menu fixed left-4 right-4 z-50 flex items-center justify-around p-2 bg-white/95 border border-[#dadce0] rounded-xl shadow-lg backdrop-blur-md select-none animate-in fade-in slide-in-from-bottom-2 duration-200"
+          style={{ bottom: `${keyboardHeight + 16}px` }}
+        >
           <Button
             variant="ghost"
             size="sm"
