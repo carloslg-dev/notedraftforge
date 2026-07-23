@@ -15,7 +15,7 @@ feat-responsive-toolbar
 Status: approved
 Source: human
 Approved by: carloslg-dev
-Reason: User approved implementation plan for mobile responsive layout, spacing, visual viewport keyboard adjustments, and touch-start focus prevention.
+Reason: User approved implementation plan for mobile responsive layout, spacing, visual viewport keyboard adjustments, touch-start focus prevention, and debounced toolbar hiding.
 
 ---
 
@@ -23,8 +23,8 @@ Reason: User approved implementation plan for mobile responsive layout, spacing,
 
 | Source | Why needed | Confidence |
 |---|---|---|
-| src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles, compact icon scaling, and visualViewport shifts | High |
-| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar, remove borders, add visualViewport shifts, and prevent touch-start blur | High |
+| src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles, compact icon scaling, visualViewport shifts, and debounced hiding | High |
+| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar, remove borders, add visualViewport shifts, prevent touch-start blur, and debounced hiding | High |
 | src/ui/hooks/use-media-query.ts | Synchronously initialize layout matching state | High |
 | openspec/specs/editor-modes/spec.md | Update specification behavior rules for mobile viewports | High |
 
@@ -56,7 +56,9 @@ PASS
 - Remove redundant labels "Reading Preview" and "Edit Piece (Editable)" inside panels to keep flow clean.
 - Implement window `visualViewport` event listener to calculate virtual keyboard height dynamically on mobile, shifting toolbar bottom offsets to stay `16px` above the keyboard.
 - Shrink mobile visualization toolbar buttons (Intent, Comment, Breath) to icon-only variants, giving full clearance to the "Ajustar" button.
-- Create unified `getMenuButtonProps` event helper to intercept touch-start (`onTouchStart`) events and call `e.preventDefault()`. This blocks the native touch focus shift to the toolbar buttons, keeping the editor focused and preserving the text selection for sequential style applications.
+- Create unified `getMenuButtonProps` event helper to intercept pointerdown (`onPointerDown`) and mousedown (`onMouseDown`) events and call `e.preventDefault()`. This blocks the native touch focus shift to the toolbar buttons, keeping the editor focused and preserving the text selection for sequential style applications.
+- Run style updates on `onClick` handlers to ensure the browser registers actions inside a valid user-initiated gesture context, allowing programmatic focus to succeed.
+- Introduce `showMobileToolbar` state with a `500ms` hide debounce timer. If selections undergo transient updates (such as during style toggling), the toolbar remains stably visible.
 
 ---
 
@@ -65,6 +67,8 @@ PASS
 - Initializing hooks that check browser window states (like media queries) with static defaults (like `false`) can cause flickering, layout shifts, or react hydration/plugin mismatch errors on mount. Always resolve them synchronously when window is available.
 - Headless test runners can sometimes fail to emit selection change events natively on simulated viewports. Manual dispatching of DOM events ensures event listeners fire predictably.
 - Touch events on mobile trigger default focus transitions that differ from mouse events. Overriding touch start events via `preventDefault` is essential to maintain text selection ranges during editor interactions.
+- Programmatic focus calls in iOS Safari are blocked if user-initiated pointer sequences are canceled. Resolving focus commands within standard `click` events bypasses this safety check cleanly.
+- Adding a short debounce delay to floating mobile toolbars prevents layout flickering caused by temporary state changes during formatting actions.
 
 ## Task log range
 
