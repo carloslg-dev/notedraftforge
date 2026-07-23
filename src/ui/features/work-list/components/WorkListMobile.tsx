@@ -7,8 +7,10 @@ import {
   Upload,
   ChevronRight,
   Feather,
-  FileText
+  FileText,
+  Settings
 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Piece } from '@/core/domain/types/';
 import type { TranslationKey } from '@/ui/hooks/use-translation';
 
@@ -85,6 +87,9 @@ export function WorkListMobile({
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={exportBackup} disabled={isExporting} title={t('exportBackup')}>
             <Download className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-[#5f6368]" onClick={() => toast.info(t('settings'))} title={t('settings')}>
+            <Settings className="h-4 w-4" />
           </Button>
         </div>
       </header>

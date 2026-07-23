@@ -36,46 +36,13 @@ test.describe('Piece Lifecycle E2E', () => {
     await expect(page).toHaveURL(/\/work\/.+/);
     await expect(page.locator('h1')).toContainText('E2E Test Piece');
 
-    // 5. Enter editing mode
-    const editBtn = page.locator('button:has-text("Editar"), button:has-text("Edit Piece")').first();
-    await editBtn.click();
-
-    // Verify editor container is visible
+    // 5. Verify we are already in editing mode after creation
     await expect(page.locator('.editing-view')).toBeVisible();
 
     // Clear content and write new structured content in Tiptap
     const editor = page.locator('.ProseMirror');
     await editor.click();
     await page.keyboard.type('Hello, this is persistent E2E text!');
-
-    // Select text in editor to trigger formatting BubbleMenu
-    await editor.dblclick();
-
-    // Verify editing mode BubbleMenu shows formatting options + Refine
-    await expect(page.locator('button[title="Bold"]')).toBeVisible();
-    await expect(page.locator('button[title="Italic"]')).toBeVisible();
-    await expect(page.locator('button[title="Underline"]')).toBeVisible();
-    
-    const refineBtn = page.locator('button:has-text("Ajustar"), button:has-text("Refine")').first();
-    await expect(refineBtn).toBeVisible();
-
-    // Click Refine button in BubbleMenu
-    await refineBtn.click();
-
-    // Verify Selection Refinement modal is visible
-    const modalHeading = page.locator('h2:has-text("Ajustar Selección"), h2:has-text("Refine Selection")');
-    await expect(modalHeading).toBeVisible();
-
-    // Nudge start right inside the modal
-    const nudgeStartRight = page.locator('button:has-text("→")').first();
-    await nudgeStartRight.click();
-
-    // Confirm refinement
-    const confirmBtn = page.locator('button:has-text("Confirmar"), button:has-text("Confirm")').first();
-    await confirmBtn.click();
-
-    // Verify modal is closed
-    await expect(modalHeading).not.toBeVisible();
 
     // Wait 1.5 seconds to trigger the 800ms debounce autosave and let state refresh
     await page.waitForTimeout(1500);
@@ -102,6 +69,8 @@ test.describe('Piece Lifecycle E2E', () => {
 
     // Open refinement modal from visualization view selection toolbar
     await refineBtnViz.click();
+    
+    const modalHeading = page.locator('h2:has-text("Ajustar Selección"), h2:has-text("Refine Selection")');
     await expect(modalHeading).toBeVisible();
 
     // Close the modal
@@ -109,14 +78,51 @@ test.describe('Piece Lifecycle E2E', () => {
     await cancelBtn.click();
     await expect(modalHeading).not.toBeVisible();
 
-    // 6. Go back to main list
+    // 6. Enter editing mode manually from visualization mode
+    const editBtn = page.locator('button:has-text("Editar"), button:has-text("Edit Piece")').first();
+    await editBtn.click();
+
+    // Verify we are back in editing mode
+    await expect(page.locator('.editing-view')).toBeVisible();
+
+    // Select text in editor to trigger formatting BubbleMenu
+    await editor.dblclick();
+
+    // Verify editing mode BubbleMenu shows formatting options + Refine
+    await expect(page.locator('button[title="Bold"]')).toBeVisible();
+    await expect(page.locator('button[title="Italic"]')).toBeVisible();
+    await expect(page.locator('button[title="Underline"]')).toBeVisible();
+    
+    const refineBtnEdit = page.locator('button:has-text("Ajustar"), button:has-text("Refine")').first();
+    await expect(refineBtnEdit).toBeVisible();
+
+    // Click Refine button in BubbleMenu
+    await refineBtnEdit.click();
+    await expect(modalHeading).toBeVisible();
+
+    // Nudge start left inside the modal
+    const nudgeStartLeft = page.locator('.bg-card').locator('button:has-text("←")').first();
+    await nudgeStartLeft.click();
+
+    // Confirm refinement
+    const confirmBtn = page.locator('button:has-text("Confirmar"), button:has-text("Confirm")').first();
+    await confirmBtn.click();
+
+    // Verify modal is closed
+    await expect(modalHeading).not.toBeVisible();
+
+    // Click Finish Editing to return to visualization mode
+    await finishBtn.click();
+    await expect(page.locator('.visualization-view')).toBeVisible();
+
+    // 7. Go back to main list
     const backBtn = page.locator('button:has-text("Obras"), button:has-text("Works")').first();
     await backBtn.click();
 
     // Verify redirect to list
     await expect(page).toHaveURL(/\/$/);
 
-    // 7. Verify the new piece appears in the list and preview pane displays the typed text
+    // 8. Verify the new piece appears in the list and preview pane displays the typed text
     const pieceListItem = page.locator('button:has-text("E2E Test Piece"), a:has-text("E2E Test Piece")').first();
     await expect(pieceListItem).toBeVisible();
     await pieceListItem.click();
