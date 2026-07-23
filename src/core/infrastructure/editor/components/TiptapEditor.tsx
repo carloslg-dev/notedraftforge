@@ -91,14 +91,14 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
 
   const getMenuButtonProps = (action: () => void) => {
     return {
+      onPointerDown: (e: React.PointerEvent) => {
+        e.preventDefault();
+      },
       onMouseDown: (e: React.MouseEvent) => {
         e.preventDefault();
       },
-      onTouchStart: (e: React.TouchEvent) => {
+      onClick: (e: React.MouseEvent) => {
         e.preventDefault();
-        action();
-      },
-      onClick: () => {
         action();
       }
     };
@@ -109,6 +109,19 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
   }
 
   const hasSelection = editor.isEditable && !editor.state.selection.empty && !isRefineOpen;
+
+  const [showMobileToolbar, setShowMobileToolbar] = useState(false);
+
+  useEffect(() => {
+    if (hasSelection) {
+      setShowMobileToolbar(true);
+    } else {
+      const timer = setTimeout(() => {
+        setShowMobileToolbar(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasSelection]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -164,7 +177,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
         <EditorContent editor={editor} />
       </div>
 
-      {hasSelection && !isDesktop && (
+      {showMobileToolbar && !isDesktop && (
         <div
           className="editor-bubble-menu fixed left-4 right-4 z-50 flex items-center justify-around p-2 bg-white/95 border border-[#dadce0] rounded-xl shadow-lg backdrop-blur-md select-none animate-in fade-in slide-in-from-bottom-2 duration-200"
           style={{ bottom: `${keyboardHeight + 16}px` }}

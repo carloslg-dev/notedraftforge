@@ -132,6 +132,20 @@ export function WorkViewPage() {
   const [refineStart, setRefineStart] = useState(0);
   const [refineEnd, setRefineEnd] = useState(0);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [showMobileToolbar, setShowMobileToolbar] = useState(false);
+
+  const hasSelectionMobile = !!selectionRect && !!selectedText;
+
+  useEffect(() => {
+    if (hasSelectionMobile) {
+      setShowMobileToolbar(true);
+    } else {
+      const timer = setTimeout(() => {
+        setShowMobileToolbar(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasSelectionMobile]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.visualViewport) return;
@@ -365,7 +379,7 @@ export function WorkViewPage() {
         )}
       </div>
 
-      {selectionRect && selectedText && (
+      {((isDesktop && selectionRect && selectedText) || (!isDesktop && showMobileToolbar)) && (
         <div
           className={
             isDesktop
@@ -375,8 +389,8 @@ export function WorkViewPage() {
           style={
             isDesktop
               ? {
-                  top: `${Math.max(10, selectionRect.top - 12)}px`,
-                  left: `${selectionRect.left + selectionRect.width / 2}px`,
+                  top: `${Math.max(10, (selectionRect?.top ?? 0) - 12)}px`,
+                  left: `${(selectionRect?.left ?? 0) + (selectionRect?.width ?? 0) / 2}px`,
                 }
               : { bottom: `${keyboardHeight + 16}px` }
           }
