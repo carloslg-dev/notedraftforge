@@ -71,7 +71,7 @@ The system SHALL reject any annotation creation or update where:
 Annotation creation SHALL follow this interaction sequence:
 
 1. In `visualization` mode, once a current snapshot is ready, the user selects text.
-2. A **selection toolbar** appears above (or below on scroll-overflow) the selection with annotation kind buttons (Intent / Comment / Breath) + Refine button.
+2. A **selection toolbar** appears with annotation kind buttons (Intent / Comment / Breath) + Refine button. On desktop viewports, this appears above (or below on scroll-overflow) the selection; on mobile viewports, it appears as a fixed bottom bar.
 3. The user taps an annotation kind to open the **annotation modal**.
 4. The annotation modal collects:
    - For `breath`: a mark selector (`S` / `L`)

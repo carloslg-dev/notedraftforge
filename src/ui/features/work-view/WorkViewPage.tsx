@@ -11,6 +11,7 @@ import { AutosavePieceUseCase } from '../../../core/application/piece-management
 import { DexiePieceRepository } from '../../../core/infrastructure/adapters/dexie/piece-repository';
 import { toast } from 'sonner';
 import { RefineSelectionModal } from './components/RefineSelectionModal';
+import { useMediaQuery } from '@/ui/hooks/use-media-query';
 
 function renderBaseContent(content: PieceContent) {
   if (content.kind === 'song') {
@@ -122,6 +123,7 @@ export function WorkViewPage() {
   const { activeMode, enterEditing, enterVisualization } = useUIStore();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const [selectionRect, setSelectionRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const [selectedText, setSelectedText] = useState('');
@@ -349,11 +351,19 @@ export function WorkViewPage() {
 
       {selectionRect && selectedText && (
         <div
-          className="visualization-selection-toolbar fixed z-50 flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md -translate-x-1/2 -translate-y-full select-none"
-          style={{
-            top: `${Math.max(10, selectionRect.top - 12)}px`,
-            left: `${selectionRect.left + selectionRect.width / 2}px`,
-          }}
+          className={
+            isDesktop
+              ? "visualization-selection-toolbar fixed z-50 flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md -translate-x-1/2 -translate-y-full select-none"
+              : "visualization-selection-toolbar fixed bottom-4 left-4 right-4 z-50 flex items-center justify-around p-2 bg-white/95 border border-[#dadce0] rounded-xl shadow-lg backdrop-blur-md select-none animate-in fade-in slide-in-from-bottom-2 duration-200"
+          }
+          style={
+            isDesktop
+              ? {
+                  top: `${Math.max(10, selectionRect.top - 12)}px`,
+                  left: `${selectionRect.left + selectionRect.width / 2}px`,
+                }
+              : undefined
+          }
         >
           <Button
             variant="ghost"

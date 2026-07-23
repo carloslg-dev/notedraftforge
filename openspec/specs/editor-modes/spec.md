@@ -42,7 +42,7 @@ In `visualization` mode, the system SHALL render `PieceSnapshot.html` as read-on
 No Angular or Markdown-editor assumptions SHALL be used in mode behavior.
 
 ### EM-REQ-05 — Selection toolbar
-When the user makes a text selection in either mode, the system SHALL show a contextual **selection toolbar** positioned above the selection (or below if near the top of the viewport).
+When the user makes a text selection in either mode, the system SHALL show a contextual **selection toolbar**. In desktop viewports, the toolbar SHALL be positioned above the selection (or below if near the top of the viewport). In mobile viewports (under 768px wide), the toolbar SHALL be rendered as a fixed bottom bar to avoid collision and styling interference with the native browser selection overlay.
 
 In `editing` mode, the toolbar SHALL expose:
 - Inline format actions: Bold, Italic, Underline

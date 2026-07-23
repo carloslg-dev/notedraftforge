@@ -55,9 +55,26 @@ test.describe('Piece Lifecycle E2E', () => {
     await expect(page.locator('.visualization-view')).toBeVisible();
     await expect(page.locator('.visualization-view')).toContainText('Hello, this is persistent E2E text!');
 
-    // Double click word in visualization mode to trigger annotation toolbar
-    const vizParagraph = page.locator('.visualization-view span').first();
-    await vizParagraph.dblclick();
+    // Programmatically select text in visualization mode to trigger annotation toolbar
+    await page.evaluate(() => {
+      const element = document.querySelector('.visualization-view span, .visualization-view p');
+      if (element) {
+        const range = document.createRange();
+        const textNode = element.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          range.setStart(textNode, 0);
+          range.setEnd(textNode, 10);
+        } else {
+          range.selectNodeContents(element);
+        }
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+      document.dispatchEvent(new Event('selectionchange'));
+    });
 
     // Verify visualization selection toolbar is visible with annotation kinds + Refine
     const vizToolbar = page.locator('.visualization-selection-toolbar');
@@ -86,14 +103,25 @@ test.describe('Piece Lifecycle E2E', () => {
     // Verify we are back in editing mode
     await expect(page.locator('.editing-view')).toBeVisible();
 
-    // Select text in editor to trigger formatting BubbleMenu via Shift+Arrow selection
-    await editor.click();
-    await page.keyboard.press('End');
-    await page.keyboard.down('Shift');
-    for (let i = 0; i < 5; i++) {
-      await page.keyboard.press('ArrowLeft');
-    }
-    await page.keyboard.up('Shift');
+    // Select text in editor to trigger formatting BubbleMenu via programmatic selection
+    await page.evaluate(() => {
+      const paragraph = document.querySelector('.ProseMirror p, .ProseMirror div');
+      if (paragraph) {
+        const range = document.createRange();
+        const textNode = paragraph.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          range.setStart(textNode, 0);
+          range.setEnd(textNode, 10);
+        } else {
+          range.selectNodeContents(paragraph);
+        }
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+    });
 
     // Verify editing mode BubbleMenu shows formatting options + Refine
     const bubbleMenu = page.locator('.editor-bubble-menu');
@@ -137,5 +165,100 @@ test.describe('Piece Lifecycle E2E', () => {
 
     // Verify the preview pane (on desktop) shows the edited text
     await expect(page.locator('main')).toContainText('Hello, this is persistent E2E text!');
+  });
+
+  test('displays mobile responsive bottom toolbar on small viewports', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+
+    // Fail the test if there are any uncaught exceptions or runtime errors in the browser console
+    page.on('pageerror', (exception) => {
+      throw new Error(`Uncaught browser exception: ${exception.stack || exception.message}`);
+    });
+
+    // 1. Visit home page
+    await page.goto('/');
+
+    // 2. Open the Create modal by clicking the "New work" button
+    const newWorkButton = page.locator('button:has-text("Obra"), button:has-text("Work"), button[title*="Work"]').first();
+    await newWorkButton.click();
+
+    // 3. Fill in the modal inputs
+    const modalForm = page.locator('form').first();
+    const titleInput = modalForm.locator('input[placeholder*="título"], input[placeholder*="title"]').first();
+    await titleInput.fill('Mobile Test Piece');
+    
+    const poemBtn = modalForm.locator('button:has-text("Poema"), button:has-text("Poem")').first();
+    await poemBtn.click();
+
+    const createSubmitBtn = modalForm.locator('button[type="submit"]').first();
+    await createSubmitBtn.click();
+
+    // 4. Verify we are in editing mode
+    await expect(page).toHaveURL(/\/work\/.+/);
+    await expect(page.locator('.editing-view')).toBeVisible();
+
+    // Fill editor content
+    const editor = page.locator('.ProseMirror');
+    await editor.click();
+    await page.keyboard.type('Hello Mobile selection toolbar!');
+
+    // Wait 1.5 seconds to trigger autosave
+    await page.waitForTimeout(1500);
+
+    // Select text in editor to trigger formatting BubbleMenu via programmatic selection
+    await page.evaluate(() => {
+      const paragraph = document.querySelector('.ProseMirror p, .ProseMirror div');
+      if (paragraph) {
+        const range = document.createRange();
+        const textNode = paragraph.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          range.setStart(textNode, 0);
+          range.setEnd(textNode, 10);
+        } else {
+          range.selectNodeContents(paragraph);
+        }
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+    });
+
+    // Verify mobile selection toolbar is rendered at the bottom (fixed bottom bar)
+    const mobileBubbleMenu = page.locator('.editor-bubble-menu.fixed.bottom-4');
+    await expect(mobileBubbleMenu).toBeVisible();
+
+    // Switch to visualization mode
+    const finishBtn = page.locator('button:has-text("Terminar Edición"), button:has-text("Finish Editing")').first();
+    await finishBtn.click();
+
+    await expect(page.locator('.visualization-view')).toBeVisible();
+
+    // Programmatically select text in visualization mode to trigger annotation toolbar
+    await page.evaluate(() => {
+      const element = document.querySelector('.visualization-view span, .visualization-view p');
+      if (element) {
+        const range = document.createRange();
+        const textNode = element.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          range.setStart(textNode, 0);
+          range.setEnd(textNode, 10);
+        } else {
+          range.selectNodeContents(element);
+        }
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+      document.dispatchEvent(new Event('selectionchange'));
+    });
+
+    // Verify visualization selection toolbar is rendered at the bottom (fixed bottom bar)
+    const mobileVizToolbar = page.locator('.visualization-selection-toolbar.fixed.bottom-4');
+    await expect(mobileVizToolbar).toBeVisible();
   });
 });
