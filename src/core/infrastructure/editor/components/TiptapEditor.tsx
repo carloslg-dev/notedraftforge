@@ -89,6 +89,21 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     editor.commands.focus();
   };
 
+  const getMenuButtonProps = (action: () => void) => {
+    return {
+      onMouseDown: (e: React.MouseEvent) => {
+        e.preventDefault();
+      },
+      onTouchStart: (e: React.TouchEvent) => {
+        e.preventDefault();
+        action();
+      },
+      onClick: () => {
+        action();
+      }
+    };
+  };
+
   if (!editor) {
     return null;
   }
@@ -107,8 +122,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
           variant="ghost"
           size="sm"
           type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          {...getMenuButtonProps(() => editor.chain().focus().toggleBold().run())}
           className={`h-8 w-8 p-0 cursor-pointer hover:bg-muted ${editor.isActive('bold') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
           title="Bold"
         >
@@ -118,8 +132,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
           variant="ghost"
           size="sm"
           type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          {...getMenuButtonProps(() => editor.chain().focus().toggleItalic().run())}
           className={`h-8 w-8 p-0 cursor-pointer hover:bg-muted ${editor.isActive('italic') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
           title="Italic"
         >
@@ -129,8 +142,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
           variant="ghost"
           size="sm"
           type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          {...getMenuButtonProps(() => editor.chain().focus().toggleUnderline().run())}
           className={`h-8 w-8 p-0 cursor-pointer hover:bg-muted ${editor.isActive('underline') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
           title="Underline"
         >
@@ -141,8 +153,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
           variant="ghost"
           size="sm"
           type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={handleRefineClick}
+          {...getMenuButtonProps(handleRefineClick)}
           className="h-8 px-2.5 py-0 text-[11px] font-semibold tracking-tight text-[#1a73e8] hover:bg-[#e8f0fe] cursor-pointer"
         >
           {t('refine')}
@@ -162,8 +173,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
             variant="ghost"
             size="sm"
             type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => editor.chain().focus().toggleBold().run()}
+            {...getMenuButtonProps(() => editor.chain().focus().toggleBold().run())}
             className={`h-9 px-3 flex items-center justify-center gap-1.5 cursor-pointer rounded-lg hover:bg-muted ${editor.isActive('bold') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
             title="Bold"
           >
@@ -173,8 +183,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
             variant="ghost"
             size="sm"
             type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => editor.chain().focus().toggleItalic().run()}
+            {...getMenuButtonProps(() => editor.chain().focus().toggleItalic().run())}
             className={`h-9 px-3 flex items-center justify-center gap-1.5 cursor-pointer rounded-lg hover:bg-muted ${editor.isActive('italic') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
             title="Italic"
           >
@@ -184,8 +193,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
             variant="ghost"
             size="sm"
             type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            {...getMenuButtonProps(() => editor.chain().focus().toggleUnderline().run())}
             className={`h-9 px-3 flex items-center justify-center gap-1.5 cursor-pointer rounded-lg hover:bg-muted ${editor.isActive('underline') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
             title="Underline"
           >
@@ -196,8 +204,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
             variant="ghost"
             size="sm"
             type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={handleRefineClick}
+            {...getMenuButtonProps(handleRefineClick)}
             className="h-9 px-4 text-[11px] font-semibold tracking-tight text-[#1a73e8] hover:bg-[#e8f0fe] cursor-pointer rounded-lg"
           >
             {t('refine')}
