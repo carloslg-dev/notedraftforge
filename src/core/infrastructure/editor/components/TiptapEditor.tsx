@@ -9,6 +9,7 @@ import { Button } from '@/ui/components/ui/button';
 import { Bold, Italic, Underline as UnderlineIcon } from 'lucide-react';
 import { useTranslation } from '@/ui/hooks/use-translation';
 import { RefineSelectionModal } from '@/ui/features/work-view/components/RefineSelectionModal';
+import 'tippy.js/dist/tippy.css';
 
 interface TiptapEditorProps {
   initialContent: PieceContent;
@@ -73,7 +74,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
       <BubbleMenu
         editor={editor}
         tippyOptions={{ duration: 150 }}
-        className="flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md"
+        className="editor-bubble-menu flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md z-50"
       >
         <Button
           variant="ghost"

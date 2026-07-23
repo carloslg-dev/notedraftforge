@@ -60,11 +60,12 @@ test.describe('Piece Lifecycle E2E', () => {
     await vizParagraph.dblclick();
 
     // Verify visualization selection toolbar is visible with annotation kinds + Refine
-    await expect(page.locator('button[title="Intención"], button[title="Intent"]')).toBeVisible();
-    await expect(page.locator('button[title="Comentario"], button[title="Comment"]')).toBeVisible();
-    await expect(page.locator('button[title="Respiración"], button[title="Breath"]')).toBeVisible();
+    const vizToolbar = page.locator('.visualization-selection-toolbar');
+    await expect(vizToolbar.locator('button[title="Intención"], button[title="Intent"]')).toBeVisible();
+    await expect(vizToolbar.locator('button[title="Comentario"], button[title="Comment"]')).toBeVisible();
+    await expect(vizToolbar.locator('button[title="Respiración"], button[title="Breath"]')).toBeVisible();
 
-    const refineBtnViz = page.locator('button:has-text("Ajustar"), button:has-text("Refine")').last();
+    const refineBtnViz = vizToolbar.locator('button:has-text("Ajustar"), button:has-text("Refine")').first();
     await expect(refineBtnViz).toBeVisible();
 
     // Open refinement modal from visualization view selection toolbar
@@ -89,11 +90,12 @@ test.describe('Piece Lifecycle E2E', () => {
     await editor.dblclick();
 
     // Verify editing mode BubbleMenu shows formatting options + Refine
-    await expect(page.locator('button[title="Bold"]')).toBeVisible();
-    await expect(page.locator('button[title="Italic"]')).toBeVisible();
-    await expect(page.locator('button[title="Underline"]')).toBeVisible();
+    const bubbleMenu = page.locator('.editor-bubble-menu');
+    await expect(bubbleMenu.locator('button[title="Bold"]')).toBeVisible();
+    await expect(bubbleMenu.locator('button[title="Italic"]')).toBeVisible();
+    await expect(bubbleMenu.locator('button[title="Underline"]')).toBeVisible();
     
-    const refineBtnEdit = page.locator('button:has-text("Ajustar"), button:has-text("Refine")').first();
+    const refineBtnEdit = bubbleMenu.locator('button:has-text("Ajustar"), button:has-text("Refine")').first();
     await expect(refineBtnEdit).toBeVisible();
 
     // Click Refine button in BubbleMenu

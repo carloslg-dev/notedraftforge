@@ -349,7 +349,7 @@ export function WorkViewPage() {
 
       {selectionRect && selectedText && (
         <div
-          className="fixed z-50 flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md -translate-x-1/2 -translate-y-full select-none"
+          className="visualization-selection-toolbar fixed z-50 flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md -translate-x-1/2 -translate-y-full select-none"
           style={{
             top: `${Math.max(10, selectionRect.top - 12)}px`,
             left: `${selectionRect.left + selectionRect.width / 2}px`,
