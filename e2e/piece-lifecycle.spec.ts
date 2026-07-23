@@ -86,8 +86,14 @@ test.describe('Piece Lifecycle E2E', () => {
     // Verify we are back in editing mode
     await expect(page.locator('.editing-view')).toBeVisible();
 
-    // Select text in editor to trigger formatting BubbleMenu
-    await editor.dblclick();
+    // Select text in editor to trigger formatting BubbleMenu via Shift+Arrow selection
+    await editor.click();
+    await page.keyboard.press('End');
+    await page.keyboard.down('Shift');
+    for (let i = 0; i < 5; i++) {
+      await page.keyboard.press('ArrowLeft');
+    }
+    await page.keyboard.up('Shift');
 
     // Verify editing mode BubbleMenu shows formatting options + Refine
     const bubbleMenu = page.locator('.editor-bubble-menu');
@@ -102,9 +108,9 @@ test.describe('Piece Lifecycle E2E', () => {
     await refineBtnEdit.click();
     await expect(modalHeading).toBeVisible();
 
-    // Nudge start left inside the modal
-    const nudgeStartLeft = page.locator('.bg-card').locator('button:has-text("←")').first();
-    await nudgeStartLeft.click();
+    // Nudge start right inside the modal
+    const nudgeStartRight = page.locator('.bg-card').locator('button:has-text("→")').first();
+    await nudgeStartRight.click();
 
     // Confirm refinement
     const confirmBtn = page.locator('button:has-text("Confirmar"), button:has-text("Confirm")').first();

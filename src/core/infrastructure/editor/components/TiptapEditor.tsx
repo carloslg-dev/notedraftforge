@@ -73,6 +73,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     <div className="flex flex-col gap-2">
       <BubbleMenu
         editor={editor}
+        shouldShow={({ editor }) => editor.isEditable && !editor.state.selection.empty && !isRefineOpen}
         tippyOptions={{ duration: 150 }}
         className="editor-bubble-menu flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md z-50"
       >
@@ -122,36 +123,6 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
         </Button>
       </BubbleMenu>
 
-      <div className="flex gap-2 p-2 border rounded-md bg-muted/50">
-        <Button
-          variant="outline"
-          size="icon"
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'bg-accent' : ''}
-          title="Bold"
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'bg-accent' : ''}
-          title="Italic"
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={editor.isActive('underline') ? 'bg-accent' : ''}
-          title="Underline"
-        >
-          <UnderlineIcon className="h-4 w-4" />
-        </Button>
-      </div>
       <div className="border rounded-md p-4">
         <EditorContent editor={editor} />
       </div>

@@ -51,12 +51,14 @@ PASS
 
 - Use DOM range cloning/conversion (`getRangeOffsetsRelativeToElement` and `setRangeOffsetsRelativeToElement`) to manage visualizer selections cleanly and avoid parent offset bugs.
 - Prevent double-click actions on selection menus by using `onMouseDown={(e) => e.preventDefault()}` on all floating buttons.
+- Import `tippy.js/dist/tippy.css` in `TiptapEditor.tsx` to satisfy Tippy's visibility states and display triggers.
 
 ---
 
 ## Retrospective summary
 
 - Scoping element locators in Playwright (like targeting `.bg-card` for modal buttons instead of matching global `button:has-text("←")`) is vital to avoid background back button conflicts during overlays.
+- Playwright E2E assertions checking generic attributes (like `button[title="Bold"]`) can produce false positives if there are duplicate controls (e.g. header toolbar vs bubble menu). Explicit container classes must be used.
 
 ## Task log range
 

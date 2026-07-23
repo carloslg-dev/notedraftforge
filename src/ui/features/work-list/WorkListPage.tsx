@@ -11,7 +11,7 @@ import { WorkListDesktop } from './components/WorkListDesktop';
 import { WorkListMobile } from './components/WorkListMobile';
 import { useUIStore } from '@/ui/state/ui-store';
 import { useTranslation } from '@/ui/hooks/use-translation';
-import type { Piece } from '@/core/domain/types/';
+
 
 export function WorkListPage() {
   const navigate = useNavigate();
@@ -82,16 +82,6 @@ export function WorkListPage() {
     navigate(`/work/${pieceId}`);
   };
 
-  const getPiecePreviewText = (piece: Piece) => {
-    if (!piece.content || piece.content.kind === 'song' || !piece.content.blocks) {
-      return [t('noContentYet')];
-    }
-    const lines = piece.content.blocks
-      .map(block => block.runs.map(run => run.text).join(''))
-      .filter(text => text.trim().length > 0);
-    return lines.length > 0 ? lines.slice(0, 5) : [t('noContentYet')];
-  };
-
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center p-8 bg-[#f8f9fa]">
@@ -128,7 +118,6 @@ export function WorkListPage() {
           setIsRestoreModalOpen={setIsRestoreModalOpen}
           handleNewWorkClick={handleNewWorkClick}
           handleEditClick={handleEditClick}
-          getPiecePreviewText={getPiecePreviewText}
           isDesktop={isDesktop}
           t={t}
           uiLanguage={uiLanguage}

@@ -13,7 +13,7 @@ import {
   Edit,
   Tag
 } from 'lucide-react';
-import type { Piece } from '@/core/domain/types/';
+import type { Piece, PieceContent } from '@/core/domain/types/';
 import { toast } from 'sonner';
 import type { TranslationKey } from '@/ui/hooks/use-translation';
 
@@ -34,11 +34,63 @@ interface WorkListDesktopProps {
   setIsRestoreModalOpen: (open: boolean) => void;
   handleNewWorkClick: () => void;
   handleEditClick: (pieceId: string) => void;
-  getPiecePreviewText: (piece: Piece) => string[];
   isDesktop: boolean;
   t: (key: TranslationKey) => string;
   uiLanguage: 'es' | 'en';
   setUILanguage: (lang: 'es' | 'en') => void;
+}
+
+function renderPreviewContent(content: PieceContent) {
+  if (content.kind === 'song') {
+    return <p className="text-[#80868b]">Song visualization is not supported in MVP.</p>;
+  }
+
+  return (
+    <div className="space-y-4 font-serif leading-relaxed text-[#202124]">
+      {content.blocks.slice(0, 5).map((block) => {
+        const renderedRuns = block.runs.map((run) => {
+          let classes = '';
+          if (run.marks?.includes('bold')) classes += ' font-bold';
+          if (run.marks?.includes('italic')) classes += ' italic';
+          if (run.marks?.includes('underline')) classes += ' underline';
+
+          return (
+            <span key={run.id} className={classes}>
+              {run.text}
+            </span>
+          );
+        });
+
+        switch (block.kind) {
+          case 'heading':
+            return (
+              <h2 key={block.id} className="text-xl font-bold tracking-tight text-[#202124] mt-6 mb-2 animate-none">
+                {renderedRuns}
+              </h2>
+            );
+          case 'quote':
+            return (
+              <blockquote key={block.id} className="border-l-4 border-[#dadce0] pl-4 italic text-[#5f6368] my-4">
+                {renderedRuns}
+              </blockquote>
+            );
+          case 'line':
+            return (
+              <div key={block.id} className="min-h-[1.5rem]">
+                {renderedRuns.length > 0 ? renderedRuns : <br />}
+              </div>
+            );
+          case 'paragraph':
+          default:
+            return (
+              <p key={block.id} className="min-h-[1.5rem]">
+                {renderedRuns.length > 0 ? renderedRuns : <br />}
+              </p>
+            );
+        }
+      })}
+    </div>
+  );
 }
 
 export function WorkListDesktop({
@@ -58,7 +110,6 @@ export function WorkListDesktop({
   setIsRestoreModalOpen,
   handleNewWorkClick,
   handleEditClick,
-  getPiecePreviewText,
   isDesktop,
   t,
   uiLanguage,
@@ -277,10 +328,8 @@ export function WorkListDesktop({
                 <div className="text-[11px] font-bold text-[#80868b] uppercase tracking-widest border-b border-neutral-100 pb-3 mb-5">
                   {t('readingPreview')}
                 </div>
-                <div className={`font-serif text-lg leading-relaxed text-[#202124] ${currentPiece.type === 'poem' ? 'whitespace-pre-line' : ''}`}>
-                  {getPiecePreviewText(currentPiece).map((line, idx) => (
-                    <p key={idx} className="mb-4">{line}</p>
-                  ))}
+                <div className="font-serif text-lg leading-relaxed text-[#202124]">
+                  {renderPreviewContent(currentPiece.content)}
                 </div>
               </div>
             </div>
