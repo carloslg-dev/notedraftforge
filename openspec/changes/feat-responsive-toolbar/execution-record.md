@@ -15,7 +15,7 @@ feat-responsive-toolbar
 Status: approved
 Source: human
 Approved by: carloslg-dev
-Reason: User approved implementation plan for mobile responsive layout, spacing, and visual viewport keyboard adjustments.
+Reason: User approved implementation plan for mobile responsive layout, spacing, visual viewport keyboard adjustments, and touch-start focus prevention.
 
 ---
 
@@ -24,7 +24,7 @@ Reason: User approved implementation plan for mobile responsive layout, spacing,
 | Source | Why needed | Confidence |
 |---|---|---|
 | src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles, compact icon scaling, and visualViewport shifts | High |
-| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar, remove borders, and add visualViewport shifts | High |
+| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar, remove borders, add visualViewport shifts, and prevent touch-start blur | High |
 | src/ui/hooks/use-media-query.ts | Synchronously initialize layout matching state | High |
 | openspec/specs/editor-modes/spec.md | Update specification behavior rules for mobile viewports | High |
 
@@ -56,6 +56,7 @@ PASS
 - Remove redundant labels "Reading Preview" and "Edit Piece (Editable)" inside panels to keep flow clean.
 - Implement window `visualViewport` event listener to calculate virtual keyboard height dynamically on mobile, shifting toolbar bottom offsets to stay `16px` above the keyboard.
 - Shrink mobile visualization toolbar buttons (Intent, Comment, Breath) to icon-only variants, giving full clearance to the "Ajustar" button.
+- Create unified `getMenuButtonProps` event helper to intercept touch-start (`onTouchStart`) events and call `e.preventDefault()`. This blocks the native touch focus shift to the toolbar buttons, keeping the editor focused and preserving the text selection for sequential style applications.
 
 ---
 
@@ -63,6 +64,7 @@ PASS
 
 - Initializing hooks that check browser window states (like media queries) with static defaults (like `false`) can cause flickering, layout shifts, or react hydration/plugin mismatch errors on mount. Always resolve them synchronously when window is available.
 - Headless test runners can sometimes fail to emit selection change events natively on simulated viewports. Manual dispatching of DOM events ensures event listeners fire predictably.
+- Touch events on mobile trigger default focus transitions that differ from mouse events. Overriding touch start events via `preventDefault` is essential to maintain text selection ranges during editor interactions.
 
 ## Task log range
 
