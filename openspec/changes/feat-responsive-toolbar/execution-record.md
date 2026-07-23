@@ -15,7 +15,7 @@ feat-responsive-toolbar
 Status: approved
 Source: human
 Approved by: carloslg-dev
-Reason: User approved implementation plan for mobile responsive layout and spacing.
+Reason: User approved implementation plan for mobile responsive layout, spacing, and visual viewport keyboard adjustments.
 
 ---
 
@@ -23,8 +23,8 @@ Reason: User approved implementation plan for mobile responsive layout and spaci
 
 | Source | Why needed | Confidence |
 |---|---|---|
-| src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles on selection toolbar and page containers | High |
-| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar and remove mobile canvas borders | High |
+| src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles, compact icon scaling, and visualViewport shifts | High |
+| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar, remove borders, and add visualViewport shifts | High |
 | src/ui/hooks/use-media-query.ts | Synchronously initialize layout matching state | High |
 | openspec/specs/editor-modes/spec.md | Update specification behavior rules for mobile viewports | High |
 
@@ -54,6 +54,8 @@ PASS
 - Switch layout to full bleed width (100% width, no margins, rounded corners, card borders or card shadows) on mobile devices to optimize horizontal reading and writing space.
 - Minimize vertical heights of headers, navbars and metadata blocks to leave maximum space for creative input.
 - Remove redundant labels "Reading Preview" and "Edit Piece (Editable)" inside panels to keep flow clean.
+- Implement window `visualViewport` event listener to calculate virtual keyboard height dynamically on mobile, shifting toolbar bottom offsets to stay `16px` above the keyboard.
+- Shrink mobile visualization toolbar buttons (Intent, Comment, Breath) to icon-only variants, giving full clearance to the "Ajustar" button.
 
 ---
 
