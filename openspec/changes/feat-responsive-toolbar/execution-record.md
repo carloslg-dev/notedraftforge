@@ -15,7 +15,7 @@ feat-responsive-toolbar
 Status: approved
 Source: human
 Approved by: carloslg-dev
-Reason: User approved Option A implementation plan to use a right-side static vertical sidebar toolbar in editing mode.
+Reason: User approved silent refresh implementation to fix focus and selection loss during autosaves.
 
 ---
 
@@ -23,7 +23,7 @@ Reason: User approved Option A implementation plan to use a right-side static ve
 
 | Source | Why needed | Confidence |
 |---|---|---|
-| src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles, compact icon scaling, visualViewport shifts, and debounced hiding | High |
+| src/ui/features/work-view/use-work-view.ts | Implement a silent refresh callback that does not trigger loading state changes | High |
 | src/core/infrastructure/editor/components/TiptapEditor.tsx | Create right-side static vertical toolbar and remove floating menu listeners | High |
 | src/ui/hooks/use-media-query.ts | Synchronously initialize layout matching state | High |
 | openspec/specs/editor-modes/spec.md | Update specification behavior rules for mobile viewports | High |
@@ -37,6 +37,7 @@ Reason: User approved Option A implementation plan to use a right-side static ve
 - src/ui/hooks/use-media-query.ts
 - src/core/infrastructure/editor/components/TiptapEditor.tsx
 - src/ui/features/work-view/WorkViewPage.tsx
+- src/ui/features/work-view/use-work-view.ts
 - e2e/piece-lifecycle.spec.ts
 
 ---
@@ -61,6 +62,7 @@ PASS
 - Introduce `showMobileToolbar` state with a `500ms` hide debounce timer. If selections undergo transient updates (such as during style toggling), the toolbar remains stably visible.
 - Remove the "Ajustar" (Refine) button entirely from editing mode (both desktop BubbleMenu and mobile keyboard-docked toolbar) to simplify formatting UX, retaining it exclusively in visualization mode for annotation precision.
 - Discard all editor-level floating bubble menus, custom mobile bottom menus, and visual viewport listeners, replacing them with a permanently visible vertical sidebar on the right margin of the editor canvas. This provides a clean interface that never conflicts with native mobile selection menus or virtual keyboards, and stays sticky during scroll events.
+- Implement a silent update mode in `useWorkView` hook. When refreshing piece state during autosave operations, the hook avoids toggling `loading = true`. This prevents React from unmounting `TiptapEditor`, retaining editor selection ranges and keyboard states.
 
 ---
 
@@ -73,6 +75,7 @@ PASS
 - Adding a short debounce delay to floating mobile toolbars prevents layout flickering caused by temporary state changes during formatting actions.
 - Discarding unnecessary refinement flows from the main editor reduces component complexity, cleans up code hooks, and simplifies the learning curve of formatting controls for users.
 - Relocating formatting buttons to a right-aligned static vertical toolbar completely removes overlapping concerns with mobile OS menu bubbles, providing a robust layout for both mobile and web viewports.
+- Asynchronous refreshes that update parent component records should avoid toggling general loader states during active editing sessions. Keeping loaders silent prevents component unmounting, which preserves focus context, selections, and virtual keyboard bindings.
 
 ## Task log range
 
