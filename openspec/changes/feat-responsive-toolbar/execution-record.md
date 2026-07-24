@@ -15,7 +15,7 @@ feat-responsive-toolbar
 Status: approved
 Source: human
 Approved by: carloslg-dev
-Reason: User approved silent refresh implementation to fix focus and selection loss during autosaves.
+Reason: User approved autosave delay increase to 5 seconds and refetching blocker during active editing to fix selection/keyboard loss.
 
 ---
 
@@ -63,6 +63,8 @@ PASS
 - Remove the "Ajustar" (Refine) button entirely from editing mode (both desktop BubbleMenu and mobile keyboard-docked toolbar) to simplify formatting UX, retaining it exclusively in visualization mode for annotation precision.
 - Discard all editor-level floating bubble menus, custom mobile bottom menus, and visual viewport listeners, replacing them with a permanently visible vertical sidebar on the right margin of the editor canvas. This provides a clean interface that never conflicts with native mobile selection menus or virtual keyboards, and stays sticky during scroll events.
 - Implement a silent update mode in `useWorkView` hook. When refreshing piece state during autosave operations, the hook avoids toggling `loading = true`. This prevents React from unmounting `TiptapEditor`, retaining editor selection ranges and keyboard states.
+- Defer all database refetching (`refresh()`) calls to only execute when transitioning from editing to visualization mode. During active writing, the local rich text editor memory operates as the single source of truth, avoiding state updates that cause input resetting.
+- Increase the active input autosave debounce delay from `800ms` to `5000ms` (5 seconds) to decrease writing overhead and provide a stable writing environment.
 
 ---
 
@@ -76,6 +78,7 @@ PASS
 - Discarding unnecessary refinement flows from the main editor reduces component complexity, cleans up code hooks, and simplifies the learning curve of formatting controls for users.
 - Relocating formatting buttons to a right-aligned static vertical toolbar completely removes overlapping concerns with mobile OS menu bubbles, providing a robust layout for both mobile and web viewports.
 - Asynchronous refreshes that update parent component records should avoid toggling general loader states during active editing sessions. Keeping loaders silent prevents component unmounting, which preserves focus context, selections, and virtual keyboard bindings.
+- During active content editing in WYSIWYG rich text systems, the editor component's memory should serve as the sole source of truth. Postponing state refreshes from database transactions until mode boundaries are crossed eliminates typing delays, content overwrites, and browser refokus issues.
 
 ## Task log range
 
