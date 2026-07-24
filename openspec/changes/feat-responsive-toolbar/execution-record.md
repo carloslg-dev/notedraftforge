@@ -15,7 +15,7 @@ feat-responsive-toolbar
 Status: approved
 Source: human
 Approved by: carloslg-dev
-Reason: User approved Option B implementation plan to simplify editing toolbar by removing refinement from editor mode.
+Reason: User approved Option A implementation plan to use a right-side static vertical sidebar toolbar in editing mode.
 
 ---
 
@@ -24,7 +24,7 @@ Reason: User approved Option B implementation plan to simplify editing toolbar b
 | Source | Why needed | Confidence |
 |---|---|---|
 | src/ui/features/work-view/WorkViewPage.tsx | Apply mobile viewport styles, compact icon scaling, visualViewport shifts, and debounced hiding | High |
-| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create custom bottom toolbar, remove borders, add visualViewport shifts, prevent touch-start blur, and remove refinement | High |
+| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create right-side static vertical toolbar and remove floating menu listeners | High |
 | src/ui/hooks/use-media-query.ts | Synchronously initialize layout matching state | High |
 | openspec/specs/editor-modes/spec.md | Update specification behavior rules for mobile viewports | High |
 
@@ -60,6 +60,7 @@ PASS
 - Run style updates on `onClick` handlers to ensure the browser registers actions inside a valid user-initiated gesture context, allowing programmatic focus to succeed.
 - Introduce `showMobileToolbar` state with a `500ms` hide debounce timer. If selections undergo transient updates (such as during style toggling), the toolbar remains stably visible.
 - Remove the "Ajustar" (Refine) button entirely from editing mode (both desktop BubbleMenu and mobile keyboard-docked toolbar) to simplify formatting UX, retaining it exclusively in visualization mode for annotation precision.
+- Discard all editor-level floating bubble menus, custom mobile bottom menus, and visual viewport listeners, replacing them with a permanently visible vertical sidebar on the right margin of the editor canvas. This provides a clean interface that never conflicts with native mobile selection menus or virtual keyboards, and stays sticky during scroll events.
 
 ---
 
@@ -71,6 +72,7 @@ PASS
 - Programmatic focus calls in iOS Safari are blocked if user-initiated pointer sequences are canceled. Resolving focus commands within standard `click` events bypasses this safety check cleanly.
 - Adding a short debounce delay to floating mobile toolbars prevents layout flickering caused by temporary state changes during formatting actions.
 - Discarding unnecessary refinement flows from the main editor reduces component complexity, cleans up code hooks, and simplifies the learning curve of formatting controls for users.
+- Relocating formatting buttons to a right-aligned static vertical toolbar completely removes overlapping concerns with mobile OS menu bubbles, providing a robust layout for both mobile and web viewports.
 
 ## Task log range
 
