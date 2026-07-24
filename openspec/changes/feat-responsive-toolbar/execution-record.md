@@ -15,7 +15,7 @@ feat-responsive-toolbar
 Status: approved
 Source: human
 Approved by: carloslg-dev
-Reason: User approved autosave delay increase to 5 seconds and refetching blocker during active editing to fix selection/keyboard loss.
+Reason: User approved formatting selection state synchronization to highlight formatting buttons in real-time based on cursor position.
 
 ---
 
@@ -24,7 +24,7 @@ Reason: User approved autosave delay increase to 5 seconds and refetching blocke
 | Source | Why needed | Confidence |
 |---|---|---|
 | src/ui/features/work-view/use-work-view.ts | Implement a silent refresh callback that does not trigger loading state changes | High |
-| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create right-side static vertical toolbar and remove floating menu listeners | High |
+| src/core/infrastructure/editor/components/TiptapEditor.tsx | Create right-side static vertical toolbar and bind selectionUpdate/transaction events | High |
 | src/ui/hooks/use-media-query.ts | Synchronously initialize layout matching state | High |
 | openspec/specs/editor-modes/spec.md | Update specification behavior rules for mobile viewports | High |
 
@@ -65,6 +65,7 @@ PASS
 - Implement a silent update mode in `useWorkView` hook. When refreshing piece state during autosave operations, the hook avoids toggling `loading = true`. This prevents React from unmounting `TiptapEditor`, retaining editor selection ranges and keyboard states.
 - Defer all database refetching (`refresh()`) calls to only execute when transitioning from editing to visualization mode. During active writing, the local rich text editor memory operates as the single source of truth, avoiding state updates that cause input resetting.
 - Increase the active input autosave debounce delay from `800ms` to `5000ms` (5 seconds) to decrease writing overhead and provide a stable writing environment.
+- Bind `selectionUpdate` and `transaction` editor events to a custom state epoch hook in `TiptapEditor.tsx`. This causes the sidebar formatting buttons to re-render dynamically on every cursor movement or styling change, highlighting active styling choices in real-time.
 
 ---
 
@@ -79,6 +80,7 @@ PASS
 - Relocating formatting buttons to a right-aligned static vertical toolbar completely removes overlapping concerns with mobile OS menu bubbles, providing a robust layout for both mobile and web viewports.
 - Asynchronous refreshes that update parent component records should avoid toggling general loader states during active editing sessions. Keeping loaders silent prevents component unmounting, which preserves focus context, selections, and virtual keyboard bindings.
 - During active content editing in WYSIWYG rich text systems, the editor component's memory should serve as the sole source of truth. Postponing state refreshes from database transactions until mode boundaries are crossed eliminates typing delays, content overwrites, and browser refokus issues.
+- React rich-text editor wrappers need event hooks linked to editor update hooks (like `selectionUpdate` or `transaction`) to prompt toolbar state refreshes. Subscribing to editor selection shifts ensures active style classes (like `bold`, `italic`, etc.) reflect the formatting of the text node currently underlying the user's cursor.
 
 ## Task log range
 
