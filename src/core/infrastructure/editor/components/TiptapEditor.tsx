@@ -1,4 +1,5 @@
 import { useEditor, EditorContent } from '@tiptap/react';
+import { useState, useEffect } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { BlockIdExtension } from '../extensions/block-id';
@@ -34,6 +35,21 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     },
   });
 
+  const [selectionEpoch, setSelectionEpoch] = useState(0);
+
+  useEffect(() => {
+    if (!editor) return;
+    const forceUpdate = () => {
+      setSelectionEpoch((prev) => prev + 1);
+    };
+    editor.on('selectionUpdate', forceUpdate);
+    editor.on('transaction', forceUpdate);
+    return () => {
+      editor.off('selectionUpdate', forceUpdate);
+      editor.off('transaction', forceUpdate);
+    };
+  }, [editor]);
+
   const getMenuButtonProps = (action: () => void) => {
     return {
       onPointerDown: (e: React.PointerEvent) => {
@@ -54,7 +70,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
   }
 
   return (
-    <div className="flex gap-3 w-full items-start">
+    <div className="flex gap-3 w-full items-start" data-selection-epoch={selectionEpoch}>
       {/* Editor Content Area */}
       <div className="flex-grow border border-[#e8eaed] rounded-lg p-3 bg-white min-h-[250px] max-w-[calc(100%-48px)] overflow-x-hidden">
         <EditorContent editor={editor} />
