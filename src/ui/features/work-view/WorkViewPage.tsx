@@ -218,12 +218,11 @@ export function WorkViewPage() {
         pieceId,
         content: contentToSave
       });
-      refresh();
     } catch (err) {
       console.error('Autosave failed:', err);
       toast.error('Failed to autosave changes: ' + (err instanceof Error ? err.message : String(err)));
     }
-  }, [pieceId, refresh]);
+  }, [pieceId]);
 
   const flushAutosave = useCallback(async () => {
     if (autosaveTimerRef.current) {
@@ -266,7 +265,7 @@ export function WorkViewPage() {
         pendingContentRef.current = null;
         triggerAutosave(content);
       }
-    }, 800);
+    }, 5000);
   };
 
   const handleAnnotationClick = (kind: string) => {
@@ -339,6 +338,7 @@ export function WorkViewPage() {
           onClick={async () => {
             if (activeMode === 'editing') {
               await flushAutosave();
+              refresh();
               await enterVisualization();
             } else {
               enterEditing(piece.id);
