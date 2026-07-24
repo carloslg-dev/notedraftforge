@@ -46,6 +46,20 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
   const [refineStart, setRefineStart] = useState(0);
   const [refineEnd, setRefineEnd] = useState(0);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [showMobileToolbar, setShowMobileToolbar] = useState(false);
+
+  const hasSelection = editor ? (editor.isEditable && !editor.state.selection.empty && !isRefineOpen) : false;
+
+  useEffect(() => {
+    if (hasSelection) {
+      setShowMobileToolbar(true);
+    } else {
+      const timer = setTimeout(() => {
+        setShowMobileToolbar(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasSelection]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.visualViewport) return;
@@ -108,20 +122,6 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     return null;
   }
 
-  const hasSelection = editor.isEditable && !editor.state.selection.empty && !isRefineOpen;
-
-  const [showMobileToolbar, setShowMobileToolbar] = useState(false);
-
-  useEffect(() => {
-    if (hasSelection) {
-      setShowMobileToolbar(true);
-    } else {
-      const timer = setTimeout(() => {
-        setShowMobileToolbar(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [hasSelection]);
 
   return (
     <div className="flex flex-col gap-2">
