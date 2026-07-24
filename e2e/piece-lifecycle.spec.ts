@@ -123,11 +123,10 @@ test.describe('Piece Lifecycle E2E', () => {
       }
     });
 
-    // Verify editing mode BubbleMenu shows formatting options
-    const bubbleMenu = page.locator('.editor-bubble-menu');
-    await expect(bubbleMenu.locator('button[title="Bold"]')).toBeVisible();
-    await expect(bubbleMenu.locator('button[title="Italic"]')).toBeVisible();
-    await expect(bubbleMenu.locator('button[title="Underline"]')).toBeVisible();
+    // Verify formatting options are visible in the sidebar toolbar
+    await expect(page.locator('button[title="Bold"]')).toBeVisible();
+    await expect(page.locator('button[title="Italic"]')).toBeVisible();
+    await expect(page.locator('button[title="Underline"]')).toBeVisible();
 
     // Click Finish Editing to return to visualization mode
     await finishBtn.click();
@@ -208,9 +207,10 @@ test.describe('Piece Lifecycle E2E', () => {
       }
     });
 
-    // Verify mobile selection toolbar is rendered at the bottom (fixed bottom bar)
-    const mobileBubbleMenu = page.locator('.editor-bubble-menu.fixed');
-    await expect(mobileBubbleMenu).toBeVisible();
+    // Verify formatting options are visible in the sidebar toolbar
+    await expect(page.locator('button[title="Bold"]')).toBeVisible();
+    await expect(page.locator('button[title="Italic"]')).toBeVisible();
+    await expect(page.locator('button[title="Underline"]')).toBeVisible();
 
     // Switch to visualization mode
     const finishBtn = page.locator('button:has-text("Terminar Edición"), button:has-text("Finish Editing")').first();

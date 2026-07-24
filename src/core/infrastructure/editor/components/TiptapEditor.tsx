@@ -1,5 +1,4 @@
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
-import { useState, useEffect } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { BlockIdExtension } from '../extensions/block-id';
@@ -7,8 +6,6 @@ import { domainToTiptap, tiptapToDomain } from '../mappers/tiptap-mapper';
 import { PieceContent } from '../../../domain/types/';
 import { Button } from '@/ui/components/ui/button';
 import { Bold, Italic, Underline as UnderlineIcon } from 'lucide-react';
-import { useMediaQuery } from '@/ui/hooks/use-media-query';
-import 'tippy.js/dist/tippy.css';
 
 interface TiptapEditorProps {
   initialContent: PieceContent;
@@ -16,7 +13,6 @@ interface TiptapEditorProps {
 }
 
 export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
-  const isDesktop = useMediaQuery('(min-width: 768px)');
   const originalKind = initialContent.kind === 'song' ? 'text' : initialContent.kind;
 
   const editor = useEditor({
@@ -38,44 +34,6 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     },
   });
 
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [showMobileToolbar, setShowMobileToolbar] = useState(false);
-
-  const hasSelection = editor ? (editor.isEditable && !editor.state.selection.empty) : false;
-
-  useEffect(() => {
-    if (hasSelection) {
-      setShowMobileToolbar(true);
-    } else {
-      const timer = setTimeout(() => {
-        setShowMobileToolbar(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [hasSelection]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.visualViewport) return;
-
-    const handleResize = () => {
-      const vv = window.visualViewport;
-      if (vv) {
-        const offset = window.innerHeight - vv.height;
-        setKeyboardHeight(Math.max(0, offset));
-      }
-    };
-
-    window.visualViewport.addEventListener('resize', handleResize);
-    window.visualViewport.addEventListener('scroll', handleResize);
-    handleResize();
-
-    return () => {
-      window.visualViewport?.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('scroll', handleResize);
-    };
-  }, []);
-
-
   const getMenuButtonProps = (action: () => void) => {
     return {
       onPointerDown: (e: React.PointerEvent) => {
@@ -95,15 +53,15 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     return null;
   }
 
-
   return (
-    <div className="flex flex-col gap-2">
-      <BubbleMenu
-        editor={editor}
-        shouldShow={({ editor }) => isDesktop && editor.isEditable && !editor.state.selection.empty}
-        tippyOptions={{ duration: 150 }}
-        className="editor-bubble-menu flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md z-50"
-      >
+    <div className="flex gap-3 w-full items-start">
+      {/* Editor Content Area */}
+      <div className="flex-grow border border-[#e8eaed] rounded-lg p-3 bg-white min-h-[250px] max-w-[calc(100%-48px)] overflow-x-hidden">
+        <EditorContent editor={editor} />
+      </div>
+
+      {/* Mini Static Side Toolbar on the right */}
+      <div className="flex flex-col gap-1 p-1 bg-white border border-[#e8eaed] rounded-lg shadow-sm shrink-0 w-10 items-center sticky top-4">
         <Button
           variant="ghost"
           size="sm"
@@ -134,49 +92,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
         >
           <UnderlineIcon className="h-4 w-4" />
         </Button>
-      </BubbleMenu>
-
-      <div className="border-0 md:border md:rounded-md p-2 md:p-4">
-        <EditorContent editor={editor} />
       </div>
-
-      {showMobileToolbar && !isDesktop && (
-        <div
-          className="editor-bubble-menu fixed left-4 right-4 z-50 flex items-center justify-around p-2 bg-white/95 border border-[#dadce0] rounded-xl shadow-lg backdrop-blur-md select-none animate-in fade-in slide-in-from-bottom-2 duration-200"
-          style={{ bottom: `${keyboardHeight + 16}px` }}
-        >
-          <Button
-            variant="ghost"
-            size="sm"
-            type="button"
-            {...getMenuButtonProps(() => editor.chain().focus().toggleBold().run())}
-            className={`h-9 px-3 flex items-center justify-center gap-1.5 cursor-pointer rounded-lg hover:bg-muted ${editor.isActive('bold') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
-            title="Bold"
-          >
-            <Bold className="h-4.5 w-4.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            type="button"
-            {...getMenuButtonProps(() => editor.chain().focus().toggleItalic().run())}
-            className={`h-9 px-3 flex items-center justify-center gap-1.5 cursor-pointer rounded-lg hover:bg-muted ${editor.isActive('italic') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
-            title="Italic"
-          >
-            <Italic className="h-4.5 w-4.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            type="button"
-            {...getMenuButtonProps(() => editor.chain().focus().toggleUnderline().run())}
-            className={`h-9 px-3 flex items-center justify-center gap-1.5 cursor-pointer rounded-lg hover:bg-muted ${editor.isActive('underline') ? 'bg-muted text-primary' : 'text-[#5f6368]'}`}
-            title="Underline"
-          >
-            <UnderlineIcon className="h-4.5 w-4.5" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

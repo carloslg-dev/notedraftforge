@@ -41,18 +41,13 @@ In `visualization` mode, the system SHALL render `PieceSnapshot.html` as read-on
 
 No Angular or Markdown-editor assumptions SHALL be used in mode behavior.
 
-### EM-REQ-05 — Selection toolbar
-When the user makes a text selection in either mode, the system SHALL show a contextual **selection toolbar**. In desktop viewports, the toolbar SHALL be positioned above the selection (or below if near the top of the viewport). In mobile viewports (under 768px wide), the toolbar SHALL be rendered as a fixed bottom bar to avoid collision and styling interference with the native browser selection overlay.
-
-In `editing` mode, the toolbar SHALL expose:
-- Inline format actions: Bold, Italic, Underline
-- A **Refine** action to open the Selection Refinement modal
+### EM-REQ-05 — Formatting and Selection toolbars
+The system SHALL expose formatting and selection actions based on the active mode:
+- In `editing` mode, the system SHALL render a static vertical formatting toolbar on the right margin of the editor content. This toolbar SHALL be permanently visible and expose formatting actions: Bold, Italic, and Underline. In editing mode, the system SHALL NOT expose selection refinement.
+- In `visualization` mode, when the user makes a text selection, the system SHALL show a contextual **selection toolbar**. In desktop viewports, this toolbar SHALL float above the selection. In mobile viewports (under 768px wide), it SHALL be rendered as a fixed bottom bar to avoid collision with the native OS selection overlay.
+- In `visualization` mode, the selection toolbar SHALL expose annotation kind actions (Intent, Comment, Breath) and a **Refine** action.
 
 `Strikethrough` SHALL NOT be exposed in MVP because crossed-out text reduces legibility for stage-reading and poetry workflows.
-
-In `visualization` mode, the toolbar SHALL expose:
-- Annotation kind actions: Intent, Comment, Breath
-- A **Refine** action to open the Selection Refinement modal
 
 Tapping an annotation kind action in `visualization` mode SHALL open the annotation modal pre-configured for that kind.
 
