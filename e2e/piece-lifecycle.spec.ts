@@ -123,29 +123,11 @@ test.describe('Piece Lifecycle E2E', () => {
       }
     });
 
-    // Verify editing mode BubbleMenu shows formatting options + Refine
+    // Verify editing mode BubbleMenu shows formatting options
     const bubbleMenu = page.locator('.editor-bubble-menu');
     await expect(bubbleMenu.locator('button[title="Bold"]')).toBeVisible();
     await expect(bubbleMenu.locator('button[title="Italic"]')).toBeVisible();
     await expect(bubbleMenu.locator('button[title="Underline"]')).toBeVisible();
-    
-    const refineBtnEdit = bubbleMenu.locator('button:has-text("Ajustar"), button:has-text("Refine")').first();
-    await expect(refineBtnEdit).toBeVisible();
-
-    // Click Refine button in BubbleMenu
-    await refineBtnEdit.click();
-    await expect(modalHeading).toBeVisible();
-
-    // Nudge start right inside the modal
-    const nudgeStartRight = page.locator('.bg-card').locator('button:has-text("→")').first();
-    await nudgeStartRight.click();
-
-    // Confirm refinement
-    const confirmBtn = page.locator('button:has-text("Confirmar"), button:has-text("Confirm")').first();
-    await confirmBtn.click();
-
-    // Verify modal is closed
-    await expect(modalHeading).not.toBeVisible();
 
     // Click Finish Editing to return to visualization mode
     await finishBtn.click();

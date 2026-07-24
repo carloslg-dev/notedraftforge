@@ -7,8 +7,6 @@ import { domainToTiptap, tiptapToDomain } from '../mappers/tiptap-mapper';
 import { PieceContent } from '../../../domain/types/';
 import { Button } from '@/ui/components/ui/button';
 import { Bold, Italic, Underline as UnderlineIcon } from 'lucide-react';
-import { useTranslation } from '@/ui/hooks/use-translation';
-import { RefineSelectionModal } from '@/ui/features/work-view/components/RefineSelectionModal';
 import { useMediaQuery } from '@/ui/hooks/use-media-query';
 import 'tippy.js/dist/tippy.css';
 
@@ -18,7 +16,6 @@ interface TiptapEditorProps {
 }
 
 export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
-  const { t } = useTranslation();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const originalKind = initialContent.kind === 'song' ? 'text' : initialContent.kind;
 
@@ -41,14 +38,10 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     },
   });
 
-  const [isRefineOpen, setIsRefineOpen] = useState(false);
-  const [refineText, setRefineText] = useState('');
-  const [refineStart, setRefineStart] = useState(0);
-  const [refineEnd, setRefineEnd] = useState(0);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [showMobileToolbar, setShowMobileToolbar] = useState(false);
 
-  const hasSelection = editor ? (editor.isEditable && !editor.state.selection.empty && !isRefineOpen) : false;
+  const hasSelection = editor ? (editor.isEditable && !editor.state.selection.empty) : false;
 
   useEffect(() => {
     if (hasSelection) {
@@ -82,26 +75,6 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     };
   }, []);
 
-  const handleRefineClick = () => {
-    if (!editor) return;
-    const { $from, $to } = editor.state.selection;
-    const blockText = $from.parent.textContent;
-    setRefineText(blockText);
-    setRefineStart($from.parentOffset);
-    setRefineEnd($to.parentOffset);
-    setIsRefineOpen(true);
-  };
-
-  const handleRefineConfirm = (newStart: number, newEnd: number) => {
-    if (!editor) return;
-    const { $from } = editor.state.selection;
-    const blockStartPos = $from.start();
-    editor.commands.setTextSelection({
-      from: blockStartPos + newStart,
-      to: blockStartPos + newEnd,
-    });
-    editor.commands.focus();
-  };
 
   const getMenuButtonProps = (action: () => void) => {
     return {
@@ -127,7 +100,7 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
     <div className="flex flex-col gap-2">
       <BubbleMenu
         editor={editor}
-        shouldShow={({ editor }) => isDesktop && editor.isEditable && !editor.state.selection.empty && !isRefineOpen}
+        shouldShow={({ editor }) => isDesktop && editor.isEditable && !editor.state.selection.empty}
         tippyOptions={{ duration: 150 }}
         className="editor-bubble-menu flex items-center gap-0.5 p-1 bg-white/90 border border-[#dadce0] rounded-lg shadow-md backdrop-blur-md z-50"
       >
@@ -160,16 +133,6 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
           title="Underline"
         >
           <UnderlineIcon className="h-4 w-4" />
-        </Button>
-        <div className="h-4 w-[1px] bg-[#dadce0] mx-1" />
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          {...getMenuButtonProps(handleRefineClick)}
-          className="h-8 px-2.5 py-0 text-[11px] font-semibold tracking-tight text-[#1a73e8] hover:bg-[#e8f0fe] cursor-pointer"
-        >
-          {t('refine')}
         </Button>
       </BubbleMenu>
 
@@ -212,27 +175,8 @@ export function TiptapEditor({ initialContent, onUpdate }: TiptapEditorProps) {
           >
             <UnderlineIcon className="h-4.5 w-4.5" />
           </Button>
-          <div className="h-5 w-[1px] bg-[#dadce0]" />
-          <Button
-            variant="ghost"
-            size="sm"
-            type="button"
-            {...getMenuButtonProps(handleRefineClick)}
-            className="h-9 px-4 text-[11px] font-semibold tracking-tight text-[#1a73e8] hover:bg-[#e8f0fe] cursor-pointer rounded-lg"
-          >
-            {t('refine')}
-          </Button>
         </div>
       )}
-
-      <RefineSelectionModal
-        isOpen={isRefineOpen}
-        onClose={() => setIsRefineOpen(false)}
-        text={refineText}
-        selectionStart={refineStart}
-        selectionEnd={refineEnd}
-        onConfirm={handleRefineConfirm}
-      />
     </div>
   );
 }

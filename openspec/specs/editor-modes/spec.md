@@ -27,10 +27,10 @@ Tiptap/ProseMirror JSON SHALL NOT be stored as domain state.
 In `editing` mode, the system SHALL allow:
 - full content editing
 - inline formatting actions exposed by the editor adapter
-- selection refinement before applying editor actions
 - piece metadata updates through relevant specs
 
 In `editing` mode, the system SHALL NOT expose:
+- selection refinement actions
 - annotation create/update/delete/resolve actions in MVP
 - direct visualization-only controls (for example, auto-scroll and layer panel toggles)
 
