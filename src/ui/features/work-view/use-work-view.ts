@@ -8,7 +8,7 @@ export function useWorkView(pieceId: string | undefined) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchPiece = useCallback(async () => {
+  const fetchPiece = useCallback(async (isSilent = false) => {
     if (!pieceId) {
       setPiece(null);
       setLoading(false);
@@ -16,7 +16,9 @@ export function useWorkView(pieceId: string | undefined) {
     }
 
     try {
-      setLoading(true);
+      if (!isSilent) {
+        setLoading(true);
+      }
       setError(null);
 
       const repository = new DexiePieceRepository();
@@ -31,13 +33,13 @@ export function useWorkView(pieceId: string | undefined) {
   }, [pieceId]);
 
   useEffect(() => {
-    fetchPiece();
+    fetchPiece(false);
   }, [fetchPiece]);
 
   return {
     piece,
     loading,
     error,
-    refresh: fetchPiece,
+    refresh: useCallback(() => fetchPiece(true), [fetchPiece]),
   };
 }
